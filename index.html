@@ -82,6 +82,16 @@ nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .chip.due{background:var(--due-light);color:var(--due)}
 .chip.later{background:var(--warm);color:var(--accent);font-weight:500}
 .chip.off{background:none;color:var(--muted);font-weight:500;cursor:default}
+/* primera sesión gratuita: dorado y rayado, para distinguirla de un vistazo */
+.chip.gratis{background:#f6e7c4;color:#8a5a00;cursor:default}
+.cita.primera{background:#fffaf0}
+.cita.primera .pcol{background:repeating-linear-gradient(180deg,#d9a21b 0 5px,#f3d58a 5px 10px)}
+.tag1{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;color:#8a5a00;background:#f6e7c4;border-radius:4px;padding:1px 5px;margin-right:5px;vertical-align:1px}
+.ev.primera{border-left:3px dashed #c8901a;background:repeating-linear-gradient(135deg,#fdf3dc 0 8px,#f8e6bb 8px 16px)}
+.dot.primera{background:#fff;box-shadow:inset 0 0 0 2px #d9a21b}
+.seg.tipo button.on[data-t="primera"]{background:#f6e7c4;color:#8a5a00}
+.tel{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 12px}
+.tel a{font-size:13px;color:var(--sage-deep);font-weight:600;text-decoration:none;padding:6px 11px;border:1px solid var(--sage-light);border-radius:16px;background:#fff}
 
 /* día */
 .tl{position:relative;margin-left:46px;border-left:1px solid var(--stone);cursor:copy}
@@ -258,12 +268,17 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <dialog id="dCita">
   <form class="dlg" id="fCita" method="dialog">
     <h3 id="cTitle">Nueva cita</h3>
+    <div class="f"><span>Tipo</span>
+      <div class="seg tipo" id="cTipo"><button type="button" data-t="sesion">Sesión</button><button type="button" data-t="primera">1ª sesión · gratis</button></div>
+    </div>
     <label class="f"><span>Paciente</span><select id="cPac"></select></label>
+    <p class="tel" id="cTel" hidden></p>
     <div id="cNewPac" hidden>
       <div class="row2">
         <label class="f"><span>Nombre e inicial</span><input id="cNewAlias" maxlength="40" placeholder="María G."></label>
         <label class="f"><span>Precio habitual (€)</span><input id="cNewPrecio" type="number" min="0" step="0.5" inputmode="decimal"></label>
       </div>
+      <label class="f"><span>Teléfono (opcional)</span><input id="cNewTel" type="tel" maxlength="30" autocomplete="off" placeholder="600 000 000"></label>
       <p class="hint">Solo nombre e inicial del apellido.</p>
     </div>
     <div class="row2">
@@ -272,7 +287,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
     </div>
     <div class="row2">
       <label class="f"><span>Duración</span>
-        <select id="cDur"><option value="30">30 min</option><option value="45">45 min</option><option value="50">50 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option><option value="120">2 h</option></select>
+        <select id="cDur"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="50">50 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option><option value="120">2 h</option></select>
       </label>
       <label class="f"><span>Precio (€)</span><input type="number" id="cPrecio" min="0" step="0.5" inputmode="decimal" required></label>
     </div>
@@ -295,9 +310,12 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <div class="seg estado" id="cEstado"><button type="button" data-e="normal">Normal</button><button type="button" data-e="novino">No vino</button><button type="button" data-e="cancelada">Cancelada</button></div>
     </div>
     <p class="hint" id="cEstadoNote" hidden></p>
-    <div class="row2" style="align-items:center">
+    <div id="cPayWrap">
       <label class="check"><input type="checkbox" id="cPagada"> Pagada</label>
-      <label class="f" id="cMetodoWrap" style="margin:0"><select id="cMetodo" aria-label="Forma de pago"><option value="">Forma de pago…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
+      <div class="row2" id="cMetodoWrap">
+        <label class="f"><span>Fecha de pago</span><input type="date" id="cPagoFecha"></label>
+        <label class="f"><span>Forma de pago</span><select id="cMetodo"><option value="">Elige…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
+      </div>
     </div>
     <p class="hint" id="cSerieNote" style="margin-top:8px" hidden></p>
     <p class="warn" id="cWarn" hidden></p>
@@ -315,6 +333,8 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   <form class="dlg" id="fPac" method="dialog">
     <h3 id="pTitle">Paciente</h3>
     <label class="f"><span>Nombre e inicial</span><input id="pAlias" maxlength="40" placeholder="María G." required></label>
+    <label class="f"><span>Teléfono</span><input id="pTel" type="tel" maxlength="30" autocomplete="off" placeholder="600 000 000"></label>
+    <p class="tel" id="pTelLinks" hidden></p>
     <div class="row2">
       <label class="f"><span>Precio por sesión (€)</span><input id="pPrecio" type="number" min="0" step="0.5" inputmode="decimal" required></label>
       <label class="f"><span>Suele pagar con</span><select id="pMetodo"><option value="">Sin indicar</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
@@ -333,6 +353,24 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <span class="grow"></span>
       <button type="button" class="btn" id="pClose">Cerrar</button>
       <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- COBRAR -->
+<dialog id="dCobro">
+  <form class="dlg" id="fCobro" method="dialog">
+    <h3 id="kTitle">Cobrar</h3>
+    <p class="hint" id="kInfo" style="margin:-6px 0 14px;font-size:14px"></p>
+    <div class="row2">
+      <label class="f"><span>Fecha de pago</span><input type="date" id="kFecha" required></label>
+      <label class="f"><span>Forma de pago</span><select id="kMetodo"><option value="">Elige…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
+    </div>
+    <div class="acts">
+      <button type="button" class="btn danger small" id="kQuitar" hidden>Quitar pago</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="kClose">Cerrar</button>
+      <button type="submit" class="btn primary" id="kOk">Cobrar</button>
     </div>
   </form>
 </dialog>
@@ -395,29 +433,31 @@ const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
 const METODOS = { efectivo: 'Efectivo', bizum: 'Bizum', transferencia: 'Transferencia', tarjeta: 'Tarjeta' };
 
 /* ---------- color de cada paciente ---------- */
-const PALETA = ['#6f9a74','#c07f52','#5f8bb0','#b06f8c','#9c8a46','#4f9a9a','#8f73b0','#c0665a','#6b8a3e','#8a7768'];
+// (sin dorados: el dorado es solo para la primera sesión)
+const PALETA = ['#6f9a74','#c07f52','#5f8bb0','#b06f8c','#3f7f6e','#4f9a9a','#8f73b0','#c0665a','#6b8a3e','#8a7768'];
 function colorOf(id){ let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETA[h % PALETA.length]; }
 
 /* ---------- almacén de datos ---------- */
+const DEMO_KEY = 'consulta-demo-v3';
 let sb = null;
 if (!DEMO) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
 const store = DEMO ? (() => {
-  const KEY = 'consulta-demo-v2';
+  const KEY = DEMO_KEY;
   let db;
   try { db = JSON.parse(localStorage.getItem(KEY)); } catch(e) {}
   if (!db) {
     const now = new Date(), mon = monday(now);
     const p = [
-      { id: uid(), alias: 'Ana P.', precio: 60, activo: true, metodo_pago: 'bizum' },
+      { id: uid(), alias: 'Ana P.', precio: 60, activo: true, metodo_pago: 'bizum', telefono: '600 123 456' },
       { id: uid(), alias: 'Luis M.', precio: 60, activo: true, metodo_pago: 'efectivo' },
       { id: uid(), alias: 'Carmen R.', precio: 70, activo: true, metodo_pago: 'transferencia' },
       { id: uid(), alias: 'Marta L.', precio: 55, activo: true, metodo_pago: null },
-      { id: uid(), alias: 'Jorge S.', precio: 50, activo: false, metodo_pago: null }
+      { id: uid(), alias: 'Jorge S.', precio: 50, activo: true, metodo_pago: null }
     ];
     const citas = [];
     const mk = (pi, d, time, extra) => citas.push(Object.assign({ id: uid(), paciente_id: p[pi].id, inicio: fromLocal(ymd(d), time).toISOString(), duracion_min: 50,
-      modalidad: 'presencial', precio: p[pi].precio, cancelada: false, no_vino: false, pagada: false, pagada_el: null, metodo_pago: null, serie_id: null }, extra || {}));
+      modalidad: 'presencial', precio: p[pi].precio, cancelada: false, no_vino: false, pagada: false, pagada_el: null, metodo_pago: null, serie_id: null, tipo: 'sesion' }, extra || {}));
     const serieAna = uid();
     for (let w = -5; w <= 6; w++){
       const d = addDays(mon, 7 * w);
@@ -435,6 +475,7 @@ const store = DEMO ? (() => {
     mk(1, addDays(mon, -13), '18:00', { no_vino: true });
     mk(3, addDays(mon, 3), '19:00');
     mk(3, addDays(mon, 3), '11:30', { duracion_min: 60 });
+    mk(4, addDays(mon, 4), '12:00', { duracion_min: 15, precio: 0, tipo: 'primera' });
     db = { pacientes: p, citas };
   }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {} };
@@ -446,7 +487,7 @@ const store = DEMO ? (() => {
       const n = Object.assign({}, x, { id: uid() }); db.pacientes.push(n); save(); return Object.assign({}, n);
     },
     async deletePaciente(id){ db.pacientes = db.pacientes.filter(p => p.id !== id); db.citas = db.citas.filter(c => c.paciente_id !== id); save(); },
-    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid(), cancelada: false, no_vino: false, metodo_pago: null, serie_id: null }, c)); db.citas.push(...out); save(); return JSON.parse(JSON.stringify(out)); },
+    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid(), cancelada: false, no_vino: false, metodo_pago: null, serie_id: null, tipo: 'sesion' }, c)); db.citas.push(...out); save(); return JSON.parse(JSON.stringify(out)); },
     async updateCitas(ids, patch){ db.citas.forEach(c => { if (ids.includes(c.id)) Object.assign(c, patch); }); save(); },
     async deleteCitas(ids){ db.citas = db.citas.filter(c => !ids.includes(c.id)); save(); }
   };
@@ -464,7 +505,7 @@ const store = DEMO ? (() => {
     return { pacientes, citas };
   },
   async savePaciente(x){
-    const row = { alias: x.alias, precio: x.precio, activo: x.activo, metodo_pago: x.metodo_pago || null };
+    const row = { alias: x.alias, precio: x.precio, activo: x.activo, metodo_pago: x.metodo_pago || null, telefono: x.telefono || null };
     const q = x.id ? sb.from('pacientes').update(row).eq('id', x.id) : sb.from('pacientes').insert(row);
     const { data, error } = await q.select().single(); if (error) throw error; return data;
   },
@@ -488,7 +529,8 @@ const pacById = id => S.pacientes.find(p => p.id === id);
 const byStart = (a, b) => a.inicio.localeCompare(b.inicio);
 const citaEnd = c => new Date(new Date(c.inicio).getTime() + c.duracion_min * 60000);
 const isPast = c => new Date(c.inicio) < new Date();
-const isDue = c => !c.cancelada && !c.pagada && isPast(c);
+const isFree = c => Number(c.precio) === 0;
+const isDue = c => !c.cancelada && !c.pagada && !isFree(c) && isPast(c);
 const dueList = () => S.citas.filter(isDue);
 function groupByDay(){ const m = {}; S.citas.forEach(c => (m[ymd(new Date(c.inicio))] = m[ymd(new Date(c.inicio))] || []).push(c)); Object.values(m).forEach(l => l.sort(byStart)); return m; }
 
@@ -535,6 +577,7 @@ function render(){
 function chipFor(c, sm){
   const k = sm ? ' sm' : '';
   if (c.cancelada) return '<span class="chip off' + k + '">Cancelada</span>';
+  if (isFree(c)) return '<span class="chip gratis' + k + '">Gratis</span>';
   if (c.pagada) return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Pagada</span>';
   if (isPast(c)) return '<span class="chip due' + k + '" data-pay="' + c.id + '">' + (c.no_vino ? 'No vino · ' : '') + 'Sin pagar</span>';
   return '<span class="chip later' + k + '" data-pay="' + c.id + '" title="Marcar como pagada por adelantado">' + eur(c.precio) + '</span>';
@@ -542,11 +585,13 @@ function chipFor(c, sm){
 
 function citaRow(c, withDate){
   const p = pacById(c.paciente_id), d = new Date(c.inicio);
-  const sub = [c.modalidad === 'online' ? 'Online' : 'Presencial', eur(c.precio), c.no_vino ? 'No vino' : null, c.pagada && c.metodo_pago ? METODOS[c.metodo_pago] : null].filter(Boolean).join(' · ');
-  return '<div class="cita' + (c.cancelada ? ' cancel' : '') + '" role="button" tabindex="0" data-cita="' + c.id + '" style="--pc:' + colorOf(c.paciente_id) + '">' +
+  const prim = c.tipo === 'primera';
+  const sub = [prim ? 'Primera sesión' : null, c.modalidad === 'online' ? 'Online' : 'Presencial', isFree(c) ? null : eur(c.precio), c.no_vino ? 'No vino' : null, c.pagada && c.metodo_pago ? METODOS[c.metodo_pago] : null].filter(Boolean).join(' · ');
+  const tag = prim ? '<span class="tag1">1ª</span>' : '';
+  return '<div class="cita' + (c.cancelada ? ' cancel' : '') + (prim ? ' primera' : '') + '" role="button" tabindex="0" data-cita="' + c.id + '" style="--pc:' + colorOf(c.paciente_id) + '">' +
     '<span class="pcol"></span>' +
     '<div class="cita-t">' + (withDate ? '<b>' + fmtShort(d) + '</b><span>' + hm(d) + '</span>' : '<b>' + hm(d) + '</b><span>' + c.duracion_min + ' min</span>') + '</div>' +
-    '<div class="cita-m"><b>' + (withDate ? DIAS[d.getDay()].charAt(0).toUpperCase() + DIAS[d.getDay()].slice(1) : esc(p ? p.alias : '—')) + '</b><span>' + sub + '</span></div>' +
+    '<div class="cita-m"><b>' + tag + (withDate ? DIAS[d.getDay()].charAt(0).toUpperCase() + DIAS[d.getDay()].slice(1) : esc(p ? p.alias : '—')) + '</b><span>' + sub + '</span></div>' +
     chipFor(c) + '</div>';
 }
 
@@ -602,11 +647,12 @@ function dayHTML(byDay){
   placed.forEach(p => {
     const d = new Date(p.c.inicio), pac = pacById(p.c.paciente_id);
     const top = ((d.getHours() - h0) * 60 + d.getMinutes()) * HOUR_PX / 60;
-    const ht = Math.max(30, p.c.duracion_min * HOUR_PX / 60 - 3);
+    const ht = Math.max(38, p.c.duracion_min * HOUR_PX / 60 - 3);
     const w = 100 / p.n;
-    h += '<div class="ev' + (p.c.cancelada ? ' cancel' : '') + '" role="button" tabindex="0" data-cita="' + p.c.id + '" style="--pc:' + colorOf(p.c.paciente_id) +
+    const prim = p.c.tipo === 'primera';
+    h += '<div class="ev' + (p.c.cancelada ? ' cancel' : '') + (prim ? ' primera' : '') + '" role="button" tabindex="0" data-cita="' + p.c.id + '" style="--pc:' + colorOf(p.c.paciente_id) +
       ';top:' + (top + 1) + 'px;height:' + ht + 'px;left:calc(' + (p.col * w) + '% + 4px);width:calc(' + w + '% - 8px)">' +
-      '<div><b>' + esc(pac ? pac.alias : '—') + '</b><small>' + hm(d) + '–' + hm(citaEnd(p.c)) + (p.c.modalidad === 'online' ? ' · Online' : '') + (p.c.no_vino ? ' · No vino' : '') + '</small></div>' +
+      '<div><b>' + (prim ? '<span class="tag1">1ª</span>' : '') + esc(pac ? pac.alias : '—') + '</b><small>' + hm(d) + '–' + hm(citaEnd(p.c)) + (p.c.modalidad === 'online' ? ' · Online' : '') + (p.c.no_vino ? ' · No vino' : '') + '</small></div>' +
       (ht >= 40 || p.n === 1 ? chipFor(p.c, true) : '') + '</div>';
   });
   if (key === ymd(new Date())){
@@ -641,7 +687,7 @@ function monthHTML(byDay){
   let h = '<p class="sumline">' + sumLine(inMonth) + '</p><div class="mgrid">' + ['L','M','X','J','V','S','D'].map(d => '<div class="mh">' + d + '</div>').join('');
   for (let d = start; d < end; d = addDays(d, 1)){
     const k = ymd(d), list = (byDay[k] || []).filter(c => !c.cancelada);
-    const dots = list.slice(0, 4).map(c => '<i class="dot" style="--pc:' + colorOf(c.paciente_id) + '"></i>').join('') + (list.length > 4 ? '<span class="more">+' + (list.length - 4) + '</span>' : '');
+    const dots = list.slice(0, 4).map(c => '<i class="dot' + (c.tipo === 'primera' ? ' primera' : '') + '" style="--pc:' + colorOf(c.paciente_id) + '"></i>').join('') + (list.length > 4 ? '<span class="more">+' + (list.length - 4) + '</span>' : '');
     h += '<button class="mc' + (d.getMonth() !== mo ? ' out' : '') + (k === today ? ' today' : '') + (k === sel ? ' sel' : '') + '" data-selday="' + k + '" aria-label="' + fmtDay(d) + ', ' + plural(list.length, 'cita', 'citas') + '">' +
       (list.some(isDue) ? '<span class="mdue" title="Sin cobrar">€</span>' : '') +
       '<span class="mn">' + d.getDate() + '</span><span class="dots">' + dots + '</span></button>';
@@ -704,11 +750,11 @@ function exportCSV(year){
   if (!rows.length){ toast('No hay citas en ' + year); return; }
   const num = n => Number(n).toFixed(2).replace('.', ',');
   const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
-  const head = ['Fecha','Hora','Paciente','Modalidad','Duración (min)','Precio','Estado','Pagada','Fecha de pago','Forma de pago'];
+  const head = ['Fecha','Hora','Paciente','Tipo','Modalidad','Duración (min)','Precio','Estado','Pagada','Fecha de pago','Forma de pago'];
   const lines = [head.join(';')].concat(rows.map(c => {
     const d = new Date(c.inicio), p = pacById(c.paciente_id);
     const estado = c.cancelada ? 'Cancelada' : c.no_vino ? 'No vino' : isPast(c) ? 'Realizada' : 'Prevista';
-    return [dmy(d), hm(d), q(p ? p.alias : ''), c.modalidad === 'online' ? 'Online' : 'Presencial', c.duracion_min, num(c.precio), estado,
+    return [dmy(d), hm(d), q(p ? p.alias : ''), c.tipo === 'primera' ? 'Primera sesión (gratis)' : 'Sesión', c.modalidad === 'online' ? 'Online' : 'Presencial', c.duracion_min, num(c.precio), estado,
       c.pagada ? 'Sí' : 'No', c.pagada_el ? dmy(new Date(c.pagada_el + 'T12:00')) : '', METODOS[c.metodo_pago] || ''].join(';');
   }));
   const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -740,23 +786,76 @@ function renderPacientes(){
   s.addEventListener('input', () => { pacQuery = s.value; renderPacientes(); const n = $('pacSearch'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); });
 }
 
-/* ---------- cobrar ---------- */
-function payPatch(c){ const p = pacById(c.paciente_id); return { pagada: true, pagada_el: ymd(new Date()), metodo_pago: c.metodo_pago || (p && p.metodo_pago) || null }; }
-async function togglePay(id){
-  const c = S.citas.find(x => x.id === id); if (!c || c.cancelada) return;
-  const patch = c.pagada ? { pagada: false, pagada_el: null } : payPatch(c);
-  try { await store.updateCitas([id], patch); Object.assign(c, patch); render(); toast(patch.pagada ? 'Pagada' + (patch.metodo_pago ? ' · ' + METODOS[patch.metodo_pago] : '') : 'Marcada como sin pagar'); }
-  catch(e){ fail(e); }
+/* ---------- cobrar: siempre con fecha y forma de pago ---------- */
+let cobroIds = [];
+function openCobro(ids){
+  const list = S.citas.filter(c => ids.includes(c.id) && !c.cancelada && !isFree(c)).sort(byStart);
+  if (!list.length) return;
+  cobroIds = list.map(c => c.id);
+  const first = list[0], p = pacById(first.paciente_id);
+  const ya = list.length === 1 && first.pagada;
+  const total = list.reduce((s, c) => s + Number(c.precio), 0);
+  const d = new Date(first.inicio);
+  $('kTitle').textContent = ya ? 'Pago' : 'Cobrar';
+  $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (list.length === 1 ? 'sesión del ' + fmtDay(d) + ' ' + MESES[d.getMonth()] : plural(list.length, 'sesión', 'sesiones')) + ' · ' + eur(total);
+  $('kFecha').value = ya && first.pagada_el ? first.pagada_el : ymd(new Date());
+  $('kMetodo').value = first.metodo_pago || (p && p.metodo_pago) || '';
+  $('kQuitar').hidden = !ya;
+  $('kOk').textContent = ya ? 'Guardar' : 'Cobrar ' + eur(total);
+  $('dCobro').showModal();
 }
-async function payAll(ids){
-  const list = S.citas.filter(c => ids.includes(c.id));
-  const patch = payPatch(list[0]);
-  try { await store.updateCitas(ids, patch); list.forEach(c => Object.assign(c, patch)); render(); toast(plural(ids.length, 'sesión cobrada', 'sesiones cobradas')); }
-  catch(e){ fail(e); }
-}
+$('kClose').addEventListener('click', () => $('dCobro').close());
+$('fCobro').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const fecha = $('kFecha').value, metodo = $('kMetodo').value;
+  if (!fecha){ $('kFecha').focus(); toast('Falta la fecha de pago'); return; }
+  if (!metodo){ $('kMetodo').focus(); toast('Elige la forma de pago'); return; }
+  const patch = { pagada: true, pagada_el: fecha, metodo_pago: metodo };
+  try {
+    await store.updateCitas(cobroIds, patch);
+    const list = S.citas.filter(c => cobroIds.includes(c.id));
+    list.forEach(c => Object.assign(c, patch));
+    // si el paciente no tenía forma de pago habitual, se queda con esta
+    const p = pacById(list[0].paciente_id);
+    if (p && !p.metodo_pago){ try { Object.assign(p, await store.savePaciente(Object.assign({}, p, { metodo_pago: metodo }))); } catch(e) {} }
+    $('dCobro').close(); render();
+    toast((list.length === 1 ? 'Cobrada' : plural(list.length, 'sesión cobrada', 'sesiones cobradas')) + ' · ' + METODOS[metodo]);
+  } catch(e){ fail(e); }
+});
+$('kQuitar').addEventListener('click', async () => {
+  const patch = { pagada: false, pagada_el: null };
+  try {
+    await store.updateCitas(cobroIds, patch);
+    S.citas.filter(c => cobroIds.includes(c.id)).forEach(c => Object.assign(c, patch));
+    $('dCobro').close(); render(); toast('Pago quitado');
+  } catch(e){ fail(e); }
+});
 
 /* ---------- ventana de cita ---------- */
-let editing = null, modo = 'presencial', estado = 'normal';
+let editing = null, modo = 'presencial', estado = 'normal', tipo = 'sesion';
+
+// teléfono → botones de llamar y WhatsApp (los móviles españoles sin prefijo llevan +34)
+function telHTML(tel){
+  const t = String(tel || '').trim(); if (!t) return '';
+  const n = t.replace(/[^\d+]/g, '');
+  let wa = n.replace(/^\+/, '').replace(/^00/, '');
+  if (/^[6789]\d{8}$/.test(wa)) wa = '34' + wa;
+  return '<a href="tel:' + esc(n) + '">Llamar · ' + esc(t) + '</a><a href="https://wa.me/' + esc(wa) + '" target="_blank" rel="noopener">WhatsApp</a>';
+}
+function paintTel(){ const p = pacById($('cPac').value); const h = p ? telHTML(p.telefono) : ''; $('cTel').innerHTML = h; $('cTel').hidden = !h; }
+function setTipo(t, aplicar){
+  tipo = t;
+  document.querySelectorAll('#cTipo button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  const prim = t === 'primera';
+  $('cPayWrap').hidden = prim;
+  if (prim) $('cPagada').checked = false;
+  if (!editing) $('cRepWrap').hidden = prim;
+  if (aplicar){
+    if (prim){ $('cDur').value = '15'; $('cPrecio').value = '0'; $('cRep').value = '0'; }
+    else { $('cDur').value = '60'; const p = pacById($('cPac').value); $('cPrecio').value = p ? p.precio : ($('cNewPrecio').value || ''); }
+  }
+  paintMetodo();
+}
 
 function fillPacSelect(selected){
   const opts = S.pacientes.filter(p => p.activo || p.id === selected).sort((a, b) => a.alias.localeCompare(b.alias, 'es'))
@@ -773,7 +872,10 @@ function setEstado(e){
   $('cPagada').disabled = e === 'cancelada';
   paintMetodo();
 }
-function paintMetodo(){ $('cMetodoWrap').style.visibility = $('cPagada').checked ? 'visible' : 'hidden'; }
+function paintMetodo(){
+  $('cMetodoWrap').hidden = !$('cPagada').checked;
+  if ($('cPagada').checked && !$('cPagoFecha').value) $('cPagoFecha').value = ymd(new Date());
+}
 
 function openCita(id, day, time, pacId){
   editing = id ? S.citas.find(c => c.id === id) : null;
@@ -784,13 +886,15 @@ function openCita(id, day, time, pacId){
     fillPacSelect(editing.paciente_id);
     $('cFecha').value = ymd(d); $('cHora').value = hm(d);
     $('cDur').value = String(editing.duracion_min);
-    if (!$('cDur').value) $('cDur').value = '50';
+    if (!$('cDur').value) $('cDur').value = '60';
     $('cPrecio').value = editing.precio;
     setModo(editing.modalidad);
     $('cPagada').checked = !!editing.pagada;
+    $('cPagoFecha').value = editing.pagada_el || '';
     $('cMetodo').value = editing.metodo_pago || (pacById(editing.paciente_id) || {}).metodo_pago || '';
     setEstado(editing.cancelada ? 'cancelada' : editing.no_vino ? 'novino' : 'normal');
     $('cRepWrap').hidden = true; $('cEstadoWrap').hidden = false; $('cDel').hidden = false;
+    setTipo(editing.tipo || 'sesion', false);
     const serie = editing.serie_id ? S.citas.filter(c => c.serie_id === editing.serie_id).sort(byStart) : [];
     $('cSerieNote').hidden = serie.length < 2;
     if (serie.length > 1) $('cSerieNote').textContent = 'Se repite · cita ' + (serie.findIndex(c => c.id === editing.id) + 1) + ' de ' + serie.length + '.';
@@ -800,28 +904,33 @@ function openCita(id, day, time, pacId){
     fillPacSelect(pacId || null);
     $('cFecha').value = dayStr;
     $('cHora').value = time || (dayStr === ymd(now) ? pad(Math.min(21, now.getHours() + 1)) + ':00' : '10:00');
-    $('cDur').value = '50';
+    $('cDur').value = '60';
     const p = pacId ? pacById(pacId) : null;
     $('cPrecio').value = p ? p.precio : '';
     $('cMetodo').value = p && p.metodo_pago || '';
+    $('cPagoFecha').value = '';
     setModo('presencial'); $('cPagada').checked = false; $('cRep').value = '0';
     setEstado('normal');
     $('cRepWrap').hidden = false; $('cEstadoWrap').hidden = true; $('cDel').hidden = true; $('cSerieNote').hidden = true;
+    setTipo('sesion', false);
   }
-  $('cNewPac').hidden = true; $('cNewAlias').value = ''; $('cNewPrecio').value = '';
+  $('cNewPac').hidden = true; $('cNewAlias').value = ''; $('cNewPrecio').value = ''; $('cNewTel').value = '';
   paintMetodo();
+  paintTel();
   $('dCita').showModal();
 }
 
 $('cPac').addEventListener('change', () => {
   const v = $('cPac').value;
   $('cNewPac').hidden = v !== '__new';
+  paintTel();
   if (v === '__new'){ $('cNewAlias').focus(); return; }
   const p = pacById(v);
-  if (p && !editing){ $('cPrecio').value = p.precio; $('cMetodo').value = p.metodo_pago || ''; }
+  if (p && !editing){ if (tipo !== 'primera') $('cPrecio').value = p.precio; $('cMetodo').value = p.metodo_pago || ''; }
 });
-$('cNewPrecio').addEventListener('input', () => { $('cPrecio').value = $('cNewPrecio').value; });
+$('cNewPrecio').addEventListener('input', () => { if (tipo !== 'primera') $('cPrecio').value = $('cNewPrecio').value; });
 $('cPagada').addEventListener('change', paintMetodo);
+document.querySelectorAll('#cTipo button').forEach(b => b.addEventListener('click', () => setTipo(b.dataset.t, true)));
 document.querySelectorAll('#cMod button').forEach(b => b.addEventListener('click', () => setModo(b.dataset.m)));
 document.querySelectorAll('#cEstado button').forEach(b => b.addEventListener('click', () => setEstado(b.dataset.e)));
 $('cClose').addEventListener('click', () => $('dCita').close());
@@ -858,21 +967,25 @@ $('fCita').addEventListener('submit', async ev => {
     $('cWarn').hidden = false; return;
   }
 
+  const cancelada = estado === 'cancelada', no_vino = estado === 'novino';
+  const pagada = !cancelada && tipo !== 'primera' && $('cPagada').checked;
+  const metodo = $('cMetodo').value || null;
+  const fechaPago = $('cPagoFecha').value || ymd(new Date());
+  if (pagada && !metodo){ $('cMetodo').focus(); toast('Elige la forma de pago'); return; }
+  if (pid === '__new' && $('cNewPrecio').value === ''){ $('cNewPrecio').focus(); toast('Pon su precio habitual por sesión'); return; }
+
   try {
     if (pid === '__new'){
       const alias = $('cNewAlias').value.trim();
       if (!alias){ $('cNewAlias').focus(); toast('Escribe el nombre e inicial'); return; }
-      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value) || precio, activo: true, metodo_pago: $('cMetodo').value || null });
+      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value), activo: true, metodo_pago: metodo, telefono: $('cNewTel').value.trim() || null });
       S.pacientes.push(np); pid = np.id;
     }
-    const cancelada = estado === 'cancelada', no_vino = estado === 'novino';
-    const pagada = !cancelada && $('cPagada').checked;
-    const metodo = $('cMetodo').value || null;
-    const base = { paciente_id: pid, duracion_min: dur, modalidad: modo, precio };
+    const base = { paciente_id: pid, duracion_min: dur, modalidad: modo, precio, tipo };
     if (editing){
       const oldStart = new Date(editing.inicio);
       const later = editing.serie_id ? S.citas.filter(c => c.serie_id === editing.serie_id && c.id !== editing.id && c.inicio > editing.inicio) : [];
-      const common = +start !== +oldStart || dur !== editing.duracion_min || modo !== editing.modalidad || precio !== Number(editing.precio) || pid !== editing.paciente_id;
+      const common = +start !== +oldStart || dur !== editing.duracion_min || modo !== editing.modalidad || precio !== Number(editing.precio) || pid !== editing.paciente_id || tipo !== (editing.tipo || 'sesion');
       let scope = 'one';
       if (later.length && common){
         scope = await ask('¿Cambiar también las siguientes?', 'Esta cita se repite: hay ' + plural(later.length, 'cita más', 'citas más') + ' después de esta.',
@@ -880,7 +993,7 @@ $('fCita').addEventListener('submit', async ev => {
         if (!scope) return;
       }
       const patch = Object.assign({}, base, { inicio: start.toISOString(), cancelada, no_vino, pagada,
-        pagada_el: pagada ? (editing.pagada_el || ymd(new Date())) : null, metodo_pago: pagada ? metodo : editing.metodo_pago || null });
+        pagada_el: pagada ? fechaPago : null, metodo_pago: pagada ? metodo : editing.metodo_pago || null });
       await store.updateCitas([editing.id], patch);
       Object.assign(editing, patch);
       if (scope === 'all'){
@@ -899,7 +1012,7 @@ $('fCita').addEventListener('submit', async ev => {
       for (let i = 0; i < times; i++){
         const d = addDays(start, step * i); d.setHours(start.getHours(), start.getMinutes(), 0, 0);
         const paid = i === 0 && pagada;
-        rows.push(Object.assign({}, base, { inicio: d.toISOString(), serie_id: serie, pagada: paid, pagada_el: paid ? ymd(new Date()) : null, metodo_pago: paid ? metodo : null }));
+        rows.push(Object.assign({}, base, { inicio: d.toISOString(), serie_id: serie, pagada: paid, pagada_el: paid ? fechaPago : null, metodo_pago: paid ? metodo : null }));
       }
       const saved = await store.insertCitas(rows);
       S.citas.push(...saved);
@@ -917,6 +1030,8 @@ function openPac(id){
   editingPac = id ? pacById(id) : null;
   $('pTitle').textContent = editingPac ? editingPac.alias : 'Paciente nuevo';
   $('pAlias').value = editingPac ? editingPac.alias : '';
+  $('pTel').value = editingPac && editingPac.telefono || '';
+  paintPacTel();
   $('pPrecio').value = editingPac ? editingPac.precio : '';
   $('pMetodo').value = editingPac && editingPac.metodo_pago || '';
   $('pActivo').checked = editingPac ? !!editingPac.activo : true;
@@ -943,6 +1058,8 @@ function renderPacHist(){
   if (!h) h = '<p class="hint">Todavía no tiene citas.</p>';
   $('pHist').innerHTML = h;
 }
+function paintPacTel(){ const h = telHTML($('pTel').value); $('pTelLinks').innerHTML = h; $('pTelLinks').hidden = !h; }
+$('pTel').addEventListener('input', paintPacTel);
 $('pClose').addEventListener('click', () => $('dPac').close());
 $('pNuevaCita').addEventListener('click', () => { const id = editingPac.id; $('dPac').close(); openCita(null, ymd(cursor), null, id); });
 $('pTerminar').addEventListener('click', async () => {
@@ -969,14 +1086,15 @@ $('fPac').addEventListener('submit', async ev => {
   const alias = $('pAlias').value.trim(), precio = Number($('pPrecio').value);
   if (!alias || $('pPrecio').value === '' || !(precio >= 0)) return;
   try {
-    const saved = await store.savePaciente({ id: editingPac ? editingPac.id : undefined, alias, precio, metodo_pago: $('pMetodo').value || null, activo: editingPac ? $('pActivo').checked : true });
+    const saved = await store.savePaciente({ id: editingPac ? editingPac.id : undefined, alias, precio, metodo_pago: $('pMetodo').value || null, telefono: $('pTel').value.trim() || null, activo: editingPac ? $('pActivo').checked : true });
     if (editingPac) Object.assign(editingPac, saved); else S.pacientes.push(saved);
     $('dPac').close(); render(); toast('Paciente guardado');
   } catch(e){ fail(e); }
 });
 
 /* ---------- ajustes y avisos ---------- */
-const AVISOS_DEF = { antes_min: 15, resumen_hora: '08:00', cobros_dia: 1, cobros_hora: '09:00', sin_marcar_hora: '21:00' };
+const AVISOS_DEF = { antes_min: 120, antes2_min: 5, resumen_hora: '08:00', cobros_dia: 1, cobros_hora: '09:00', sin_marcar_hora: '21:00' };
+const NUM_CFG = ['antes_min', 'antes2_min', 'cobros_dia'];
 let cfg = null, cfgRow = false, ajToken = 0;
 const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -994,7 +1112,7 @@ async function loadCfg(){
 }
 async function saveCfg(){
   if (DEMO) return;
-  const row = { owner_id: userId, antes_min: cfg.antes_min, resumen_hora: cfg.resumen_hora, cobros_dia: cfg.cobros_dia, cobros_hora: cfg.cobros_hora, sin_marcar_hora: cfg.sin_marcar_hora };
+  const row = { owner_id: userId, antes_min: cfg.antes_min, antes2_min: cfg.antes2_min, resumen_hora: cfg.resumen_hora, cobros_dia: cfg.cobros_dia, cobros_hora: cfg.cobros_hora, sin_marcar_hora: cfg.sin_marcar_hora };
   const { error } = await sb.from('avisos_ajustes').upsert(row, { onConflict: 'owner_id' });
   if (error) throw error;
   cfgRow = true;
@@ -1019,10 +1137,14 @@ async function renderAjustes(){
 
   const c = cfg || AVISOS_DEF;
   const opt = (vals, cur, lab) => vals.map((v, i) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + (lab ? lab[i] : v) + '</option>').join('');
+  // minutos → «5 min», «2 h», «1 día»; incluye el valor guardado aunque no esté en la lista
+  const minLab = m => m >= 1440 ? (m / 1440) + (m === 1440 ? ' día' : ' días') : m >= 60 ? (m % 60 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : (m / 60) + ' h') : m + ' min';
+  const optMin = (vals, cur) => { const v = [...new Set(vals.concat(cur != null ? [Number(cur)] : []))].sort((a, b) => a - b); return opt(v, cur, v.map(minLab)); };
   const rowA = (key, title, sub, ctl) => '<div class="srow"><div class="st"><b>' + title + '</b><span>' + sub + '</span></div><div class="ctl">' + ctl + '<input type="checkbox" class="sw" data-cfgsw="' + key + '"' + (c[key] != null ? ' checked' : '') + ' aria-label="' + title + '"></div></div>';
   let h = '<p class="sec" style="margin-top:0">Avisos</p><div class="set">' + estadoHTML + '</div>';
   h += '<p class="sec">Qué avisos</p><div class="set">' +
-    rowA('antes_min', 'Antes de cada cita', 'Con el nombre y la hora', '<select data-cfg="antes_min" aria-label="Minutos antes">' + opt([5, 10, 15, 30, 60], c.antes_min ?? 15, ['5 min', '10 min', '15 min', '30 min', '1 h']) + '</select>') +
+    rowA('antes_min', 'Primer aviso de cita', 'Con el nombre y la hora', '<select data-cfg="antes_min" aria-label="Antelación del primer aviso">' + optMin([15, 30, 60, 120, 180, 1440], c.antes_min ?? 120) + '</select>') +
+    rowA('antes2_min', 'Segundo aviso de cita', 'Justo antes de empezar', '<select data-cfg="antes2_min" aria-label="Antelación del segundo aviso">' + optMin([5, 10, 15, 30, 60], c.antes2_min ?? 5) + '</select>') +
     rowA('resumen_hora', 'Resumen de la mañana', 'Las sesiones del día', '<input type="time" data-cfg="resumen_hora" value="' + (c.resumen_hora || '08:00') + '" aria-label="Hora del resumen">') +
     rowA('cobros_dia', 'Cobros pendientes', 'Quién debe y cuánto', '<select data-cfg="cobros_dia" aria-label="Día">' + opt([1, 2, 3, 4, 5, 6, 7], c.cobros_dia ?? 1, ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']) + '</select><input type="time" data-cfg="cobros_hora" value="' + (c.cobros_hora || '09:00') + '" aria-label="Hora de los cobros">') +
     rowA('sin_marcar_hora', 'Citas sin marcar', 'Sesiones de hoy sin pagar', '<input type="time" data-cfg="sin_marcar_hora" value="' + (c.sin_marcar_hora || '21:00') + '" aria-label="Hora del repaso">') +
@@ -1041,7 +1163,7 @@ async function renderAjustes(){
   if ($('avPrueba')) $('avPrueba').addEventListener('click', avisoPrueba);
   if ($('demoReset')) $('demoReset').addEventListener('click', async () => {
     if (!(await ask('¿Reiniciar la prueba?', 'Se borran los datos de ejemplo y se crean de nuevo.', [{ label: 'Reiniciar', value: 1, cls: 'danger' }]))) return;
-    try { localStorage.removeItem('consulta-demo-v2'); } catch(e) {}
+    try { localStorage.removeItem(DEMO_KEY); } catch(e) {}
     location.reload();
   });
   if ($('chgPass')) $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
@@ -1051,7 +1173,7 @@ async function renderAjustes(){
     if (!el.checked) cfg[k] = null;
     else {
       const ctl = box.querySelector('[data-cfg="' + k + '"]');
-      cfg[k] = k === 'antes_min' || k === 'cobros_dia' ? Number(ctl.value) : ctl.value;
+      cfg[k] = NUM_CFG.includes(k) ? Number(ctl.value) : ctl.value;
       if (k === 'cobros_dia') cfg.cobros_hora = box.querySelector('[data-cfg="cobros_hora"]').value || '09:00';
     }
     guardarCfg();
@@ -1060,7 +1182,7 @@ async function renderAjustes(){
     const k = el.dataset.cfg;
     const sw = box.querySelector('[data-cfgsw="' + (k === 'cobros_hora' ? 'cobros_dia' : k) + '"]');
     if (!sw.checked) sw.checked = true;
-    cfg[k] = k === 'antes_min' || k === 'cobros_dia' ? Number(el.value) : el.value;
+    cfg[k] = NUM_CFG.includes(k) ? Number(el.value) : el.value;
     if (k === 'cobros_hora' && cfg.cobros_dia == null) cfg.cobros_dia = Number(box.querySelector('[data-cfg="cobros_dia"]').value);
     if (k === 'cobros_dia' && !cfg.cobros_hora) cfg.cobros_hora = box.querySelector('[data-cfg="cobros_hora"]').value || '09:00';
     guardarCfg();
@@ -1124,8 +1246,8 @@ document.addEventListener('click', e => {
   }
   const t = e.target.closest('[data-pay],[data-payall],[data-cita],[data-nav],[data-mode],[data-goday],[data-selday],[data-newday],[data-pac],nav.tabs button');
   if (!t) return;
-  if (t.dataset.pay){ e.stopPropagation(); togglePay(t.dataset.pay); return; }
-  if (t.dataset.payall){ payAll(t.dataset.payall.split(',')); return; }
+  if (t.dataset.pay){ e.stopPropagation(); openCobro([t.dataset.pay]); return; }
+  if (t.dataset.payall){ openCobro(t.dataset.payall.split(',')); return; }
   if (t.dataset.cita){ openCita(t.dataset.cita); return; }
   if (t.dataset.nav !== undefined){ nav(Number(t.dataset.nav)); return; }
   if (t.dataset.mode){ setMode(t.dataset.mode); return; }
