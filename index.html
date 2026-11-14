@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Consulta">
+<title>Consulta</title>
+<style>
+:root{
+  --sage:#8fa880; --sage-deep:#5f7a52; --sage-light:#d4e0cc;
+  --cream:#faf9f7; --warm:#f5f0e8; --stone:#e8e0d4;
+  --ink:#2c2c2c; --muted:#6b6560; --accent:#7a6e5f;
+  --due:#b5694a; --due-light:#f3e1d8;
+  --serif:Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sage-deep);outline-offset:2px}
+[hidden]{display:none !important}
+
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:5;background:rgba(250,249,247,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--stone);padding-top:env(safe-area-inset-top)}
+.top-row{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{font-family:var(--serif);font-size:21px}
+.brand small{display:block;font-family:var(--sans);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.link{font-size:13px;color:var(--muted);padding:8px}
+.demo{background:var(--warm);border-bottom:1px solid var(--stone);font-size:12.5px;color:var(--accent);padding:8px 16px;text-align:center}
+
+main.wrap{padding-top:18px;padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--stone);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .wrap{display:flex}
+nav.tabs button{flex:1;padding:12px 4px 13px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button.on{color:var(--sage-deep);font-weight:600}
+.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--due);color:#fff;font-size:11px;line-height:18px;font-weight:600;margin-left:4px}
+
+h2{font-family:var(--serif);font-weight:normal;font-size:24px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.week{display:flex;align-items:center;gap:4px}
+.arrow{width:38px;height:38px;border-radius:50%;border:1px solid var(--stone);background:#fff;font-size:18px;display:grid;place-items:center}
+.range{font-family:var(--serif);font-size:18px;min-width:9ch;text-align:center}
+.btn{padding:9px 14px;border-radius:10px;border:1px solid var(--stone);background:#fff;font-size:14px}
+.btn.primary{background:var(--sage-deep);border-color:var(--sage-deep);color:#fff;font-weight:600}
+.btn.danger{color:var(--due);border-color:var(--due-light)}
+.btn.small{padding:6px 10px;font-size:13px}
+
+.day{margin-bottom:14px}
+.day-h{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);text-transform:capitalize;padding:0 2px 6px}
+.day-h.today{color:var(--sage-deep);font-weight:600}
+.day-h .sum{text-transform:none}
+.free{font-size:13px;color:#aaa29a;padding:10px 14px;border:1px dashed var(--stone);border-radius:12px}
+.card{background:#fff;border:1px solid var(--stone);border-radius:12px;overflow:hidden}
+.cita{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--warm);width:100%;text-align:left}
+.card .cita:last-child{border-bottom:none}
+.cita-t{width:52px;flex:none;font-variant-numeric:tabular-nums}
+.cita-t b{display:block;font-size:16px}
+.cita-t span{font-size:11.5px;color:var(--muted)}
+.cita-m{flex:1;min-width:0}
+.cita-m b{display:block;font-weight:600;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cita-m span{font-size:12.5px;color:var(--muted)}
+.cita.cancel .cita-m b,.cita.cancel .cita-t b{text-decoration:line-through;color:var(--muted)}
+.chip{flex:none;padding:6px 10px;border-radius:20px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.chip.paid{background:var(--sage-light);color:var(--sage-deep)}
+.chip.due{background:var(--due-light);color:var(--due)}
+.chip.later{background:var(--warm);color:var(--accent);font-weight:500}
+.chip.off{background:none;color:var(--muted);font-weight:500}
+
+.fab{position:fixed;right:max(16px,calc(50% - 364px));bottom:calc(78px + env(safe-area-inset-bottom));z-index:6;padding:14px 20px;border-radius:30px;background:var(--sage-deep);color:#fff;font-weight:600;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:14px}
+.stat b{display:block;font-family:var(--serif);font-weight:normal;font-size:28px;line-height:1.1}
+.stat span{font-size:12.5px;color:var(--muted)}
+.stat.due b{color:var(--due)}
+.sec{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 2px 8px}
+.debt{padding:14px;border-bottom:1px solid var(--warm)}
+.card .debt:last-child{border-bottom:none}
+.debt-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.debt-h b{font-size:15.5px}
+.debt-h span{font-size:13px;color:var(--muted)}
+.dates{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.date{padding:5px 9px;border-radius:16px;border:1px solid var(--due-light);color:var(--due);font-size:12.5px;background:#fff}
+.empty{text-align:center;color:var(--muted);padding:30px 16px;font-size:14px}
+
+.search{width:100%;padding:11px 14px;border:1px solid var(--stone);border-radius:10px;background:#fff;margin-bottom:12px}
+.pac{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid var(--warm);width:100%;text-align:left}
+.card .pac:last-child{border-bottom:none}
+.pac b{font-weight:600}
+.pac span{font-size:12.5px;color:var(--muted)}
+
+dialog{border:none;border-radius:16px;padding:0;width:min(520px,calc(100% - 24px));max-height:calc(100% - 24px);margin:auto;background:var(--cream);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(44,44,44,.4)}
+.dlg{padding:20px}
+.dlg h3{font-family:var(--serif);font-weight:normal;font-size:22px;margin-bottom:14px}
+.f{display:block;margin-bottom:12px}
+.f>span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.f input,.f select{width:100%;padding:11px 12px;border:1px solid var(--stone);border-radius:10px;background:#fff;font-size:16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;border:1px solid var(--stone);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;padding:10px;font-size:14px}
+.seg button.on{background:var(--sage-light);color:var(--sage-deep);font-weight:600}
+.check{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:15px}
+.check input{width:22px;height:22px;accent-color:var(--sage-deep)}
+.hint{font-size:12.5px;color:var(--muted);margin:-4px 0 12px}
+.warn{font-size:13px;color:var(--due);background:var(--due-light);border-radius:10px;padding:9px 12px;margin-bottom:12px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:8px}
+.acts .grow{flex:1}
+
+#login{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login{width:min(380px,100%);background:#fff;border:1px solid var(--stone);border-radius:16px;padding:26px 22px}
+.login h1{font-family:var(--serif);font-weight:normal;font-size:30px;margin-bottom:4px}
+.login p{color:var(--muted);font-size:14px;margin-bottom:18px}
+.login .btn{width:100%;padding:12px;margin-top:4px}
+.msg{font-size:13px;margin-top:12px;color:var(--muted)}
+.msg.err{color:var(--due)}
+
+.toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;background:var(--ink);color:#fff;padding:10px 16px;border-radius:22px;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.2);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ENTRAR -->
+<section id="login" hidden>
+  <form class="login" id="loginForm">
+    <h1>Consulta</h1>
+    <p id="loginSub">Agenda y cobros</p>
+    <div id="loginFields">
+      <label class="f"><span>Correo</span><input type="email" id="lEmail" autocomplete="username" required></label>
+      <label class="f"><span>Contraseña</span><input type="password" id="lPass" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit">Entrar</button>
+      <p class="msg"><button type="button" class="link" id="forgot" style="padding:0">¿Has olvidado la contraseña?</button></p>
+    </div>
+    <div id="newPassFields" hidden>
+      <label class="f"><span>Contraseña nueva (mínimo 10 caracteres)</span><input type="password" id="lNew" autocomplete="new-password" minlength="10"></label>
+      <button class="btn primary" type="button" id="saveNewPass">Guardar contraseña</button>
+    </div>
+    <p class="msg" id="loginMsg"></p>
+  </form>
+</section>
+
+<!-- APP -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap top-row">
+      <div class="brand">Consulta<small>Fadia Garrido</small></div>
+      <button class="link" id="logout">Salir</button>
+    </div>
+    <div class="demo" id="demoBar" hidden>Modo de prueba: datos de ejemplo guardados solo en este navegador.</div>
+  </header>
+
+  <main class="wrap">
+    <section id="vAgenda"></section>
+    <section id="vCobros" hidden></section>
+    <section id="vPacientes" hidden></section>
+  </main>
+
+  <button class="fab" id="fab">+ Cita</button>
+
+  <nav class="tabs">
+    <div class="wrap">
+      <button data-v="Agenda" class="on"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</button>
+      <button data-v="Cobros"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2a3 3 0 1 0 0 5.6M8 11h5M8 13.2h5"/></svg><span>Cobros<span id="dueBadge"></span></span></button>
+      <button data-v="Pacientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.8" cy="9.5" r="2.5"/><path d="M15.5 14.2c2.4-.3 4.4 1.2 5 4.3"/></svg>Pacientes</button>
+    </div>
+  </nav>
+</div>
+
+<!-- CITA -->
+<dialog id="dCita">
+  <form class="dlg" id="fCita" method="dialog">
+    <h3 id="cTitle">Nueva cita</h3>
+    <label class="f"><span>Paciente</span><select id="cPac"></select></label>
+    <div id="cNewPac" hidden>
+      <div class="row2">
+        <label class="f"><span>Nombre e inicial</span><input id="cNewAlias" maxlength="40" placeholder="María G."></label>
+        <label class="f"><span>Precio habitual (€)</span><input id="cNewPrecio" type="number" min="0" step="0.5" inputmode="decimal"></label>
+      </div>
+      <p class="hint">Solo nombre e inicial del apellido.</p>
+    </div>
+    <div class="row2">
+      <label class="f"><span>Día</span><input type="date" id="cFecha" required></label>
+      <label class="f"><span>Hora</span><input type="time" id="cHora" step="300" required></label>
+    </div>
+    <div class="row2">
+      <label class="f"><span>Duración</span>
+        <select id="cDur"><option value="30">30 min</option><option value="45">45 min</option><option value="50">50 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option></select>
+      </label>
+      <label class="f"><span>Precio (€)</span><input type="number" id="cPrecio" min="0" step="0.5" inputmode="decimal" required></label>
+    </div>
+    <div class="f"><span>Modalidad</span>
+      <div class="seg" id="cMod"><button type="button" data-m="presencial">Presencial</button><button type="button" data-m="online">Online</button></div>
+    </div>
+    <label class="f" id="cRepWrap"><span>Repetir</span>
+      <select id="cRep">
+        <option value="0">No se repite</option>
+        <option value="7:4">Cada semana · 4 citas</option>
+        <option value="7:8">Cada semana · 8 citas</option>
+        <option value="7:12">Cada semana · 12 citas</option>
+        <option value="14:4">Cada 2 semanas · 4 citas</option>
+        <option value="14:6">Cada 2 semanas · 6 citas</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="cPagada"> Pagada</label>
+    <p class="warn" id="cWarn" hidden></p>
+    <p class="hint" id="cCancelNote" hidden>Cita cancelada: no cuenta para cobrar.</p>
+    <div class="acts">
+      <button type="button" class="btn danger small" id="cDel" hidden>Borrar</button>
+      <button type="button" class="btn small" id="cCancel" hidden>Cancelar cita</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="cClose">Cerrar</button>
+      <button type="submit" class="btn primary" id="cSave">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- PACIENTE -->
+<dialog id="dPac">
+  <form class="dlg" id="fPac" method="dialog">
+    <h3 id="pTitle">Paciente</h3>
+    <label class="f"><span>Nombre e inicial</span><input id="pAlias" maxlength="40" placeholder="María G." required></label>
+    <p class="hint">Solo nombre e inicial del apellido.</p>
+    <label class="f"><span>Precio habitual por sesión (€)</span><input id="pPrecio" type="number" min="0" step="0.5" inputmode="decimal" required></label>
+    <label class="check" id="pActivoWrap"><input type="checkbox" id="pActivo"> En terapia (si no, queda archivado)</label>
+    <p class="hint" id="pResumen"></p>
+    <div class="acts">
+      <button type="button" class="btn danger small" id="pDel" hidden>Borrar</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="pClose">Cerrar</button>
+      <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ============================================================
+   CONEXIÓN
+   Con los dos valores vacíos la app funciona en MODO DE PRUEBA:
+   datos de ejemplo guardados solo en este navegador.
+   La clave "anon" es pública por diseño: los datos los protege
+   la base de datos (cada fila solo la ve la usuaria que la creó).
+   ============================================================ */
+const SUPABASE_URL = '';
+const SUPABASE_ANON_KEY = '';
+
+const DEMO = !SUPABASE_URL || !SUPABASE_ANON_KEY;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- fechas (siempre en hora local, nunca toISOString para el día) ---------- */
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const hm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const monday = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const w = (x.getDay() + 6) % 7; return addDays(x, -w); };
+const fromLocal = (date, time) => new Date(date + 'T' + time);
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fmtDay = d => DIAS[d.getDay()] + ' ' + d.getDate();
+const fmtShort = d => d.getDate() + ' ' + MESES[d.getMonth()];
+const eur = n => new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:2}).format(Number(n) || 0);
+
+/* ---------- almacén de datos ---------- */
+let sb = null;
+if (!DEMO) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+const store = DEMO ? (() => {
+  const KEY = 'consulta-demo-v1';
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+  let db;
+  try { db = JSON.parse(localStorage.getItem(KEY)); } catch(e) {}
+  if (!db) {
+    const now = new Date(), mon = monday(now);
+    const p = [
+      { id: uid(), alias: 'Ana P.', precio: 60, activo: true },
+      { id: uid(), alias: 'Luis M.', precio: 60, activo: true },
+      { id: uid(), alias: 'Carmen R.', precio: 70, activo: true },
+      { id: uid(), alias: 'Jorge S.', precio: 50, activo: false }
+    ];
+    const mk = (pi, dayOff, time, extra) => {
+      const d = addDays(mon, dayOff);
+      return Object.assign({ id: uid(), paciente_id: p[pi].id, inicio: fromLocal(ymd(d), time).toISOString(), duracion_min: 50,
+        modalidad: 'presencial', precio: p[pi].precio, cancelada: false, pagada: false, pagada_el: null }, extra || {});
+    };
+    db = { pacientes: p, citas: [
+      mk(0, -7, '17:00', { pagada: true, pagada_el: ymd(addDays(mon, -7)) }),
+      mk(1, -6, '18:00'),
+      mk(2, -5, '10:00', { modalidad: 'online' }),
+      mk(0, 0, '17:00'),
+      mk(1, 1, '18:00', { cancelada: true }),
+      mk(2, 2, '10:00', { modalidad: 'online', pagada: true, pagada_el: ymd(now) }),
+      mk(0, 7, '17:00')
+    ]};
+  }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {} };
+  save();
+  return {
+    async load(){ return JSON.parse(JSON.stringify(db)); },
+    async savePaciente(x){
+      if (x.id){ const i = db.pacientes.findIndex(p => p.id === x.id); db.pacientes[i] = Object.assign(db.pacientes[i], x); save(); return db.pacientes[i]; }
+      const n = Object.assign({ id: uid() }, x); db.pacientes.push(n); save(); return n;
+    },
+    async deletePaciente(id){ db.pacientes = db.pacientes.filter(p => p.id !== id); db.citas = db.citas.filter(c => c.paciente_id !== id); save(); },
+    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid() }, c)); db.citas.push(...out); save(); return out; },
+    async updateCitas(ids, patch){ const out = []; db.citas.forEach(c => { if (ids.includes(c.id)) { Object.assign(c, patch); out.push(c); } }); save(); return out; },
+    async deleteCita(id){ db.citas = db.citas.filter(c => c.id !== id); save(); }
+  };
+})() : {
+  async load(){
+    const { data: pacientes, error: e1 } = await sb.from('pacientes').select('*').order('alias');
+    if (e1) throw e1;
+    const citas = [];
+    for (let from = 0; ; from += 1000){
+      const { data, error } = await sb.from('citas').select('*').order('inicio').range(from, from + 999);
+      if (error) throw error;
+      citas.push(...data);
+      if (data.length < 1000) break;
+    }
+    return { pacientes, citas };
+  },
+  async savePaciente(x){
+    const q = x.id ? sb.from('pacientes').update({ alias: x.alias, precio: x.precio, activo: x.activo }).eq('id', x.id)
+                   : sb.from('pacientes').insert({ alias: x.alias, precio: x.precio, activo: x.activo });
+    const { data, error } = await q.select().single(); if (error) throw error; return data;
+  },
+  async deletePaciente(id){ const { error } = await sb.from('pacientes').delete().eq('id', id); if (error) throw error; },
+  async insertCitas(arr){ const { data, error } = await sb.from('citas').insert(arr).select(); if (error) throw error; return data; },
+  async updateCitas(ids, patch){ const { data, error } = await sb.from('citas').update(patch).in('id', ids).select(); if (error) throw error; return data; },
+  async deleteCita(id){ const { error } = await sb.from('citas').delete().eq('id', id); if (error) throw error; }
+};
+
+/* ---------- estado ---------- */
+let S = { pacientes: [], citas: [] };
+let view = 'Agenda';
+let weekStart = monday(new Date());
+let pacQuery = '';
+
+const pacById = id => S.pacientes.find(p => p.id === id);
+const isPast = c => new Date(c.inicio) < new Date();
+const isDue = c => !c.cancelada && !c.pagada && isPast(c);
+const dueList = () => S.citas.filter(isDue);
+
+function toast(t){
+  const el = $('toast'); el.textContent = t; el.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.hidden = true, 2200);
+}
+function fail(e){ console.error(e); toast('No se ha podido guardar. Revisa la conexión.'); }
+
+/* ---------- pintar ---------- */
+function render(){
+  ['Agenda','Cobros','Pacientes'].forEach(v => $('v' + v).hidden = v !== view);
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === view));
+  const n = new Set(dueList().map(c => c.paciente_id)).size;
+  $('dueBadge').innerHTML = n ? '<span class="badge">' + n + '</span>' : '';
+  $('fab').textContent = view === 'Pacientes' ? '+ Paciente' : '+ Cita';
+  if (view === 'Agenda') renderAgenda();
+  if (view === 'Cobros') renderCobros();
+  if (view === 'Pacientes') renderPacientes();
+}
+
+function chipFor(c){
+  if (c.cancelada) return '<span class="chip off">Cancelada</span>';
+  if (c.pagada) return '<span class="chip paid" data-pay="' + c.id + '">Pagada</span>';
+  if (isPast(c)) return '<span class="chip due" data-pay="' + c.id + '">Sin pagar</span>';
+  return '<span class="chip later" data-pay="' + c.id + '">' + eur(c.precio) + '</span>';
+}
+
+function citaRow(c){
+  const p = pacById(c.paciente_id), d = new Date(c.inicio);
+  return '<div class="cita' + (c.cancelada ? ' cancel' : '') + '" role="button" tabindex="0" data-cita="' + c.id + '">' +
+    '<div class="cita-t"><b>' + hm(d) + '</b><span>' + c.duracion_min + ' min</span></div>' +
+    '<div class="cita-m"><b>' + esc(p ? p.alias : '—') + '</b><span>' + (c.modalidad === 'online' ? 'Online' : 'Presencial') + ' · ' + eur(c.precio) + '</span></div>' +
+    chipFor(c) + '</div>';
+}
+
+function renderAgenda(){
+  const end = addDays(weekStart, 7), today = ymd(new Date());
+  const inWeek = S.citas.filter(c => { const d = new Date(c.inicio); return d >= weekStart && d < end; })
+                        .sort((a, b) => a.inicio.localeCompare(b.inicio));
+  const sameMonth = weekStart.getMonth() === addDays(weekStart, 6).getMonth();
+  const range = sameMonth ? weekStart.getDate() + '–' + fmtShort(addDays(weekStart, 6))
+                          : fmtShort(weekStart) + ' – ' + fmtShort(addDays(weekStart, 6));
+  const active = inWeek.filter(c => !c.cancelada);
+  let h = '<div class="bar"><div class="week"><button class="arrow" data-wk="-1" aria-label="Semana anterior">‹</button>' +
+    '<span class="range">' + range + '</span><button class="arrow" data-wk="1" aria-label="Semana siguiente">›</button></div>' +
+    '<button class="btn small" data-wk="0">Hoy</button></div>' +
+    '<p class="hint" style="margin:0 2px 14px">' + active.length + (active.length === 1 ? ' sesión' : ' sesiones') +
+    ' · ' + eur(active.reduce((s, c) => s + Number(c.precio), 0)) + '</p>';
+  for (let i = 0; i < 7; i++){
+    const d = addDays(weekStart, i), key = ymd(d);
+    const list = inWeek.filter(c => ymd(new Date(c.inicio)) === key);
+    if (i >= 5 && !list.length && key !== today) continue;
+    h += '<div class="day"><div class="day-h' + (key === today ? ' today' : '') + '"><span>' + (key === today ? 'Hoy · ' : '') + fmtDay(d) + '</span>' +
+      '<span class="sum">' + (() => { const n = list.filter(c => !c.cancelada).length; return n ? n + ' ses.' : ''; })() + '</span></div>' +
+      (list.length ? '<div class="card">' + list.map(citaRow).join('') + '</div>'
+                   : '<button class="free" style="width:100%;text-align:left" data-newday="' + key + '">Libre</button>') + '</div>';
+  }
+  $('vAgenda').innerHTML = h;
+}
+
+function renderCobros(){
+  const due = dueList();
+  const total = due.reduce((s, c) => s + Number(c.precio), 0);
+  const mes = ymd(new Date()).slice(0, 7);
+  const cobrado = S.citas.filter(c => c.pagada && (c.pagada_el || '').startsWith(mes)).reduce((s, c) => s + Number(c.precio), 0);
+  const groups = {};
+  due.forEach(c => (groups[c.paciente_id] = groups[c.paciente_id] || []).push(c));
+  const rows = Object.entries(groups).map(([pid, list]) => ({ p: pacById(pid), list, sum: list.reduce((s, c) => s + Number(c.precio), 0) }))
+    .sort((a, b) => b.sum - a.sum);
+  let h = '<div class="stats"><div class="stat due"><b>' + eur(total) + '</b><span>Pendiente de cobro</span></div>' +
+    '<div class="stat"><b>' + eur(cobrado) + '</b><span>Cobrado en ' + ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][new Date().getMonth()] + '</span></div></div>';
+  if (!rows.length){
+    h += '<div class="empty">Nadie debe nada. Todo cobrado.</div>';
+  } else {
+    h += '<p class="sec">Quién debe</p><div class="card">' + rows.map(r =>
+      '<div class="debt"><div class="debt-h"><div><b>' + esc(r.p ? r.p.alias : '—') + '</b><br><span>' + r.list.length +
+      (r.list.length === 1 ? ' sesión · ' : ' sesiones · ') + eur(r.sum) + '</span></div>' +
+      '<button class="btn small primary" data-payall="' + r.list.map(c => c.id).join(',') + '">Cobrar todo</button></div>' +
+      '<div class="dates">' + r.list.sort((a, b) => a.inicio.localeCompare(b.inicio)).map(c =>
+        '<button class="date" data-pay="' + c.id + '" title="Marcar esta sesión como pagada">' + fmtShort(new Date(c.inicio)) + ' · ' + eur(c.precio) + '</button>').join('') +
+      '</div></div>').join('') + '</div>' +
+      '<p class="hint" style="margin-top:10px">Toca una fecha para cobrar solo esa sesión.</p>';
+  }
+  $('vCobros').innerHTML = h;
+}
+
+function renderPacientes(){
+  const q = pacQuery.trim().toLowerCase();
+  const list = S.pacientes.filter(p => !q || p.alias.toLowerCase().includes(q)).sort((a, b) => a.alias.localeCompare(b.alias, 'es'));
+  const row = p => {
+    const debe = S.citas.filter(c => c.paciente_id === p.id && isDue(c)).reduce((s, c) => s + Number(c.precio), 0);
+    const next = S.citas.filter(c => c.paciente_id === p.id && !c.cancelada && !isPast(c)).sort((a, b) => a.inicio.localeCompare(b.inicio))[0];
+    const info = [eur(p.precio) + '/sesión', next ? 'próxima ' + fmtShort(new Date(next.inicio)) : null].filter(Boolean).join(' · ');
+    return '<button class="pac" data-pac="' + p.id + '"><div><b>' + esc(p.alias) + '</b><br><span>' + info + '</span></div>' +
+      (debe ? '<span class="chip due">Debe ' + eur(debe) + '</span>' : '') + '</button>';
+  };
+  const act = list.filter(p => p.activo), arch = list.filter(p => !p.activo);
+  let h = '<input class="search" id="pacSearch" placeholder="Buscar paciente" value="' + esc(pacQuery) + '" autocomplete="off">';
+  h += act.length ? '<p class="sec">En terapia · ' + act.length + '</p><div class="card">' + act.map(row).join('') + '</div>'
+                  : '<div class="empty">' + (q ? 'Nadie con ese nombre.' : 'Aún no hay pacientes. Añade el primero.') + '</div>';
+  if (arch.length) h += '<p class="sec">Archivados · ' + arch.length + '</p><div class="card">' + arch.map(row).join('') + '</div>';
+  $('vPacientes').innerHTML = h;
+  const s = $('pacSearch');
+  s.addEventListener('input', () => { pacQuery = s.value; renderPacientes(); const n = $('pacSearch'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); });
+}
+
+/* ---------- cobrar ---------- */
+async function togglePay(id){
+  const c = S.citas.find(x => x.id === id); if (!c || c.cancelada) return;
+  const patch = c.pagada ? { pagada: false, pagada_el: null } : { pagada: true, pagada_el: ymd(new Date()) };
+  try { await store.updateCitas([id], patch); Object.assign(c, patch); render(); toast(patch.pagada ? 'Marcada como pagada' : 'Marcada como sin pagar'); }
+  catch(e){ fail(e); }
+}
+async function payAll(ids){
+  const patch = { pagada: true, pagada_el: ymd(new Date()) };
+  try { await store.updateCitas(ids, patch); S.citas.forEach(c => { if (ids.includes(c.id)) Object.assign(c, patch); }); render(); toast(ids.length + (ids.length === 1 ? ' sesión cobrada' : ' sesiones cobradas')); }
+  catch(e){ fail(e); }
+}
+
+/* ---------- ventana de cita ---------- */
+let editing = null, modo = 'presencial', cancelFlag = false;
+
+function fillPacSelect(selected){
+  const opts = S.pacientes.filter(p => p.activo || p.id === selected).sort((a, b) => a.alias.localeCompare(b.alias, 'es'))
+    .map(p => '<option value="' + p.id + '"' + (p.id === selected ? ' selected' : '') + '>' + esc(p.alias) + '</option>').join('');
+  $('cPac').innerHTML = (selected ? '' : '<option value="" disabled selected>Elige paciente</option>') + opts + '<option value="__new">+ Paciente nuevo…</option>';
+}
+function setModo(m){ modo = m; document.querySelectorAll('#cMod button').forEach(b => b.classList.toggle('on', b.dataset.m === m)); }
+
+function openCita(id, day){
+  editing = id ? S.citas.find(c => c.id === id) : null;
+  $('cWarn').hidden = true;
+  if (editing){
+    const d = new Date(editing.inicio);
+    $('cTitle').textContent = 'Cita';
+    fillPacSelect(editing.paciente_id);
+    $('cFecha').value = ymd(d); $('cHora').value = hm(d);
+    $('cDur').value = String(editing.duracion_min);
+    $('cPrecio').value = editing.precio;
+    setModo(editing.modalidad);
+    $('cPagada').checked = !!editing.pagada;
+    cancelFlag = !!editing.cancelada;
+    $('cRepWrap').hidden = true; $('cDel').hidden = false; $('cCancel').hidden = false;
+  } else {
+    const now = new Date();
+    let dayStr = day || (ymd(now) >= ymd(weekStart) && ymd(now) < ymd(addDays(weekStart, 7)) ? ymd(now) : ymd(weekStart));
+    $('cTitle').textContent = 'Nueva cita';
+    fillPacSelect(null);
+    $('cFecha').value = dayStr;
+    $('cHora').value = dayStr === ymd(now) ? pad(Math.min(21, now.getHours() + 1)) + ':00' : '10:00';
+    $('cDur').value = '50'; $('cPrecio').value = '';
+    setModo('presencial'); $('cPagada').checked = false; $('cRep').value = '0';
+    cancelFlag = false;
+    $('cRepWrap').hidden = false; $('cDel').hidden = true; $('cCancel').hidden = true;
+  }
+  $('cNewPac').hidden = true; $('cNewAlias').value = ''; $('cNewPrecio').value = '';
+  paintCancel();
+  $('dCita').showModal();
+}
+function paintCancel(){
+  $('cCancel').textContent = cancelFlag ? 'Recuperar cita' : 'Cancelar cita';
+  $('cCancelNote').hidden = !cancelFlag;
+  $('cPagada').disabled = cancelFlag;
+}
+
+$('cPac').addEventListener('change', () => {
+  const v = $('cPac').value;
+  $('cNewPac').hidden = v !== '__new';
+  if (v === '__new'){ $('cNewAlias').focus(); return; }
+  const p = pacById(v);
+  if (p && !editing) $('cPrecio').value = p.precio;
+});
+$('cNewPrecio').addEventListener('input', () => { $('cPrecio').value = $('cNewPrecio').value; });
+document.querySelectorAll('#cMod button').forEach(b => b.addEventListener('click', () => setModo(b.dataset.m)));
+$('cClose').addEventListener('click', () => $('dCita').close());
+$('cCancel').addEventListener('click', () => { cancelFlag = !cancelFlag; if (cancelFlag) $('cPagada').checked = false; paintCancel(); });
+$('cDel').addEventListener('click', async () => {
+  if (!editing || !confirm('¿Borrar esta cita? No se puede deshacer.')) return;
+  try { await store.deleteCita(editing.id); S.citas = S.citas.filter(c => c.id !== editing.id); $('dCita').close(); render(); toast('Cita borrada'); }
+  catch(e){ fail(e); }
+});
+
+$('fCita').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  let pid = $('cPac').value;
+  if (!pid){ $('cPac').focus(); return; }
+  const fecha = $('cFecha').value, hora = $('cHora').value;
+  const precio = Number($('cPrecio').value);
+  if (!fecha || !hora || !(precio >= 0) || $('cPrecio').value === ''){ toast('Falta el día, la hora o el precio'); return; }
+  const dur = Number($('cDur').value);
+  const start = fromLocal(fecha, hora);
+
+  // ¿se pisa con otra cita?
+  const endT = start.getTime() + dur * 60000;
+  const clash = S.citas.find(c => !c.cancelada && (!editing || c.id !== editing.id) &&
+    new Date(c.inicio).getTime() < endT && new Date(c.inicio).getTime() + c.duracion_min * 60000 > start.getTime());
+  if (clash && $('cWarn').hidden){
+    const p = pacById(clash.paciente_id);
+    $('cWarn').textContent = 'Se pisa con ' + (p ? p.alias : 'otra cita') + ' a las ' + hm(new Date(clash.inicio)) + '. Pulsa Guardar otra vez para guardarla igualmente.';
+    $('cWarn').hidden = false; return;
+  }
+
+  try {
+    if (pid === '__new'){
+      const alias = $('cNewAlias').value.trim();
+      if (!alias){ $('cNewAlias').focus(); toast('Escribe el nombre e inicial'); return; }
+      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value) || precio, activo: true });
+      S.pacientes.push(np); pid = np.id;
+    }
+    const pagada = !cancelFlag && $('cPagada').checked;
+    const base = { paciente_id: pid, duracion_min: dur, modalidad: modo, precio, cancelada: cancelFlag, pagada };
+    if (editing){
+      const patch = Object.assign({}, base, { inicio: start.toISOString(), pagada_el: pagada ? (editing.pagada_el || ymd(new Date())) : null });
+      await store.updateCitas([editing.id], patch);
+      Object.assign(editing, patch);
+      toast('Cita guardada');
+    } else {
+      const [step, times] = $('cRep').value === '0' ? [0, 1] : $('cRep').value.split(':').map(Number);
+      const rows = [];
+      for (let i = 0; i < times; i++){
+        const d = addDays(start, step * i);
+        rows.push(Object.assign({}, base, { inicio: d.toISOString(), pagada: i === 0 ? pagada : false, pagada_el: i === 0 && pagada ? ymd(new Date()) : null }));
+      }
+      const saved = await store.insertCitas(rows);
+      S.citas.push(...saved);
+      toast(saved.length === 1 ? 'Cita creada' : saved.length + ' citas creadas');
+    }
+    $('dCita').close();
+    weekStart = monday(start);
+    render();
+  } catch(e){ fail(e); }
+});
+
+/* ---------- ventana de paciente ---------- */
+let editingPac = null;
+function openPac(id){
+  editingPac = id ? pacById(id) : null;
+  $('pTitle').textContent = editingPac ? 'Paciente' : 'Paciente nuevo';
+  $('pAlias').value = editingPac ? editingPac.alias : '';
+  $('pPrecio').value = editingPac ? editingPac.precio : '';
+  $('pActivo').checked = editingPac ? !!editingPac.activo : true;
+  $('pActivoWrap').hidden = !editingPac;
+  $('pDel').hidden = !editingPac;
+  if (editingPac){
+    const mine = S.citas.filter(c => c.paciente_id === editingPac.id && !c.cancelada);
+    const hechas = mine.filter(isPast).length;
+    const debe = mine.filter(isDue).reduce((s, c) => s + Number(c.precio), 0);
+    $('pResumen').textContent = hechas + (hechas === 1 ? ' sesión hecha' : ' sesiones hechas') + (debe ? ' · debe ' + eur(debe) : ' · nada pendiente');
+  } else $('pResumen').textContent = '';
+  $('dPac').showModal();
+}
+$('pClose').addEventListener('click', () => $('dPac').close());
+$('pDel').addEventListener('click', async () => {
+  if (!editingPac) return;
+  const n = S.citas.filter(c => c.paciente_id === editingPac.id).length;
+  if (!confirm('¿Borrar a ' + editingPac.alias + ' y sus ' + n + ' citas? No se puede deshacer.\n\nSi solo ha terminado la terapia, mejor desmarca «En terapia» para archivarlo.')) return;
+  try { await store.deletePaciente(editingPac.id); S.pacientes = S.pacientes.filter(p => p.id !== editingPac.id); S.citas = S.citas.filter(c => c.paciente_id !== editingPac.id); $('dPac').close(); render(); toast('Paciente borrado'); }
+  catch(e){ fail(e); }
+});
+$('fPac').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const alias = $('pAlias').value.trim(), precio = Number($('pPrecio').value);
+  if (!alias || $('pPrecio').value === '' || !(precio >= 0)) return;
+  try {
+    const saved = await store.savePaciente({ id: editingPac ? editingPac.id : undefined, alias, precio, activo: editingPac ? $('pActivo').checked : true });
+    if (editingPac) Object.assign(editingPac, saved); else S.pacientes.push(saved);
+    $('dPac').close(); render(); toast('Paciente guardado');
+  } catch(e){ fail(e); }
+});
+
+/* ---------- clics ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-pay],[data-payall],[data-cita],[data-wk],[data-newday],[data-pac],nav.tabs button');
+  if (!t) return;
+  if (t.dataset.pay){ e.stopPropagation(); togglePay(t.dataset.pay); return; }
+  if (t.dataset.payall){ payAll(t.dataset.payall.split(',')); return; }
+  if (t.dataset.cita){ openCita(t.dataset.cita); return; }
+  if (t.dataset.newday){ openCita(null, t.dataset.newday); return; }
+  if (t.dataset.pac){ openPac(t.dataset.pac); return; }
+  if (t.dataset.wk !== undefined){
+    const k = Number(t.dataset.wk);
+    weekStart = k === 0 ? monday(new Date()) : addDays(weekStart, 7 * k);
+    renderAgenda(); return;
+  }
+  if (t.dataset.v){ view = t.dataset.v; render(); window.scrollTo(0, 0); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.cita) openCita(e.target.dataset.cita);
+});
+$('fab').addEventListener('click', () => view === 'Pacientes' ? openPac(null) : openCita(null));
+
+/* ---------- entrar / salir ---------- */
+async function start(){
+  try { S = await store.load(); }
+  catch(e){ console.error(e); toast('No se han podido cargar los datos'); }
+  $('login').hidden = true; $('app').hidden = false;
+  render();
+}
+function showLogin(msg, isErr){
+  $('app').hidden = true; $('login').hidden = false;
+  $('loginMsg').textContent = msg || ''; $('loginMsg').classList.toggle('err', !!isErr);
+}
+
+if (DEMO){
+  $('demoBar').hidden = false;
+  $('logout').textContent = 'Reiniciar prueba';
+  $('logout').addEventListener('click', () => {
+    if (!confirm('¿Borrar los datos de prueba y empezar de nuevo?')) return;
+    try { localStorage.removeItem('consulta-demo-v1'); } catch(e) {}
+    location.reload();
+  });
+  start();
+} else {
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('loginMsg').textContent = 'Entrando…'; $('loginMsg').classList.remove('err');
+    const { error } = await sb.auth.signInWithPassword({ email: $('lEmail').value.trim(), password: $('lPass').value });
+    if (error) showLogin('Correo o contraseña incorrectos.', true);
+  });
+  $('forgot').addEventListener('click', async () => {
+    const email = $('lEmail').value.trim();
+    if (!email){ showLogin('Escribe tu correo arriba y vuelve a pulsar.', true); return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    showLogin(error ? 'No se ha podido enviar el correo.' : 'Te hemos enviado un correo para cambiar la contraseña.', !!error);
+  });
+  $('saveNewPass').addEventListener('click', async () => {
+    const p = $('lNew').value;
+    if (p.length < 10){ showLogin('La contraseña necesita al menos 10 caracteres.', true); return; }
+    const { error } = await sb.auth.updateUser({ password: p });
+    if (error){ showLogin('No se ha podido cambiar la contraseña.', true); return; }
+    $('newPassFields').hidden = true; $('loginFields').hidden = false;
+    start();
+  });
+  $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [] }; showLogin('Has salido.'); });
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY'){
+      showLogin(''); $('loginSub').textContent = 'Elige una contraseña nueva';
+      $('loginFields').hidden = true; $('newPassFields').hidden = false; return;
+    }
+    if (event === 'SIGNED_IN' && $('newPassFields').hidden && $('app').hidden) start();
+    if (event === 'SIGNED_OUT') showLogin('');
+  });
+  sb.auth.getSession().then(({ data }) => { if (data.session) start(); else showLogin(''); });
+}
+</script>
+</body>
+</html>
