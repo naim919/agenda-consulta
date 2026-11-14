@@ -6,7 +6,12 @@
 <meta name="theme-color" content="#faf9f7">
 <meta name="robots" content="noindex, nofollow">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Consulta">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>Consulta</title>
 <style>
 :root{
@@ -27,74 +32,141 @@ input,select{font:inherit;color:inherit}
 
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
 header.top{position:sticky;top:0;z-index:5;background:rgba(250,249,247,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--stone);padding-top:env(safe-area-inset-top)}
-.top-row{display:flex;align-items:center;justify-content:space-between;height:56px}
+.top-row{display:flex;align-items:center;justify-content:space-between;height:54px}
 .brand{font-family:var(--serif);font-size:21px}
 .brand small{display:block;font-family:var(--sans);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .link{font-size:13px;color:var(--muted);padding:8px}
 .demo{background:var(--warm);border-bottom:1px solid var(--stone);font-size:12.5px;color:var(--accent);padding:8px 16px;text-align:center}
 
-main.wrap{padding-top:18px;padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+main.wrap{padding-top:14px;padding-bottom:calc(150px + env(safe-area-inset-bottom))}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--stone);padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs .wrap{display:flex}
-nav.tabs button{flex:1;padding:12px 4px 13px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button{flex:1;padding:11px 2px 12px;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
 nav.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--due);color:#fff;font-size:11px;line-height:18px;font-weight:600;margin-left:4px}
 
-h2{font-family:var(--serif);font-weight:normal;font-size:24px}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
-.week{display:flex;align-items:center;gap:4px}
-.arrow{width:38px;height:38px;border-radius:50%;border:1px solid var(--stone);background:#fff;font-size:18px;display:grid;place-items:center}
-.range{font-family:var(--serif);font-size:18px;min-width:9ch;text-align:center}
+.modes{display:flex;background:var(--warm);border-radius:10px;padding:3px;margin-bottom:12px}
+.modes button{flex:1;padding:7px 4px;border-radius:8px;font-size:14px;color:var(--muted)}
+.modes button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.week{display:flex;align-items:center;gap:4px;min-width:0}
+.arrow{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--stone);background:#fff;font-size:18px;display:grid;place-items:center}
+.range{font-family:var(--serif);font-size:18px;text-align:center;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .btn{padding:9px 14px;border-radius:10px;border:1px solid var(--stone);background:#fff;font-size:14px}
 .btn.primary{background:var(--sage-deep);border-color:var(--sage-deep);color:#fff;font-weight:600}
 .btn.danger{color:var(--due);border-color:var(--due-light)}
 .btn.small{padding:6px 10px;font-size:13px}
+.btn.block{width:100%}
+.sumline{font-size:12.5px;color:var(--muted);margin:0 2px 12px}
 
 .day{margin-bottom:14px}
-.day-h{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);text-transform:capitalize;padding:0 2px 6px}
+.day-h{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);padding:0 2px 6px;width:100%;text-align:left}
+.day-h .dn{text-transform:capitalize}
 .day-h.today{color:var(--sage-deep);font-weight:600}
-.day-h .sum{text-transform:none}
-.free{font-size:13px;color:#aaa29a;padding:10px 14px;border:1px dashed var(--stone);border-radius:12px}
+.free{display:block;width:100%;text-align:left;font-size:13px;color:#aaa29a;padding:10px 14px;border:1px dashed var(--stone);border-radius:12px}
 .card{background:#fff;border:1px solid var(--stone);border-radius:12px;overflow:hidden}
-.cita{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--warm);width:100%;text-align:left}
+.cita{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--warm);width:100%;text-align:left;cursor:pointer}
 .card .cita:last-child{border-bottom:none}
-.cita-t{width:52px;flex:none;font-variant-numeric:tabular-nums}
+.pcol{width:4px;align-self:stretch;border-radius:2px;background:var(--pc);flex:none}
+.cita-t{width:50px;flex:none;font-variant-numeric:tabular-nums}
 .cita-t b{display:block;font-size:16px}
 .cita-t span{font-size:11.5px;color:var(--muted)}
 .cita-m{flex:1;min-width:0}
 .cita-m b{display:block;font-weight:600;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cita-m span{font-size:12.5px;color:var(--muted)}
 .cita.cancel .cita-m b,.cita.cancel .cita-t b{text-decoration:line-through;color:var(--muted)}
-.chip{flex:none;padding:6px 10px;border-radius:20px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.chip{flex:none;padding:6px 10px;border-radius:20px;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+.chip.sm{padding:3px 8px;font-size:11px}
 .chip.paid{background:var(--sage-light);color:var(--sage-deep)}
 .chip.due{background:var(--due-light);color:var(--due)}
 .chip.later{background:var(--warm);color:var(--accent);font-weight:500}
-.chip.off{background:none;color:var(--muted);font-weight:500}
+.chip.off{background:none;color:var(--muted);font-weight:500;cursor:default}
+
+/* día */
+.tl{position:relative;margin-left:46px;border-left:1px solid var(--stone);cursor:copy}
+.hr{position:absolute;left:0;right:0;border-top:1px solid var(--stone);pointer-events:none}
+.hr.half{border-top-style:dashed;border-top-color:var(--warm)}
+.hr span{position:absolute;left:-46px;top:-8px;width:40px;text-align:right;font-size:11px;color:var(--muted)}
+.ev{position:absolute;border-radius:8px;border-left:3px solid var(--pc);background:color-mix(in srgb,var(--pc) 16%,#fff);padding:4px 7px;overflow:hidden;display:flex;justify-content:space-between;gap:6px;align-items:flex-start;text-align:left;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.ev b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev small{display:block;font-size:11.5px;color:var(--muted)}
+.ev>div{min-width:0}
+.ev.cancel{opacity:.5}
+.ev.cancel b{text-decoration:line-through}
+.now{position:absolute;left:-5px;right:0;border-top:2px solid var(--due);z-index:3;pointer-events:none}
+.now::before{content:'';position:absolute;left:-1px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--due)}
+
+/* mes */
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mh{font-size:11px;color:var(--muted);text-align:center;padding:2px 0 4px}
+.mc{position:relative;min-height:54px;background:#fff;border:1px solid var(--stone);border-radius:10px;padding:5px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.mc.out{opacity:.38}
+.mn{width:24px;height:24px;display:grid;place-items:center;font-size:14px;border-radius:50%}
+.mc.today .mn{background:var(--sage-deep);color:#fff;font-weight:600}
+.mc.sel{border-color:var(--sage-deep);box-shadow:inset 0 0 0 1px var(--sage-deep)}
+.dots{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 2px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--pc)}
+.more{font-size:9.5px;color:var(--muted);line-height:7px}
+.mdue{position:absolute;top:3px;right:5px;font-size:9.5px;font-weight:700;color:var(--due)}
 
 .fab{position:fixed;right:max(16px,calc(50% - 364px));bottom:calc(78px + env(safe-area-inset-bottom));z-index:6;padding:14px 20px;border-radius:30px;background:var(--sage-deep);color:#fff;font-weight:600;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
 
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+/* cobros */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
 .stat{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:14px}
 .stat b{display:block;font-family:var(--serif);font-weight:normal;font-size:28px;line-height:1.1}
 .stat span{font-size:12.5px;color:var(--muted)}
 .stat.due b{color:var(--due)}
-.sec{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 2px 8px}
+.sec{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:20px 2px 8px}
 .debt{padding:14px;border-bottom:1px solid var(--warm)}
 .card .debt:last-child{border-bottom:none}
 .debt-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .debt-h b{font-size:15.5px}
 .debt-h span{font-size:13px;color:var(--muted)}
+.debt-h .btn{white-space:nowrap;flex:none}
 .dates{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .date{padding:5px 9px;border-radius:16px;border:1px solid var(--due-light);color:var(--due);font-size:12.5px;background:#fff}
-.empty{text-align:center;color:var(--muted);padding:30px 16px;font-size:14px}
+.empty{text-align:center;color:var(--muted);padding:26px 16px;font-size:14px}
+.mrow{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--warm)}
+.card .mrow:last-child{border-bottom:none}
+.mrow .ml{font-size:13px;color:var(--muted);text-transform:capitalize}
+.mrow .mv{font-family:var(--serif);font-size:17px;text-align:right}
+.mrow small{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
+.meter{height:8px;border-radius:4px;background:var(--warm);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--sage);border-radius:4px}
+.exp{display:flex;gap:8px;align-items:center}
+.exp select{padding:9px 10px;border:1px solid var(--stone);border-radius:10px;background:#fff}
 
-.search{width:100%;padding:11px 14px;border:1px solid var(--stone);border-radius:10px;background:#fff;margin-bottom:12px}
-.pac{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid var(--warm);width:100%;text-align:left}
+/* pacientes */
+.search{width:100%;padding:11px 14px;border:1px solid var(--stone);border-radius:10px;background:#fff;margin-bottom:4px;font-size:16px}
+.pac{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--warm);width:100%;text-align:left}
 .card .pac:last-child{border-bottom:none}
+.pac .pi{flex:1;min-width:0}
 .pac b{font-weight:600}
 .pac span{font-size:12.5px;color:var(--muted)}
+.av{width:34px;height:34px;flex:none;border-radius:50%;background:color-mix(in srgb,var(--pc) 22%,#fff);color:var(--pc);display:grid;place-items:center;font-weight:700;font-size:14px}
 
+/* ajustes */
+.set{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:2px 14px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--warm)}
+.srow:last-child{border-bottom:none}
+.srow .st{flex:1;min-width:0}
+.srow .st b{display:block;font-weight:600;font-size:15px}
+.srow .st span{font-size:12.5px;color:var(--muted)}
+.srow .ctl{display:flex;gap:6px;align-items:center}
+.srow select,.srow input[type=time]{padding:6px 8px;border:1px solid var(--stone);border-radius:8px;background:#fff;font-size:15px}
+.sw{appearance:none;-webkit-appearance:none;width:46px;height:28px;flex:none;border-radius:14px;background:var(--stone);position:relative;cursor:pointer;transition:background .15s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s}
+.sw:checked{background:var(--sage-deep)}
+.sw:checked::after{left:21px}
+.note{font-size:13.5px;line-height:1.5;padding:12px 0}
+.note.ok{color:var(--sage-deep)}
+.note.bad{color:var(--due)}
+.steps{margin:4px 0 4px 20px;font-size:13.5px;line-height:1.7}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;padding:0 0 12px}
+
+/* ventanas */
 dialog{border:none;border-radius:16px;padding:0;width:min(520px,calc(100% - 24px));max-height:calc(100% - 24px);margin:auto;background:var(--cream);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
 dialog::backdrop{background:rgba(44,44,44,.4)}
 .dlg{padding:20px}
@@ -104,14 +176,22 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 .f input,.f select{width:100%;padding:11px 12px;border:1px solid var(--stone);border-radius:10px;background:#fff;font-size:16px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg{display:flex;border:1px solid var(--stone);border-radius:10px;overflow:hidden;background:#fff}
-.seg button{flex:1;padding:10px;font-size:14px}
+.seg button{flex:1;padding:10px 4px;font-size:14px}
+.seg button+button{border-left:1px solid var(--stone)}
 .seg button.on{background:var(--sage-light);color:var(--sage-deep);font-weight:600}
-.check{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:15px}
+.seg.estado button.on[data-e="novino"]{background:var(--due-light);color:var(--due)}
+.seg.estado button.on[data-e="cancelada"]{background:var(--warm);color:var(--accent)}
+.check{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:15px}
 .check input{width:22px;height:22px;accent-color:var(--sage-deep)}
 .hint{font-size:12.5px;color:var(--muted);margin:-4px 0 12px}
 .warn{font-size:13px;color:var(--due);background:var(--due-light);border-radius:10px;padding:9px 12px;margin-bottom:12px}
 .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:8px}
 .acts .grow{flex:1}
+.acts.col{flex-direction:column;align-items:stretch}
+.hist{margin:6px 0 10px}
+.hist .cita{padding:9px 12px}
+.hist .cita-t{width:auto;min-width:74px}
+.hist .cita-t b{font-size:14px}
 
 #login{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
 .login{width:min(380px,100%);background:#fff;border:1px solid var(--stone);border-radius:16px;padding:26px 22px}
@@ -151,7 +231,6 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   <header class="top">
     <div class="wrap top-row">
       <div class="brand">Consulta<small>Fadia Garrido</small></div>
-      <div><button class="link" id="chgPass" hidden>Contraseña</button><button class="link" id="logout">Salir</button></div>
     </div>
     <div class="demo" id="demoBar" hidden>Modo de prueba: datos de ejemplo guardados solo en este navegador.</div>
   </header>
@@ -160,6 +239,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
     <section id="vAgenda"></section>
     <section id="vCobros" hidden></section>
     <section id="vPacientes" hidden></section>
+    <section id="vAjustes" hidden></section>
   </main>
 
   <button class="fab" id="fab">+ Cita</button>
@@ -169,6 +249,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <button data-v="Agenda" class="on"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</button>
       <button data-v="Cobros"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2a3 3 0 1 0 0 5.6M8 11h5M8 13.2h5"/></svg><span>Cobros<span id="dueBadge"></span></span></button>
       <button data-v="Pacientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.8" cy="9.5" r="2.5"/><path d="M15.5 14.2c2.4-.3 4.4 1.2 5 4.3"/></svg>Pacientes</button>
+      <button data-v="Ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>Ajustes</button>
     </div>
   </nav>
 </div>
@@ -191,7 +272,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
     </div>
     <div class="row2">
       <label class="f"><span>Duración</span>
-        <select id="cDur"><option value="30">30 min</option><option value="45">45 min</option><option value="50">50 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option></select>
+        <select id="cDur"><option value="30">30 min</option><option value="45">45 min</option><option value="50">50 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option><option value="120">2 h</option></select>
       </label>
       <label class="f"><span>Precio (€)</span><input type="number" id="cPrecio" min="0" step="0.5" inputmode="decimal" required></label>
     </div>
@@ -204,19 +285,27 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
         <option value="7:4">Cada semana · 4 citas</option>
         <option value="7:8">Cada semana · 8 citas</option>
         <option value="7:12">Cada semana · 12 citas</option>
+        <option value="7:26">Cada semana · 6 meses</option>
         <option value="14:4">Cada 2 semanas · 4 citas</option>
         <option value="14:6">Cada 2 semanas · 6 citas</option>
+        <option value="14:13">Cada 2 semanas · 6 meses</option>
       </select>
     </label>
-    <label class="check"><input type="checkbox" id="cPagada"> Pagada</label>
+    <div class="f" id="cEstadoWrap"><span>Asistencia</span>
+      <div class="seg estado" id="cEstado"><button type="button" data-e="normal">Normal</button><button type="button" data-e="novino">No vino</button><button type="button" data-e="cancelada">Cancelada</button></div>
+    </div>
+    <p class="hint" id="cEstadoNote" hidden></p>
+    <div class="row2" style="align-items:center">
+      <label class="check"><input type="checkbox" id="cPagada"> Pagada</label>
+      <label class="f" id="cMetodoWrap" style="margin:0"><select id="cMetodo" aria-label="Forma de pago"><option value="">Forma de pago…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
+    </div>
+    <p class="hint" id="cSerieNote" style="margin-top:8px" hidden></p>
     <p class="warn" id="cWarn" hidden></p>
-    <p class="hint" id="cCancelNote" hidden>Cita cancelada: no cuenta para cobrar.</p>
     <div class="acts">
       <button type="button" class="btn danger small" id="cDel" hidden>Borrar</button>
-      <button type="button" class="btn small" id="cCancel" hidden>Cancelar cita</button>
       <span class="grow"></span>
       <button type="button" class="btn" id="cClose">Cerrar</button>
-      <button type="submit" class="btn primary" id="cSave">Guardar</button>
+      <button type="submit" class="btn primary">Guardar</button>
     </div>
   </form>
 </dialog>
@@ -226,10 +315,19 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   <form class="dlg" id="fPac" method="dialog">
     <h3 id="pTitle">Paciente</h3>
     <label class="f"><span>Nombre e inicial</span><input id="pAlias" maxlength="40" placeholder="María G." required></label>
-    <p class="hint">Solo nombre e inicial del apellido.</p>
-    <label class="f"><span>Precio habitual por sesión (€)</span><input id="pPrecio" type="number" min="0" step="0.5" inputmode="decimal" required></label>
+    <div class="row2">
+      <label class="f"><span>Precio por sesión (€)</span><input id="pPrecio" type="number" min="0" step="0.5" inputmode="decimal" required></label>
+      <label class="f"><span>Suele pagar con</span><select id="pMetodo"><option value="">Sin indicar</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
+    </div>
     <label class="check" id="pActivoWrap"><input type="checkbox" id="pActivo"> En terapia (si no, queda archivado)</label>
-    <p class="hint" id="pResumen"></p>
+    <div id="pFicha" hidden>
+      <p class="hint" id="pResumen" style="margin:6px 0 10px"></p>
+      <div class="btnrow">
+        <button type="button" class="btn small primary" id="pNuevaCita">+ Cita</button>
+        <button type="button" class="btn small" id="pTerminar">Terminar terapia</button>
+      </div>
+      <div id="pHist"></div>
+    </div>
     <div class="acts">
       <button type="button" class="btn danger small" id="pDel" hidden>Borrar</button>
       <span class="grow"></span>
@@ -239,21 +337,30 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   </form>
 </dialog>
 
+<!-- PREGUNTA -->
+<dialog id="dAsk">
+  <div class="dlg">
+    <h3 id="aTitle"></h3>
+    <p class="hint" id="aText" style="margin:0 0 14px;font-size:14px"></p>
+    <div class="acts col" id="aBtns"></div>
+  </div>
+</dialog>
+
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
 <script>
 /* ============================================================
    CONEXIÓN
-   Con los dos valores vacíos la app funciona en MODO DE PRUEBA:
-   datos de ejemplo guardados solo en este navegador.
-   La clave "anon" es pública por diseño: los datos los protege
-   la base de datos (cada fila solo la ve la usuaria que la creó).
+   La clave es la «publishable»: pública por diseño. Los datos los
+   protege la base de datos (cada fila solo la ve quien la creó).
+   Con ?demo en la dirección se abre el modo de prueba (datos de
+   ejemplo guardados solo en el navegador).
    ============================================================ */
 const SUPABASE_URL = 'https://kvsfcoejwnxroeajqhuk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_HiAJIXSe-Oedajf_SQGO9g_jA4B0o6h';
 
-const DEMO = !SUPABASE_URL || !SUPABASE_ANON_KEY;
+const DEMO = !SUPABASE_URL || !SUPABASE_ANON_KEY || new URLSearchParams(location.search).has('demo');
 
 /* Enlace del correo (invitación o cambio de contraseña): se lee ANTES de que
    la conexión lo procese y lo borre de la dirección. */
@@ -262,66 +369,86 @@ const LINK = (() => {
   return { type: h.get('type'), error: h.get('error_description') || h.get('error') };
 })();
 let needsPass = LINK.type === 'invite' || LINK.type === 'recovery';
+
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
 
-/* ---------- fechas (siempre en hora local, nunca toISOString para el día) ---------- */
+/* ---------- fechas (siempre en hora local; nunca toISOString para el día) ---------- */
 const pad = n => String(n).padStart(2, '0');
 const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const dmy = d => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
 const hm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-const monday = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const w = (x.getDay() + 6) % 7; return addDays(x, -w); };
+const addMonths = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth() + n, 1); x.setDate(Math.min(d.getDate(), new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); return x; };
+const monday = d => addDays(startOfDay(d), -((d.getDay() + 6) % 7));
 const fromLocal = (date, time) => new Date(date + 'T' + time);
 const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DIAS_SEM = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const fmtDay = d => DIAS[d.getDay()] + ' ' + d.getDate();
 const fmtShort = d => d.getDate() + ' ' + MESES[d.getMonth()];
 const eur = n => new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:2}).format(Number(n) || 0);
+const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+const METODOS = { efectivo: 'Efectivo', bizum: 'Bizum', transferencia: 'Transferencia', tarjeta: 'Tarjeta' };
+
+/* ---------- color de cada paciente ---------- */
+const PALETA = ['#6f9a74','#c07f52','#5f8bb0','#b06f8c','#9c8a46','#4f9a9a','#8f73b0','#c0665a','#6b8a3e','#8a7768'];
+function colorOf(id){ let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETA[h % PALETA.length]; }
 
 /* ---------- almacén de datos ---------- */
 let sb = null;
 if (!DEMO) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
 const store = DEMO ? (() => {
-  const KEY = 'consulta-demo-v1';
-  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+  const KEY = 'consulta-demo-v2';
   let db;
   try { db = JSON.parse(localStorage.getItem(KEY)); } catch(e) {}
   if (!db) {
     const now = new Date(), mon = monday(now);
     const p = [
-      { id: uid(), alias: 'Ana P.', precio: 60, activo: true },
-      { id: uid(), alias: 'Luis M.', precio: 60, activo: true },
-      { id: uid(), alias: 'Carmen R.', precio: 70, activo: true },
-      { id: uid(), alias: 'Jorge S.', precio: 50, activo: false }
+      { id: uid(), alias: 'Ana P.', precio: 60, activo: true, metodo_pago: 'bizum' },
+      { id: uid(), alias: 'Luis M.', precio: 60, activo: true, metodo_pago: 'efectivo' },
+      { id: uid(), alias: 'Carmen R.', precio: 70, activo: true, metodo_pago: 'transferencia' },
+      { id: uid(), alias: 'Marta L.', precio: 55, activo: true, metodo_pago: null },
+      { id: uid(), alias: 'Jorge S.', precio: 50, activo: false, metodo_pago: null }
     ];
-    const mk = (pi, dayOff, time, extra) => {
-      const d = addDays(mon, dayOff);
-      return Object.assign({ id: uid(), paciente_id: p[pi].id, inicio: fromLocal(ymd(d), time).toISOString(), duracion_min: 50,
-        modalidad: 'presencial', precio: p[pi].precio, cancelada: false, pagada: false, pagada_el: null }, extra || {});
-    };
-    db = { pacientes: p, citas: [
-      mk(0, -7, '17:00', { pagada: true, pagada_el: ymd(addDays(mon, -7)) }),
-      mk(1, -6, '18:00'),
-      mk(2, -5, '10:00', { modalidad: 'online' }),
-      mk(0, 0, '17:00'),
-      mk(1, 1, '18:00', { cancelada: true }),
-      mk(2, 2, '10:00', { modalidad: 'online', pagada: true, pagada_el: ymd(now) }),
-      mk(0, 7, '17:00')
-    ]};
+    const citas = [];
+    const mk = (pi, d, time, extra) => citas.push(Object.assign({ id: uid(), paciente_id: p[pi].id, inicio: fromLocal(ymd(d), time).toISOString(), duracion_min: 50,
+      modalidad: 'presencial', precio: p[pi].precio, cancelada: false, no_vino: false, pagada: false, pagada_el: null, metodo_pago: null, serie_id: null }, extra || {}));
+    const serieAna = uid();
+    for (let w = -5; w <= 6; w++){
+      const d = addDays(mon, 7 * w);
+      const past = w < 0 || (w === 0 && d < now);
+      mk(0, d, '17:00', { serie_id: serieAna, pagada: past && w !== -1, pagada_el: past && w !== -1 ? ymd(d) : null, metodo_pago: past && w !== -1 ? 'bizum' : null });
+    }
+    const serieCar = uid();
+    for (let w = -4; w <= 6; w += 2){
+      const d = addDays(mon, 7 * w + 2);
+      const past = d < now;
+      mk(2, d, '10:00', { modalidad: 'online', serie_id: serieCar, pagada: past && w < -1, pagada_el: past && w < -1 ? ymd(d) : null, metodo_pago: past && w < -1 ? 'transferencia' : null });
+    }
+    mk(1, addDays(mon, -6), '18:00');
+    mk(1, addDays(mon, 1), '18:00', { cancelada: true });
+    mk(1, addDays(mon, -13), '18:00', { no_vino: true });
+    mk(3, addDays(mon, 3), '19:00');
+    mk(3, addDays(mon, 3), '11:30', { duracion_min: 60 });
+    db = { pacientes: p, citas };
   }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {} };
   save();
   return {
     async load(){ return JSON.parse(JSON.stringify(db)); },
     async savePaciente(x){
-      if (x.id){ const i = db.pacientes.findIndex(p => p.id === x.id); db.pacientes[i] = Object.assign(db.pacientes[i], x); save(); return db.pacientes[i]; }
-      const n = Object.assign({ id: uid() }, x); db.pacientes.push(n); save(); return n;
+      if (x.id){ const i = db.pacientes.findIndex(p => p.id === x.id); Object.assign(db.pacientes[i], x); save(); return Object.assign({}, db.pacientes[i]); }
+      const n = Object.assign({}, x, { id: uid() }); db.pacientes.push(n); save(); return Object.assign({}, n);
     },
     async deletePaciente(id){ db.pacientes = db.pacientes.filter(p => p.id !== id); db.citas = db.citas.filter(c => c.paciente_id !== id); save(); },
-    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid() }, c)); db.citas.push(...out); save(); return out; },
-    async updateCitas(ids, patch){ const out = []; db.citas.forEach(c => { if (ids.includes(c.id)) { Object.assign(c, patch); out.push(c); } }); save(); return out; },
-    async deleteCita(id){ db.citas = db.citas.filter(c => c.id !== id); save(); }
+    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid(), cancelada: false, no_vino: false, metodo_pago: null, serie_id: null }, c)); db.citas.push(...out); save(); return JSON.parse(JSON.stringify(out)); },
+    async updateCitas(ids, patch){ db.citas.forEach(c => { if (ids.includes(c.id)) Object.assign(c, patch); }); save(); },
+    async deleteCitas(ids){ db.citas = db.citas.filter(c => !ids.includes(c.id)); save(); }
   };
 })() : {
   async load(){
@@ -337,109 +464,259 @@ const store = DEMO ? (() => {
     return { pacientes, citas };
   },
   async savePaciente(x){
-    const q = x.id ? sb.from('pacientes').update({ alias: x.alias, precio: x.precio, activo: x.activo }).eq('id', x.id)
-                   : sb.from('pacientes').insert({ alias: x.alias, precio: x.precio, activo: x.activo });
+    const row = { alias: x.alias, precio: x.precio, activo: x.activo, metodo_pago: x.metodo_pago || null };
+    const q = x.id ? sb.from('pacientes').update(row).eq('id', x.id) : sb.from('pacientes').insert(row);
     const { data, error } = await q.select().single(); if (error) throw error; return data;
   },
   async deletePaciente(id){ const { error } = await sb.from('pacientes').delete().eq('id', id); if (error) throw error; },
   async insertCitas(arr){ const { data, error } = await sb.from('citas').insert(arr).select(); if (error) throw error; return data; },
-  async updateCitas(ids, patch){ const { data, error } = await sb.from('citas').update(patch).in('id', ids).select(); if (error) throw error; return data; },
-  async deleteCita(id){ const { error } = await sb.from('citas').delete().eq('id', id); if (error) throw error; }
+  async updateCitas(ids, patch){ const { error } = await sb.from('citas').update(patch).in('id', ids); if (error) throw error; },
+  async deleteCitas(ids){ const { error } = await sb.from('citas').delete().in('id', ids); if (error) throw error; }
 };
 
 /* ---------- estado ---------- */
 let S = { pacientes: [], citas: [] };
 let view = 'Agenda';
-let weekStart = monday(new Date());
+let agMode = 'semana';
+try { agMode = localStorage.getItem('consulta-modo') || 'semana'; } catch(e) {}
+let cursor = startOfDay(new Date());
+let pendingScroll = true;
 let pacQuery = '';
+let userId = null, userEmail = '';
 
 const pacById = id => S.pacientes.find(p => p.id === id);
+const byStart = (a, b) => a.inicio.localeCompare(b.inicio);
+const citaEnd = c => new Date(new Date(c.inicio).getTime() + c.duracion_min * 60000);
 const isPast = c => new Date(c.inicio) < new Date();
 const isDue = c => !c.cancelada && !c.pagada && isPast(c);
 const dueList = () => S.citas.filter(isDue);
+function groupByDay(){ const m = {}; S.citas.forEach(c => (m[ymd(new Date(c.inicio))] = m[ymd(new Date(c.inicio))] || []).push(c)); Object.values(m).forEach(l => l.sort(byStart)); return m; }
 
 function toast(t){
   const el = $('toast'); el.textContent = t; el.hidden = false;
-  clearTimeout(toast._t); toast._t = setTimeout(() => el.hidden = true, 2200);
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.hidden = true, 2400);
 }
 function fail(e){ console.error(e); toast('No se ha podido guardar. Revisa la conexión.'); }
 
+/* pregunta con botones: devuelve el valor elegido o null */
+function ask(title, text, buttons){
+  return new Promise(res => {
+    const d = $('dAsk');
+    $('aTitle').textContent = title; $('aText').textContent = text || '';
+    $('aBtns').innerHTML = '';
+    let done = false;
+    const finish = v => { if (done) return; done = true; if (d.open) d.close(); res(v); };
+    buttons.concat([{ label: 'Cancelar', value: null }]).forEach(b => {
+      const el = document.createElement('button');
+      el.type = 'button'; el.className = 'btn ' + (b.cls || ''); el.textContent = b.label;
+      el.addEventListener('click', () => finish(b.value));
+      $('aBtns').appendChild(el);
+    });
+    d.addEventListener('close', () => finish(null), { once: true });
+    d.showModal();
+  });
+}
+
 /* ---------- pintar ---------- */
 function render(){
-  ['Agenda','Cobros','Pacientes'].forEach(v => $('v' + v).hidden = v !== view);
+  ['Agenda','Cobros','Pacientes','Ajustes'].forEach(v => $('v' + v).hidden = v !== view);
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === view));
   const n = new Set(dueList().map(c => c.paciente_id)).size;
   $('dueBadge').innerHTML = n ? '<span class="badge">' + n + '</span>' : '';
+  $('fab').hidden = !(view === 'Agenda' || view === 'Pacientes');
   $('fab').textContent = view === 'Pacientes' ? '+ Paciente' : '+ Cita';
   if (view === 'Agenda') renderAgenda();
   if (view === 'Cobros') renderCobros();
   if (view === 'Pacientes') renderPacientes();
+  if (view === 'Ajustes') renderAjustes();
+  if ($('dPac').open && editingPac) renderPacHist();
 }
 
-function chipFor(c){
-  if (c.cancelada) return '<span class="chip off">Cancelada</span>';
-  if (c.pagada) return '<span class="chip paid" data-pay="' + c.id + '">Pagada</span>';
-  if (isPast(c)) return '<span class="chip due" data-pay="' + c.id + '">Sin pagar</span>';
-  return '<span class="chip later" data-pay="' + c.id + '">' + eur(c.precio) + '</span>';
+function chipFor(c, sm){
+  const k = sm ? ' sm' : '';
+  if (c.cancelada) return '<span class="chip off' + k + '">Cancelada</span>';
+  if (c.pagada) return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Pagada</span>';
+  if (isPast(c)) return '<span class="chip due' + k + '" data-pay="' + c.id + '">' + (c.no_vino ? 'No vino · ' : '') + 'Sin pagar</span>';
+  return '<span class="chip later' + k + '" data-pay="' + c.id + '" title="Marcar como pagada por adelantado">' + eur(c.precio) + '</span>';
 }
 
-function citaRow(c){
+function citaRow(c, withDate){
   const p = pacById(c.paciente_id), d = new Date(c.inicio);
-  return '<div class="cita' + (c.cancelada ? ' cancel' : '') + '" role="button" tabindex="0" data-cita="' + c.id + '">' +
-    '<div class="cita-t"><b>' + hm(d) + '</b><span>' + c.duracion_min + ' min</span></div>' +
-    '<div class="cita-m"><b>' + esc(p ? p.alias : '—') + '</b><span>' + (c.modalidad === 'online' ? 'Online' : 'Presencial') + ' · ' + eur(c.precio) + '</span></div>' +
+  const sub = [c.modalidad === 'online' ? 'Online' : 'Presencial', eur(c.precio), c.no_vino ? 'No vino' : null, c.pagada && c.metodo_pago ? METODOS[c.metodo_pago] : null].filter(Boolean).join(' · ');
+  return '<div class="cita' + (c.cancelada ? ' cancel' : '') + '" role="button" tabindex="0" data-cita="' + c.id + '" style="--pc:' + colorOf(c.paciente_id) + '">' +
+    '<span class="pcol"></span>' +
+    '<div class="cita-t">' + (withDate ? '<b>' + fmtShort(d) + '</b><span>' + hm(d) + '</span>' : '<b>' + hm(d) + '</b><span>' + c.duracion_min + ' min</span>') + '</div>' +
+    '<div class="cita-m"><b>' + (withDate ? DIAS[d.getDay()].charAt(0).toUpperCase() + DIAS[d.getDay()].slice(1) : esc(p ? p.alias : '—')) + '</b><span>' + sub + '</span></div>' +
     chipFor(c) + '</div>';
 }
 
+function sumLine(list){
+  const a = list.filter(c => !c.cancelada);
+  return plural(a.length, 'sesión', 'sesiones') + ' · ' + eur(a.reduce((s, c) => s + Number(c.precio), 0));
+}
+
 function renderAgenda(){
-  const end = addDays(weekStart, 7), today = ymd(new Date());
-  const inWeek = S.citas.filter(c => { const d = new Date(c.inicio); return d >= weekStart && d < end; })
-                        .sort((a, b) => a.inicio.localeCompare(b.inicio));
-  const sameMonth = weekStart.getMonth() === addDays(weekStart, 6).getMonth();
-  const range = sameMonth ? weekStart.getDate() + '–' + fmtShort(addDays(weekStart, 6))
-                          : fmtShort(weekStart) + ' – ' + fmtShort(addDays(weekStart, 6));
-  const active = inWeek.filter(c => !c.cancelada);
-  let h = '<div class="bar"><div class="week"><button class="arrow" data-wk="-1" aria-label="Semana anterior">‹</button>' +
-    '<span class="range">' + range + '</span><button class="arrow" data-wk="1" aria-label="Semana siguiente">›</button></div>' +
-    '<button class="btn small" data-wk="0">Hoy</button></div>' +
-    '<p class="hint" style="margin:0 2px 14px">' + active.length + (active.length === 1 ? ' sesión' : ' sesiones') +
-    ' · ' + eur(active.reduce((s, c) => s + Number(c.precio), 0)) + '</p>';
-  for (let i = 0; i < 7; i++){
-    const d = addDays(weekStart, i), key = ymd(d);
-    const list = inWeek.filter(c => ymd(new Date(c.inicio)) === key);
-    if (i >= 5 && !list.length && key !== today) continue;
-    h += '<div class="day"><div class="day-h' + (key === today ? ' today' : '') + '"><span>' + (key === today ? 'Hoy · ' : '') + fmtDay(d) + '</span>' +
-      '<span class="sum">' + (() => { const n = list.filter(c => !c.cancelada).length; return n ? n + ' ses.' : ''; })() + '</span></div>' +
-      (list.length ? '<div class="card">' + list.map(citaRow).join('') + '</div>'
-                   : '<button class="free" style="width:100%;text-align:left" data-newday="' + key + '">Libre</button>') + '</div>';
-  }
+  const byDay = groupByDay();
+  let title;
+  if (agMode === 'dia') title = DIAS[cursor.getDay()] + ' ' + cursor.getDate() + ' ' + MESES[cursor.getMonth()];
+  else if (agMode === 'semana'){
+    const a = monday(cursor), b = addDays(a, 6);
+    title = a.getMonth() === b.getMonth() ? a.getDate() + '–' + fmtShort(b) : fmtShort(a) + ' – ' + fmtShort(b);
+  } else title = MESES_L[cursor.getMonth()] + ' ' + cursor.getFullYear();
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+  let h = '<div class="modes">' + [['dia','Día'],['semana','Semana'],['mes','Mes']].map(([m, l]) =>
+    '<button data-mode="' + m + '" class="' + (m === agMode ? 'on' : '') + '">' + l + '</button>').join('') + '</div>' +
+    '<div class="bar"><div class="week"><button class="arrow" data-nav="-1" aria-label="Anterior">‹</button>' +
+    '<span class="range">' + title + '</span><button class="arrow" data-nav="1" aria-label="Siguiente">›</button></div>' +
+    '<button class="btn small" data-nav="0">Hoy</button></div>';
+  h += agMode === 'dia' ? dayHTML(byDay) : agMode === 'semana' ? weekHTML(byDay) : monthHTML(byDay);
   $('vAgenda').innerHTML = h;
+  if (pendingScroll){
+    pendingScroll = false;
+    if (agMode === 'dia'){
+      const t = document.querySelector('#tl .now') || document.querySelector('#tl .ev');
+      if (t) t.scrollIntoView({ block: 'center' }); else window.scrollTo(0, 0);
+    } else window.scrollTo(0, 0);
+  }
+}
+
+const HOUR_PX = 64;
+function dayHTML(byDay){
+  const key = ymd(cursor), list = byDay[key] || [];
+  let h0 = 8, h1 = 21;
+  list.forEach(c => { const s = new Date(c.inicio), e = citaEnd(c); h0 = Math.min(h0, s.getHours()); h1 = Math.max(h1, e.getHours() + (e.getMinutes() ? 1 : 0)); });
+  h1 = Math.min(24, Math.max(h1, h0 + 1));
+  const cols = [];
+  const placed = list.slice().sort(byStart).map(c => {
+    const s = +new Date(c.inicio), e = +citaEnd(c);
+    let col = cols.findIndex(end => end <= s);
+    if (col < 0){ col = cols.length; cols.push(e); } else cols[col] = e;
+    return { c, s, e, col };
+  });
+  placed.forEach(p => { p.n = Math.max(...placed.filter(q => q.s < p.e && q.e > p.s).map(q => q.col)) + 1; });
+  let h = '<p class="sumline">' + sumLine(list) + '</p><div class="tl" id="tl" data-h0="' + h0 + '" style="height:' + ((h1 - h0) * HOUR_PX) + 'px">';
+  for (let x = h0; x <= h1; x++){
+    h += '<div class="hr" style="top:' + ((x - h0) * HOUR_PX) + 'px"><span>' + pad(x % 24) + ':00</span></div>';
+    if (x < h1) h += '<div class="hr half" style="top:' + ((x - h0) * HOUR_PX + HOUR_PX / 2) + 'px"></div>';
+  }
+  placed.forEach(p => {
+    const d = new Date(p.c.inicio), pac = pacById(p.c.paciente_id);
+    const top = ((d.getHours() - h0) * 60 + d.getMinutes()) * HOUR_PX / 60;
+    const ht = Math.max(30, p.c.duracion_min * HOUR_PX / 60 - 3);
+    const w = 100 / p.n;
+    h += '<div class="ev' + (p.c.cancelada ? ' cancel' : '') + '" role="button" tabindex="0" data-cita="' + p.c.id + '" style="--pc:' + colorOf(p.c.paciente_id) +
+      ';top:' + (top + 1) + 'px;height:' + ht + 'px;left:calc(' + (p.col * w) + '% + 4px);width:calc(' + w + '% - 8px)">' +
+      '<div><b>' + esc(pac ? pac.alias : '—') + '</b><small>' + hm(d) + '–' + hm(citaEnd(p.c)) + (p.c.modalidad === 'online' ? ' · Online' : '') + (p.c.no_vino ? ' · No vino' : '') + '</small></div>' +
+      (ht >= 40 || p.n === 1 ? chipFor(p.c, true) : '') + '</div>';
+  });
+  if (key === ymd(new Date())){
+    const n = new Date(), m = (n.getHours() - h0) * 60 + n.getMinutes();
+    if (m >= 0 && m <= (h1 - h0) * 60) h += '<div class="now" style="top:' + (m * HOUR_PX / 60) + 'px"></div>';
+  }
+  return h + '</div><p class="hint" style="margin-top:12px">Toca un hueco para añadir una cita a esa hora.</p>';
+}
+
+function weekHTML(byDay){
+  const start = monday(cursor), today = ymd(new Date());
+  const all = [];
+  for (let i = 0; i < 7; i++) all.push(...(byDay[ymd(addDays(start, i))] || []));
+  let h = '<p class="sumline">' + sumLine(all) + '</p>';
+  for (let i = 0; i < 7; i++){
+    const d = addDays(start, i), key = ymd(d), list = byDay[key] || [];
+    if (i >= 5 && !list.length && key !== today) continue;
+    const n = list.filter(c => !c.cancelada).length;
+    h += '<div class="day"><button class="day-h' + (key === today ? ' today' : '') + '" data-goday="' + key + '"><span class="dn">' + (key === today ? 'Hoy · ' : '') + fmtDay(d) + '</span>' +
+      '<span>' + (n ? plural(n, 'sesión', 'sesiones') + ' ›' : '›') + '</span></button>' +
+      (list.length ? '<div class="card">' + list.map(c => citaRow(c)).join('') + '</div>'
+                   : '<button class="free" data-newday="' + key + '">Libre</button>') + '</div>';
+  }
+  return h;
+}
+
+function monthHTML(byDay){
+  const y = cursor.getFullYear(), mo = cursor.getMonth();
+  const start = monday(new Date(y, mo, 1)), end = addDays(monday(new Date(y, mo + 1, 0)), 7);
+  const today = ymd(new Date()), sel = ymd(cursor);
+  const inMonth = S.citas.filter(c => { const d = new Date(c.inicio); return d.getFullYear() === y && d.getMonth() === mo; });
+  let h = '<p class="sumline">' + sumLine(inMonth) + '</p><div class="mgrid">' + ['L','M','X','J','V','S','D'].map(d => '<div class="mh">' + d + '</div>').join('');
+  for (let d = start; d < end; d = addDays(d, 1)){
+    const k = ymd(d), list = (byDay[k] || []).filter(c => !c.cancelada);
+    const dots = list.slice(0, 4).map(c => '<i class="dot" style="--pc:' + colorOf(c.paciente_id) + '"></i>').join('') + (list.length > 4 ? '<span class="more">+' + (list.length - 4) + '</span>' : '');
+    h += '<button class="mc' + (d.getMonth() !== mo ? ' out' : '') + (k === today ? ' today' : '') + (k === sel ? ' sel' : '') + '" data-selday="' + k + '" aria-label="' + fmtDay(d) + ', ' + plural(list.length, 'cita', 'citas') + '">' +
+      (list.some(isDue) ? '<span class="mdue" title="Sin cobrar">€</span>' : '') +
+      '<span class="mn">' + d.getDate() + '</span><span class="dots">' + dots + '</span></button>';
+  }
+  const dl = byDay[sel] || [];
+  h += '</div><div class="day" style="margin-top:16px"><button class="day-h' + (sel === today ? ' today' : '') + '" data-goday="' + sel + '"><span class="dn">' + (sel === today ? 'Hoy · ' : '') + fmtDay(cursor) + ' ' + MESES[cursor.getMonth()] + '</span><span>Ver día ›</span></button>' +
+    (dl.length ? '<div class="card">' + dl.map(c => citaRow(c)).join('') + '</div>' : '<button class="free" data-newday="' + sel + '">Libre · añadir cita</button>') + '</div>';
+  return h;
 }
 
 function renderCobros(){
   const due = dueList();
   const total = due.reduce((s, c) => s + Number(c.precio), 0);
-  const mes = ymd(new Date()).slice(0, 7);
-  const cobrado = S.citas.filter(c => c.pagada && (c.pagada_el || '').startsWith(mes)).reduce((s, c) => s + Number(c.precio), 0);
+  const now = new Date(), mes = ymd(now).slice(0, 7);
+  const paidMonth = S.citas.filter(c => c.pagada && (c.pagada_el || '').startsWith(mes));
+  const cobrado = paidMonth.reduce((s, c) => s + Number(c.precio), 0);
+  const porMetodo = {};
+  paidMonth.forEach(c => { const k = METODOS[c.metodo_pago] || 'Sin indicar'; porMetodo[k] = (porMetodo[k] || 0) + Number(c.precio); });
+
+  let h = '<div class="stats"><div class="stat due"><b>' + eur(total) + '</b><span>Pendiente de cobro</span></div>' +
+    '<div class="stat"><b>' + eur(cobrado) + '</b><span>Cobrado en ' + MESES_L[now.getMonth()] + '</span></div></div>';
+  if (Object.keys(porMetodo).length) h += '<p class="sumline">' + Object.entries(porMetodo).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + eur(v)).join(' · ') + '</p>';
+
   const groups = {};
   due.forEach(c => (groups[c.paciente_id] = groups[c.paciente_id] || []).push(c));
-  const rows = Object.entries(groups).map(([pid, list]) => ({ p: pacById(pid), list, sum: list.reduce((s, c) => s + Number(c.precio), 0) }))
-    .sort((a, b) => b.sum - a.sum);
-  let h = '<div class="stats"><div class="stat due"><b>' + eur(total) + '</b><span>Pendiente de cobro</span></div>' +
-    '<div class="stat"><b>' + eur(cobrado) + '</b><span>Cobrado en ' + ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][new Date().getMonth()] + '</span></div></div>';
-  if (!rows.length){
-    h += '<div class="empty">Nadie debe nada. Todo cobrado.</div>';
-  } else {
-    h += '<p class="sec">Quién debe</p><div class="card">' + rows.map(r =>
-      '<div class="debt"><div class="debt-h"><div><b>' + esc(r.p ? r.p.alias : '—') + '</b><br><span>' + r.list.length +
-      (r.list.length === 1 ? ' sesión · ' : ' sesiones · ') + eur(r.sum) + '</span></div>' +
+  const rows = Object.entries(groups).map(([pid, list]) => ({ pid, p: pacById(pid), list: list.sort(byStart), sum: list.reduce((s, c) => s + Number(c.precio), 0) })).sort((a, b) => b.sum - a.sum);
+  h += '<p class="sec">Quién debe</p>';
+  h += !rows.length ? '<div class="card"><div class="empty">Nadie debe nada. Todo cobrado.</div></div>' :
+    '<div class="card">' + rows.map(r =>
+      '<div class="debt" style="--pc:' + colorOf(r.pid) + '"><div class="debt-h"><div><b>' + esc(r.p ? r.p.alias : '—') + '</b><br><span>' + plural(r.list.length, 'sesión', 'sesiones') + ' · ' + eur(r.sum) +
+      (r.p && r.p.metodo_pago ? ' · ' + METODOS[r.p.metodo_pago] : '') + '</span></div>' +
       '<button class="btn small primary" data-payall="' + r.list.map(c => c.id).join(',') + '">Cobrar todo</button></div>' +
-      '<div class="dates">' + r.list.sort((a, b) => a.inicio.localeCompare(b.inicio)).map(c =>
-        '<button class="date" data-pay="' + c.id + '" title="Marcar esta sesión como pagada">' + fmtShort(new Date(c.inicio)) + ' · ' + eur(c.precio) + '</button>').join('') +
-      '</div></div>').join('') + '</div>' +
-      '<p class="hint" style="margin-top:10px">Toca una fecha para cobrar solo esa sesión.</p>';
-  }
+      '<div class="dates">' + r.list.map(c => '<button class="date" data-pay="' + c.id + '" title="Cobrar solo esta sesión">' + fmtShort(new Date(c.inicio)) + (c.no_vino ? ' · no vino' : '') + ' · ' + eur(c.precio) + '</button>').join('') + '</div></div>').join('') +
+    '</div><p class="hint" style="margin-top:8px">Toca una fecha para cobrar solo esa sesión.</p>';
+
+  // últimos 6 meses
+  const months = [];
+  for (let i = 5; i >= 0; i--){ const d = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push({ d, k: ymd(d).slice(0, 7) }); }
+  months.forEach(m => {
+    const ses = S.citas.filter(c => !c.cancelada && isPast(c) && ymd(new Date(c.inicio)).startsWith(m.k));
+    m.ses = ses.length;
+    m.pend = ses.filter(c => !c.pagada).reduce((s, c) => s + Number(c.precio), 0);
+    m.cob = S.citas.filter(c => c.pagada && (c.pagada_el || '').startsWith(m.k)).reduce((s, c) => s + Number(c.precio), 0);
+  });
+  const max = Math.max(1, ...months.map(m => m.cob));
+  h += '<p class="sec">Últimos meses · cobrado</p><div class="card">' + months.slice().reverse().map(m =>
+    '<div class="mrow"><span class="ml">' + MESES[m.d.getMonth()] + '</span><div><div class="meter"><i style="width:' + Math.round(m.cob / max * 100) + '%"></i></div>' +
+    '<small>' + plural(m.ses, 'sesión', 'sesiones') + (m.pend ? ' · falta ' + eur(m.pend) : '') + '</small></div><span class="mv">' + eur(m.cob) + '</span></div>').join('') + '</div>';
+
+  // exportar
+  const years = [...new Set(S.citas.map(c => new Date(c.inicio).getFullYear()).concat([now.getFullYear()]))].sort((a, b) => b - a);
+  h += '<p class="sec">Para la gestoría</p><div class="exp"><select id="expYear" aria-label="Año">' + years.map(y => '<option>' + y + '</option>').join('') + '</select>' +
+    '<button class="btn" id="expBtn">Descargar Excel</button></div>';
   $('vCobros').innerHTML = h;
+  $('expBtn').addEventListener('click', () => exportCSV(Number($('expYear').value)));
+}
+
+function exportCSV(year){
+  const rows = S.citas.filter(c => new Date(c.inicio).getFullYear() === year).sort(byStart);
+  if (!rows.length){ toast('No hay citas en ' + year); return; }
+  const num = n => Number(n).toFixed(2).replace('.', ',');
+  const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+  const head = ['Fecha','Hora','Paciente','Modalidad','Duración (min)','Precio','Estado','Pagada','Fecha de pago','Forma de pago'];
+  const lines = [head.join(';')].concat(rows.map(c => {
+    const d = new Date(c.inicio), p = pacById(c.paciente_id);
+    const estado = c.cancelada ? 'Cancelada' : c.no_vino ? 'No vino' : isPast(c) ? 'Realizada' : 'Prevista';
+    return [dmy(d), hm(d), q(p ? p.alias : ''), c.modalidad === 'online' ? 'Online' : 'Presencial', c.duracion_min, num(c.precio), estado,
+      c.pagada ? 'Sí' : 'No', c.pagada_el ? dmy(new Date(c.pagada_el + 'T12:00')) : '', METODOS[c.metodo_pago] || ''].join(';');
+  }));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'consulta-' + year + '.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast('Descargando ' + plural(rows.length, 'cita', 'citas'));
 }
 
 function renderPacientes(){
@@ -447,9 +724,10 @@ function renderPacientes(){
   const list = S.pacientes.filter(p => !q || p.alias.toLowerCase().includes(q)).sort((a, b) => a.alias.localeCompare(b.alias, 'es'));
   const row = p => {
     const debe = S.citas.filter(c => c.paciente_id === p.id && isDue(c)).reduce((s, c) => s + Number(c.precio), 0);
-    const next = S.citas.filter(c => c.paciente_id === p.id && !c.cancelada && !isPast(c)).sort((a, b) => a.inicio.localeCompare(b.inicio))[0];
-    const info = [eur(p.precio) + '/sesión', next ? 'próxima ' + fmtShort(new Date(next.inicio)) : null].filter(Boolean).join(' · ');
-    return '<button class="pac" data-pac="' + p.id + '"><div><b>' + esc(p.alias) + '</b><br><span>' + info + '</span></div>' +
+    const next = S.citas.filter(c => c.paciente_id === p.id && !c.cancelada && !isPast(c)).sort(byStart)[0];
+    const info = [eur(p.precio) + '/sesión', next ? 'próxima ' + DIAS[new Date(next.inicio).getDay()].slice(0, 3) + ' ' + fmtShort(new Date(next.inicio)) + ' ' + hm(new Date(next.inicio)) : null].filter(Boolean).join(' · ');
+    return '<button class="pac" data-pac="' + p.id + '" style="--pc:' + colorOf(p.id) + '"><span class="av">' + esc(p.alias.charAt(0).toUpperCase()) + '</span>' +
+      '<span class="pi"><b>' + esc(p.alias) + '</b><br><span>' + info + '</span></span>' +
       (debe ? '<span class="chip due">Debe ' + eur(debe) + '</span>' : '') + '</button>';
   };
   const act = list.filter(p => p.activo), arch = list.filter(p => !p.activo);
@@ -463,20 +741,22 @@ function renderPacientes(){
 }
 
 /* ---------- cobrar ---------- */
+function payPatch(c){ const p = pacById(c.paciente_id); return { pagada: true, pagada_el: ymd(new Date()), metodo_pago: c.metodo_pago || (p && p.metodo_pago) || null }; }
 async function togglePay(id){
   const c = S.citas.find(x => x.id === id); if (!c || c.cancelada) return;
-  const patch = c.pagada ? { pagada: false, pagada_el: null } : { pagada: true, pagada_el: ymd(new Date()) };
-  try { await store.updateCitas([id], patch); Object.assign(c, patch); render(); toast(patch.pagada ? 'Marcada como pagada' : 'Marcada como sin pagar'); }
+  const patch = c.pagada ? { pagada: false, pagada_el: null } : payPatch(c);
+  try { await store.updateCitas([id], patch); Object.assign(c, patch); render(); toast(patch.pagada ? 'Pagada' + (patch.metodo_pago ? ' · ' + METODOS[patch.metodo_pago] : '') : 'Marcada como sin pagar'); }
   catch(e){ fail(e); }
 }
 async function payAll(ids){
-  const patch = { pagada: true, pagada_el: ymd(new Date()) };
-  try { await store.updateCitas(ids, patch); S.citas.forEach(c => { if (ids.includes(c.id)) Object.assign(c, patch); }); render(); toast(ids.length + (ids.length === 1 ? ' sesión cobrada' : ' sesiones cobradas')); }
+  const list = S.citas.filter(c => ids.includes(c.id));
+  const patch = payPatch(list[0]);
+  try { await store.updateCitas(ids, patch); list.forEach(c => Object.assign(c, patch)); render(); toast(plural(ids.length, 'sesión cobrada', 'sesiones cobradas')); }
   catch(e){ fail(e); }
 }
 
 /* ---------- ventana de cita ---------- */
-let editing = null, modo = 'presencial', cancelFlag = false;
+let editing = null, modo = 'presencial', estado = 'normal';
 
 function fillPacSelect(selected){
   const opts = S.pacientes.filter(p => p.activo || p.id === selected).sort((a, b) => a.alias.localeCompare(b.alias, 'es'))
@@ -484,8 +764,18 @@ function fillPacSelect(selected){
   $('cPac').innerHTML = (selected ? '' : '<option value="" disabled selected>Elige paciente</option>') + opts + '<option value="__new">+ Paciente nuevo…</option>';
 }
 function setModo(m){ modo = m; document.querySelectorAll('#cMod button').forEach(b => b.classList.toggle('on', b.dataset.m === m)); }
+function setEstado(e){
+  estado = e;
+  document.querySelectorAll('#cEstado button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
+  $('cEstadoNote').hidden = e === 'normal';
+  $('cEstadoNote').textContent = e === 'novino' ? 'No vino: se cobra igualmente.' : 'Cancelada: no se cobra.';
+  if (e === 'cancelada') $('cPagada').checked = false;
+  $('cPagada').disabled = e === 'cancelada';
+  paintMetodo();
+}
+function paintMetodo(){ $('cMetodoWrap').style.visibility = $('cPagada').checked ? 'visible' : 'hidden'; }
 
-function openCita(id, day){
+function openCita(id, day, time, pacId){
   editing = id ? S.citas.find(c => c.id === id) : null;
   $('cWarn').hidden = true;
   if (editing){
@@ -494,31 +784,33 @@ function openCita(id, day){
     fillPacSelect(editing.paciente_id);
     $('cFecha').value = ymd(d); $('cHora').value = hm(d);
     $('cDur').value = String(editing.duracion_min);
+    if (!$('cDur').value) $('cDur').value = '50';
     $('cPrecio').value = editing.precio;
     setModo(editing.modalidad);
     $('cPagada').checked = !!editing.pagada;
-    cancelFlag = !!editing.cancelada;
-    $('cRepWrap').hidden = true; $('cDel').hidden = false; $('cCancel').hidden = false;
+    $('cMetodo').value = editing.metodo_pago || (pacById(editing.paciente_id) || {}).metodo_pago || '';
+    setEstado(editing.cancelada ? 'cancelada' : editing.no_vino ? 'novino' : 'normal');
+    $('cRepWrap').hidden = true; $('cEstadoWrap').hidden = false; $('cDel').hidden = false;
+    const serie = editing.serie_id ? S.citas.filter(c => c.serie_id === editing.serie_id).sort(byStart) : [];
+    $('cSerieNote').hidden = serie.length < 2;
+    if (serie.length > 1) $('cSerieNote').textContent = 'Se repite · cita ' + (serie.findIndex(c => c.id === editing.id) + 1) + ' de ' + serie.length + '.';
   } else {
-    const now = new Date();
-    let dayStr = day || (ymd(now) >= ymd(weekStart) && ymd(now) < ymd(addDays(weekStart, 7)) ? ymd(now) : ymd(weekStart));
+    const now = new Date(), dayStr = day || ymd(cursor);
     $('cTitle').textContent = 'Nueva cita';
-    fillPacSelect(null);
+    fillPacSelect(pacId || null);
     $('cFecha').value = dayStr;
-    $('cHora').value = dayStr === ymd(now) ? pad(Math.min(21, now.getHours() + 1)) + ':00' : '10:00';
-    $('cDur').value = '50'; $('cPrecio').value = '';
+    $('cHora').value = time || (dayStr === ymd(now) ? pad(Math.min(21, now.getHours() + 1)) + ':00' : '10:00');
+    $('cDur').value = '50';
+    const p = pacId ? pacById(pacId) : null;
+    $('cPrecio').value = p ? p.precio : '';
+    $('cMetodo').value = p && p.metodo_pago || '';
     setModo('presencial'); $('cPagada').checked = false; $('cRep').value = '0';
-    cancelFlag = false;
-    $('cRepWrap').hidden = false; $('cDel').hidden = true; $('cCancel').hidden = true;
+    setEstado('normal');
+    $('cRepWrap').hidden = false; $('cEstadoWrap').hidden = true; $('cDel').hidden = true; $('cSerieNote').hidden = true;
   }
   $('cNewPac').hidden = true; $('cNewAlias').value = ''; $('cNewPrecio').value = '';
-  paintCancel();
+  paintMetodo();
   $('dCita').showModal();
-}
-function paintCancel(){
-  $('cCancel').textContent = cancelFlag ? 'Recuperar cita' : 'Cancelar cita';
-  $('cCancelNote').hidden = !cancelFlag;
-  $('cPagada').disabled = cancelFlag;
 }
 
 $('cPac').addEventListener('change', () => {
@@ -526,15 +818,23 @@ $('cPac').addEventListener('change', () => {
   $('cNewPac').hidden = v !== '__new';
   if (v === '__new'){ $('cNewAlias').focus(); return; }
   const p = pacById(v);
-  if (p && !editing) $('cPrecio').value = p.precio;
+  if (p && !editing){ $('cPrecio').value = p.precio; $('cMetodo').value = p.metodo_pago || ''; }
 });
 $('cNewPrecio').addEventListener('input', () => { $('cPrecio').value = $('cNewPrecio').value; });
+$('cPagada').addEventListener('change', paintMetodo);
 document.querySelectorAll('#cMod button').forEach(b => b.addEventListener('click', () => setModo(b.dataset.m)));
+document.querySelectorAll('#cEstado button').forEach(b => b.addEventListener('click', () => setEstado(b.dataset.e)));
 $('cClose').addEventListener('click', () => $('dCita').close());
-$('cCancel').addEventListener('click', () => { cancelFlag = !cancelFlag; if (cancelFlag) $('cPagada').checked = false; paintCancel(); });
+
 $('cDel').addEventListener('click', async () => {
-  if (!editing || !confirm('¿Borrar esta cita? No se puede deshacer.')) return;
-  try { await store.deleteCita(editing.id); S.citas = S.citas.filter(c => c.id !== editing.id); $('dCita').close(); render(); toast('Cita borrada'); }
+  if (!editing) return;
+  const later = editing.serie_id ? S.citas.filter(c => c.serie_id === editing.serie_id && c.id !== editing.id && c.inicio > editing.inicio && !c.pagada) : [];
+  const r = later.length
+    ? await ask('Borrar cita', 'Esta cita se repite. Las ya pagadas no se borran.', [{ label: 'Borrar solo esta', value: 'one', cls: 'danger' }, { label: 'Esta y las ' + later.length + ' siguientes', value: 'all', cls: 'danger' }])
+    : await ask('¿Borrar esta cita?', 'No se puede deshacer.', [{ label: 'Borrar', value: 'one', cls: 'danger' }]);
+  if (!r) return;
+  const ids = [editing.id].concat(r === 'all' ? later.map(c => c.id) : []);
+  try { await store.deleteCitas(ids); S.citas = S.citas.filter(c => !ids.includes(c.id)); $('dCita').close(); render(); toast(ids.length === 1 ? 'Cita borrada' : ids.length + ' citas borradas'); }
   catch(e){ fail(e); }
 });
 
@@ -544,15 +844,15 @@ $('fCita').addEventListener('submit', async ev => {
   if (!pid){ $('cPac').focus(); return; }
   const fecha = $('cFecha').value, hora = $('cHora').value;
   const precio = Number($('cPrecio').value);
-  if (!fecha || !hora || !(precio >= 0) || $('cPrecio').value === ''){ toast('Falta el día, la hora o el precio'); return; }
+  if (!fecha || !hora || $('cPrecio').value === '' || !(precio >= 0)){ toast('Falta el día, la hora o el precio'); return; }
   const dur = Number($('cDur').value);
   const start = fromLocal(fecha, hora);
 
   // ¿se pisa con otra cita?
   const endT = start.getTime() + dur * 60000;
   const clash = S.citas.find(c => !c.cancelada && (!editing || c.id !== editing.id) &&
-    new Date(c.inicio).getTime() < endT && new Date(c.inicio).getTime() + c.duracion_min * 60000 > start.getTime());
-  if (clash && $('cWarn').hidden){
+    new Date(c.inicio).getTime() < endT && citaEnd(c).getTime() > start.getTime());
+  if (clash && estado !== 'cancelada' && $('cWarn').hidden){
     const p = pacById(clash.paciente_id);
     $('cWarn').textContent = 'Se pisa con ' + (p ? p.alias : 'otra cita') + ' a las ' + hm(new Date(clash.inicio)) + '. Pulsa Guardar otra vez para guardarla igualmente.';
     $('cWarn').hidden = false; return;
@@ -562,29 +862,51 @@ $('fCita').addEventListener('submit', async ev => {
     if (pid === '__new'){
       const alias = $('cNewAlias').value.trim();
       if (!alias){ $('cNewAlias').focus(); toast('Escribe el nombre e inicial'); return; }
-      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value) || precio, activo: true });
+      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value) || precio, activo: true, metodo_pago: $('cMetodo').value || null });
       S.pacientes.push(np); pid = np.id;
     }
-    const pagada = !cancelFlag && $('cPagada').checked;
-    const base = { paciente_id: pid, duracion_min: dur, modalidad: modo, precio, cancelada: cancelFlag, pagada };
+    const cancelada = estado === 'cancelada', no_vino = estado === 'novino';
+    const pagada = !cancelada && $('cPagada').checked;
+    const metodo = $('cMetodo').value || null;
+    const base = { paciente_id: pid, duracion_min: dur, modalidad: modo, precio };
     if (editing){
-      const patch = Object.assign({}, base, { inicio: start.toISOString(), pagada_el: pagada ? (editing.pagada_el || ymd(new Date())) : null });
+      const oldStart = new Date(editing.inicio);
+      const later = editing.serie_id ? S.citas.filter(c => c.serie_id === editing.serie_id && c.id !== editing.id && c.inicio > editing.inicio) : [];
+      const common = +start !== +oldStart || dur !== editing.duracion_min || modo !== editing.modalidad || precio !== Number(editing.precio) || pid !== editing.paciente_id;
+      let scope = 'one';
+      if (later.length && common){
+        scope = await ask('¿Cambiar también las siguientes?', 'Esta cita se repite: hay ' + plural(later.length, 'cita más', 'citas más') + ' después de esta.',
+          [{ label: 'Solo esta', value: 'one' }, { label: 'Esta y las ' + later.length + ' siguientes', value: 'all', cls: 'primary' }]);
+        if (!scope) return;
+      }
+      const patch = Object.assign({}, base, { inicio: start.toISOString(), cancelada, no_vino, pagada,
+        pagada_el: pagada ? (editing.pagada_el || ymd(new Date())) : null, metodo_pago: pagada ? metodo : editing.metodo_pago || null });
       await store.updateCitas([editing.id], patch);
       Object.assign(editing, patch);
-      toast('Cita guardada');
+      if (scope === 'all'){
+        const dayDelta = Math.round((startOfDay(start) - startOfDay(oldStart)) / 864e5);
+        for (const c of later){
+          const nd = addDays(new Date(c.inicio), dayDelta); nd.setHours(start.getHours(), start.getMinutes(), 0, 0);
+          const p = Object.assign({}, base, { inicio: nd.toISOString() });
+          await store.updateCitas([c.id], p); Object.assign(c, p);
+        }
+      }
+      toast(scope === 'all' ? plural(later.length + 1, 'cita cambiada', 'citas cambiadas') : 'Cita guardada');
     } else {
       const [step, times] = $('cRep').value === '0' ? [0, 1] : $('cRep').value.split(':').map(Number);
+      const serie = times > 1 ? uid() : null;
       const rows = [];
       for (let i = 0; i < times; i++){
-        const d = addDays(start, step * i);
-        rows.push(Object.assign({}, base, { inicio: d.toISOString(), pagada: i === 0 ? pagada : false, pagada_el: i === 0 && pagada ? ymd(new Date()) : null }));
+        const d = addDays(start, step * i); d.setHours(start.getHours(), start.getMinutes(), 0, 0);
+        const paid = i === 0 && pagada;
+        rows.push(Object.assign({}, base, { inicio: d.toISOString(), serie_id: serie, pagada: paid, pagada_el: paid ? ymd(new Date()) : null, metodo_pago: paid ? metodo : null }));
       }
       const saved = await store.insertCitas(rows);
       S.citas.push(...saved);
       toast(saved.length === 1 ? 'Cita creada' : saved.length + ' citas creadas');
     }
     $('dCita').close();
-    weekStart = monday(start);
+    cursor = startOfDay(start);
     render();
   } catch(e){ fail(e); }
 });
@@ -593,25 +915,52 @@ $('fCita').addEventListener('submit', async ev => {
 let editingPac = null;
 function openPac(id){
   editingPac = id ? pacById(id) : null;
-  $('pTitle').textContent = editingPac ? 'Paciente' : 'Paciente nuevo';
+  $('pTitle').textContent = editingPac ? editingPac.alias : 'Paciente nuevo';
   $('pAlias').value = editingPac ? editingPac.alias : '';
   $('pPrecio').value = editingPac ? editingPac.precio : '';
+  $('pMetodo').value = editingPac && editingPac.metodo_pago || '';
   $('pActivo').checked = editingPac ? !!editingPac.activo : true;
   $('pActivoWrap').hidden = !editingPac;
   $('pDel').hidden = !editingPac;
-  if (editingPac){
-    const mine = S.citas.filter(c => c.paciente_id === editingPac.id && !c.cancelada);
-    const hechas = mine.filter(isPast).length;
-    const debe = mine.filter(isDue).reduce((s, c) => s + Number(c.precio), 0);
-    $('pResumen').textContent = hechas + (hechas === 1 ? ' sesión hecha' : ' sesiones hechas') + (debe ? ' · debe ' + eur(debe) : ' · nada pendiente');
-  } else $('pResumen').textContent = '';
+  $('pFicha').hidden = !editingPac;
+  if (editingPac) renderPacHist();
   $('dPac').showModal();
 }
+function renderPacHist(){
+  const p = editingPac; if (!p) return;
+  const mine = S.citas.filter(c => c.paciente_id === p.id).sort(byStart);
+  const hechas = mine.filter(c => !c.cancelada && isPast(c));
+  const pagado = mine.filter(c => c.pagada).reduce((s, c) => s + Number(c.precio), 0);
+  const debe = mine.filter(isDue).reduce((s, c) => s + Number(c.precio), 0);
+  const futuras = mine.filter(c => !isPast(c) && !c.cancelada);
+  $('pResumen').textContent = plural(hechas.length, 'sesión hecha', 'sesiones hechas') + ' · pagado ' + eur(pagado) + (debe ? ' · debe ' + eur(debe) : ' · nada pendiente');
+  $('pTerminar').hidden = !p.activo;
+  const pasadas = mine.filter(c => isPast(c)).reverse();
+  let h = '';
+  if (futuras.length) h += '<p class="sec" style="margin-top:4px">Próximas · ' + futuras.length + '</p><div class="card hist">' + futuras.slice(0, 4).map(c => citaRow(c, true)).join('') + '</div>';
+  if (pasadas.length) h += '<p class="sec">Historial · ' + pasadas.length + '</p><div class="card hist">' + pasadas.slice(0, 30).map(c => citaRow(c, true)).join('') + '</div>' +
+    (pasadas.length > 30 ? '<p class="hint" style="margin-top:6px">Se ven las 30 últimas.</p>' : '');
+  if (!h) h = '<p class="hint">Todavía no tiene citas.</p>';
+  $('pHist').innerHTML = h;
+}
 $('pClose').addEventListener('click', () => $('dPac').close());
+$('pNuevaCita').addEventListener('click', () => { const id = editingPac.id; $('dPac').close(); openCita(null, ymd(cursor), null, id); });
+$('pTerminar').addEventListener('click', async () => {
+  const p = editingPac; if (!p) return;
+  const fut = S.citas.filter(c => c.paciente_id === p.id && !isPast(c) && !c.pagada);
+  const r = await ask('Terminar la terapia de ' + p.alias, (fut.length ? 'Se borran sus ' + plural(fut.length, 'cita futura', 'citas futuras') + ' y ' : '') + 'queda archivado. Su historial y sus cobros se mantienen.', [{ label: 'Terminar terapia', value: 'ok', cls: 'primary' }]);
+  if (!r) return;
+  try {
+    if (fut.length){ const ids = fut.map(c => c.id); await store.deleteCitas(ids); S.citas = S.citas.filter(c => !ids.includes(c.id)); }
+    const saved = await store.savePaciente(Object.assign({}, p, { activo: false }));
+    Object.assign(p, saved); $('dPac').close(); render(); toast(p.alias + ' archivado');
+  } catch(e){ fail(e); }
+});
 $('pDel').addEventListener('click', async () => {
   if (!editingPac) return;
   const n = S.citas.filter(c => c.paciente_id === editingPac.id).length;
-  if (!confirm('¿Borrar a ' + editingPac.alias + ' y sus ' + n + ' citas? No se puede deshacer.\n\nSi solo ha terminado la terapia, mejor desmarca «En terapia» para archivarlo.')) return;
+  const r = await ask('¿Borrar a ' + editingPac.alias + '?', 'Se borran también sus ' + plural(n, 'cita', 'citas') + ', pagos incluidos, y no se puede deshacer. Si solo ha terminado, mejor «Terminar terapia».', [{ label: 'Borrar todo', value: 'ok', cls: 'danger' }]);
+  if (!r) return;
   try { await store.deletePaciente(editingPac.id); S.pacientes = S.pacientes.filter(p => p.id !== editingPac.id); S.citas = S.citas.filter(c => c.paciente_id !== editingPac.id); $('dPac').close(); render(); toast('Paciente borrado'); }
   catch(e){ fail(e); }
 });
@@ -620,26 +969,170 @@ $('fPac').addEventListener('submit', async ev => {
   const alias = $('pAlias').value.trim(), precio = Number($('pPrecio').value);
   if (!alias || $('pPrecio').value === '' || !(precio >= 0)) return;
   try {
-    const saved = await store.savePaciente({ id: editingPac ? editingPac.id : undefined, alias, precio, activo: editingPac ? $('pActivo').checked : true });
+    const saved = await store.savePaciente({ id: editingPac ? editingPac.id : undefined, alias, precio, metodo_pago: $('pMetodo').value || null, activo: editingPac ? $('pActivo').checked : true });
     if (editingPac) Object.assign(editingPac, saved); else S.pacientes.push(saved);
     $('dPac').close(); render(); toast('Paciente guardado');
   } catch(e){ fail(e); }
 });
 
-/* ---------- clics ---------- */
+/* ---------- ajustes y avisos ---------- */
+const AVISOS_DEF = { antes_min: 15, resumen_hora: '08:00', cobros_dia: 1, cobros_hora: '09:00', sin_marcar_hora: '21:00' };
+let cfg = null, cfgRow = false, ajToken = 0;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const pushOK = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+async function getSub(){ if (!('serviceWorker' in navigator)) return null; const reg = await navigator.serviceWorker.getRegistration(); return reg ? reg.pushManager.getSubscription() : null; }
+function b64uToU8(s){ const b = atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, ch => ch.charCodeAt(0)); }
+function deviceName(){ const u = navigator.userAgent; return /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : 'Otro'; }
+
+async function loadCfg(){
+  if (DEMO){ cfg = cfg || Object.assign({}, AVISOS_DEF); return; }
+  const { data, error } = await sb.from('avisos_ajustes').select('*').maybeSingle();
+  if (error) throw error;
+  cfgRow = !!data;
+  cfg = data ? data : Object.assign({}, AVISOS_DEF);
+}
+async function saveCfg(){
+  if (DEMO) return;
+  const row = { owner_id: userId, antes_min: cfg.antes_min, resumen_hora: cfg.resumen_hora, cobros_dia: cfg.cobros_dia, cobros_hora: cfg.cobros_hora, sin_marcar_hora: cfg.sin_marcar_hora };
+  const { error } = await sb.from('avisos_ajustes').upsert(row, { onConflict: 'owner_id' });
+  if (error) throw error;
+  cfgRow = true;
+}
+
+async function renderAjustes(){
+  const my = ++ajToken;
+  const box = $('vAjustes');
+  let estadoHTML = '', sub = null;
+  try { if (!cfg) await loadCfg(); } catch(e){ console.error(e); }
+  if (pushOK() && !DEMO){ try { sub = await getSub(); } catch(e) {} }
+  if (my !== ajToken) return;
+
+  if (DEMO) estadoHTML = '<p class="note">En el modo de prueba no hay avisos.</p>';
+  else if (!pushOK() && isIOS() && !isStandalone())
+    estadoHTML = '<p class="note">Para recibir avisos, primero instala la app en el iPhone:</p><ol class="steps"><li>Abre esta web en <b>Safari</b>.</li><li>Pulsa <b>Compartir</b> (el cuadrado con la flecha).</li><li>Elige <b>«Añadir a pantalla de inicio»</b>.</li><li>Abre la app desde el icono nuevo y vuelve a Ajustes.</li></ol><div style="height:10px"></div>';
+  else if (!pushOK()) estadoHTML = '<p class="note bad">Este navegador no permite avisos.</p>';
+  else if (Notification.permission === 'denied') estadoHTML = '<p class="note bad">Los avisos están bloqueados. Actívalos en Ajustes del iPhone → Notificaciones → Consulta.</p>';
+  else if (sub && Notification.permission === 'granted')
+    estadoHTML = '<p class="note ok">Avisos activados en este ' + deviceName() + '.</p><div class="btnrow"><button class="btn small" id="avPrueba">Enviar aviso de prueba</button><button class="btn small" id="avOff">Desactivar aquí</button></div>';
+  else estadoHTML = '<p class="note">Activa los avisos para recibirlos en este ' + deviceName() + ', aunque la app esté cerrada.</p><div class="btnrow"><button class="btn primary" id="avOn">Activar avisos</button></div>';
+
+  const c = cfg || AVISOS_DEF;
+  const opt = (vals, cur, lab) => vals.map((v, i) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + (lab ? lab[i] : v) + '</option>').join('');
+  const rowA = (key, title, sub, ctl) => '<div class="srow"><div class="st"><b>' + title + '</b><span>' + sub + '</span></div><div class="ctl">' + ctl + '<input type="checkbox" class="sw" data-cfgsw="' + key + '"' + (c[key] != null ? ' checked' : '') + ' aria-label="' + title + '"></div></div>';
+  let h = '<p class="sec" style="margin-top:0">Avisos</p><div class="set">' + estadoHTML + '</div>';
+  h += '<p class="sec">Qué avisos</p><div class="set">' +
+    rowA('antes_min', 'Antes de cada cita', 'Con el nombre y la hora', '<select data-cfg="antes_min" aria-label="Minutos antes">' + opt([5, 10, 15, 30, 60], c.antes_min ?? 15, ['5 min', '10 min', '15 min', '30 min', '1 h']) + '</select>') +
+    rowA('resumen_hora', 'Resumen de la mañana', 'Las sesiones del día', '<input type="time" data-cfg="resumen_hora" value="' + (c.resumen_hora || '08:00') + '" aria-label="Hora del resumen">') +
+    rowA('cobros_dia', 'Cobros pendientes', 'Quién debe y cuánto', '<select data-cfg="cobros_dia" aria-label="Día">' + opt([1, 2, 3, 4, 5, 6, 7], c.cobros_dia ?? 1, ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']) + '</select><input type="time" data-cfg="cobros_hora" value="' + (c.cobros_hora || '09:00') + '" aria-label="Hora de los cobros">') +
+    rowA('sin_marcar_hora', 'Citas sin marcar', 'Sesiones de hoy sin pagar', '<input type="time" data-cfg="sin_marcar_hora" value="' + (c.sin_marcar_hora || '21:00') + '" aria-label="Hora del repaso">') +
+    '</div><p class="hint" style="margin-top:8px">Valen para todos los dispositivos donde actives los avisos.</p>';
+  if (!isStandalone() && !DEMO && pushOK()) h += '<p class="sec">Tenerla como app</p><div class="set"><p class="note">En Safari: <b>Compartir → «Añadir a pantalla de inicio»</b>. Se abrirá a pantalla completa, con el icono de Fadia.</p></div>';
+  h += '<p class="sec">Cuenta</p><div class="set">' +
+    (DEMO ? '<div class="srow"><div class="st"><b>Modo de prueba</b><span>Datos de ejemplo en este navegador</span></div><button class="btn small" id="demoReset">Reiniciar</button></div>'
+          : '<div class="srow"><div class="st"><b>' + esc(userEmail) + '</b><span>Sesión iniciada</span></div></div>' +
+            '<div class="srow"><div class="st"><b>Contraseña</b></div><button class="btn small" id="chgPass">Cambiar</button></div>' +
+            '<div class="srow"><div class="st"><b>Salir</b><span>Cerrar la sesión en este dispositivo</span></div><button class="btn small danger" id="logout">Salir</button></div>') +
+    '</div>';
+  box.innerHTML = h;
+
+  if ($('avOn')) $('avOn').addEventListener('click', activarAvisos);
+  if ($('avOff')) $('avOff').addEventListener('click', desactivarAvisos);
+  if ($('avPrueba')) $('avPrueba').addEventListener('click', avisoPrueba);
+  if ($('demoReset')) $('demoReset').addEventListener('click', async () => {
+    if (!(await ask('¿Reiniciar la prueba?', 'Se borran los datos de ejemplo y se crean de nuevo.', [{ label: 'Reiniciar', value: 1, cls: 'danger' }]))) return;
+    try { localStorage.removeItem('consulta-demo-v2'); } catch(e) {}
+    location.reload();
+  });
+  if ($('chgPass')) $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
+  if ($('logout')) $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [] }; cfg = null; showLogin('Has salido.'); });
+  box.querySelectorAll('[data-cfgsw]').forEach(el => el.addEventListener('change', () => {
+    const k = el.dataset.cfgsw;
+    if (!el.checked) cfg[k] = null;
+    else {
+      const ctl = box.querySelector('[data-cfg="' + k + '"]');
+      cfg[k] = k === 'antes_min' || k === 'cobros_dia' ? Number(ctl.value) : ctl.value;
+      if (k === 'cobros_dia') cfg.cobros_hora = box.querySelector('[data-cfg="cobros_hora"]').value || '09:00';
+    }
+    guardarCfg();
+  }));
+  box.querySelectorAll('[data-cfg]').forEach(el => el.addEventListener('change', () => {
+    const k = el.dataset.cfg;
+    const sw = box.querySelector('[data-cfgsw="' + (k === 'cobros_hora' ? 'cobros_dia' : k) + '"]');
+    if (!sw.checked) sw.checked = true;
+    cfg[k] = k === 'antes_min' || k === 'cobros_dia' ? Number(el.value) : el.value;
+    if (k === 'cobros_hora' && cfg.cobros_dia == null) cfg.cobros_dia = Number(box.querySelector('[data-cfg="cobros_dia"]').value);
+    if (k === 'cobros_dia' && !cfg.cobros_hora) cfg.cobros_hora = box.querySelector('[data-cfg="cobros_hora"]').value || '09:00';
+    guardarCfg();
+  }));
+}
+async function guardarCfg(){
+  if (DEMO){ toast('En la prueba no se guardan los avisos'); return; }
+  try { await saveCfg(); toast('Guardado'); } catch(e){ fail(e); }
+}
+
+async function activarAvisos(){
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted'){ toast('Sin permiso para avisar'); renderAjustes(); return; }
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    const { data, error } = await sb.functions.invoke('avisos', { body: { accion: 'clave' } });
+    if (error || !data || !data.publicKey) throw (error || new Error('sin clave'));
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uToU8(data.publicKey) });
+    const j = sub.toJSON();
+    const { error: e2 } = await sb.from('avisos_suscripciones').upsert({ endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, dispositivo: deviceName() }, { onConflict: 'endpoint' });
+    if (e2) throw e2;
+    if (!cfgRow) await saveCfg();
+    toast('Avisos activados');
+  } catch(e){ console.error(e); toast('No se han podido activar los avisos'); }
+  renderAjustes();
+}
+async function desactivarAvisos(){
+  try {
+    const sub = await getSub();
+    if (sub){ await sb.from('avisos_suscripciones').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
+    toast('Avisos desactivados en este dispositivo');
+  } catch(e){ fail(e); }
+  renderAjustes();
+}
+async function avisoPrueba(){
+  try {
+    const { data, error } = await sb.functions.invoke('avisos', { body: { accion: 'prueba' } });
+    if (error) throw error;
+    toast(data && data.enviados ? 'Aviso enviado' : 'No hay dispositivos con avisos');
+  } catch(e){ console.error(e); toast('No se ha podido enviar'); }
+}
+
+/* ---------- clics y gestos ---------- */
+function setMode(m){ agMode = m; try { localStorage.setItem('consulta-modo', m); } catch(e) {} pendingScroll = true; renderAgenda(); }
+function nav(k){
+  if (k === 0) cursor = startOfDay(new Date());
+  else if (agMode === 'dia') cursor = addDays(cursor, k);
+  else if (agMode === 'semana') cursor = addDays(cursor, 7 * k);
+  else cursor = addMonths(cursor, k);
+  pendingScroll = true; renderAgenda();
+}
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-pay],[data-payall],[data-cita],[data-wk],[data-newday],[data-pac],nav.tabs button');
+  const tl = e.target.closest('#tl');
+  if (tl && !e.target.closest('.ev')){
+    const y = e.clientY - tl.getBoundingClientRect().top;
+    const mins = Math.max(0, Math.floor(y / HOUR_PX * 2) * 30) + Number(tl.dataset.h0) * 60;
+    openCita(null, ymd(cursor), pad(Math.min(23, Math.floor(mins / 60))) + ':' + pad(mins % 60));
+    return;
+  }
+  const t = e.target.closest('[data-pay],[data-payall],[data-cita],[data-nav],[data-mode],[data-goday],[data-selday],[data-newday],[data-pac],nav.tabs button');
   if (!t) return;
   if (t.dataset.pay){ e.stopPropagation(); togglePay(t.dataset.pay); return; }
   if (t.dataset.payall){ payAll(t.dataset.payall.split(',')); return; }
   if (t.dataset.cita){ openCita(t.dataset.cita); return; }
+  if (t.dataset.nav !== undefined){ nav(Number(t.dataset.nav)); return; }
+  if (t.dataset.mode){ setMode(t.dataset.mode); return; }
+  if (t.dataset.goday){ cursor = fromLocal(t.dataset.goday, '00:00'); setMode('dia'); return; }
+  if (t.dataset.selday){ cursor = fromLocal(t.dataset.selday, '00:00'); renderAgenda(); return; }
   if (t.dataset.newday){ openCita(null, t.dataset.newday); return; }
   if (t.dataset.pac){ openPac(t.dataset.pac); return; }
-  if (t.dataset.wk !== undefined){
-    const k = Number(t.dataset.wk);
-    weekStart = k === 0 ? monday(new Date()) : addDays(weekStart, 7 * k);
-    renderAgenda(); return;
-  }
   if (t.dataset.v){ view = t.dataset.v; render(); window.scrollTo(0, 0); }
 });
 document.addEventListener('keydown', e => {
@@ -647,8 +1140,25 @@ document.addEventListener('keydown', e => {
 });
 $('fab').addEventListener('click', () => view === 'Pacientes' ? openPac(null) : openCita(null));
 
+let sx = null, sy = null;
+$('vAgenda').addEventListener('touchstart', e => { if (e.touches.length !== 1){ sx = null; return; } sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+$('vAgenda').addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dy) < 45) nav(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+// la línea de «ahora» y los «sin pagar» se actualizan solos
+setInterval(() => { if (!$('app').hidden && view === 'Agenda' && !document.querySelector('dialog[open]')) renderAgenda(); }, 60000);
+
 /* ---------- entrar / salir ---------- */
+function hashView(){
+  if (location.hash === '#cobros'){ view = 'Cobros'; history.replaceState(null, '', location.pathname + location.search); return true; }
+  return false;
+}
+window.addEventListener('hashchange', () => { if (hashView() && !$('app').hidden) render(); });
 async function start(){
+  hashView();
   try { S = await store.load(); }
   catch(e){ console.error(e); toast('No se han podido cargar los datos'); }
   $('login').hidden = true; $('app').hidden = false;
@@ -658,17 +1168,19 @@ function showLogin(msg, isErr){
   $('app').hidden = true; $('login').hidden = false;
   $('loginMsg').textContent = msg || ''; $('loginMsg').classList.toggle('err', !!isErr);
 }
+function askNewPass(){
+  showLogin('');
+  $('loginSub').textContent = LINK.type === 'invite' && needsPass ? 'Bienvenida. Elige tu contraseña para entrar.' : 'Elige una contraseña nueva.';
+  $('loginFields').hidden = true; $('newPassFields').hidden = false;
+  $('lNew').focus();
+}
 
 if (DEMO){
   $('demoBar').hidden = false;
-  $('logout').textContent = 'Reiniciar prueba';
-  $('logout').addEventListener('click', () => {
-    if (!confirm('¿Borrar los datos de prueba y empezar de nuevo?')) return;
-    try { localStorage.removeItem('consulta-demo-v1'); } catch(e) {}
-    location.reload();
-  });
   start();
 } else {
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
   $('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
     $('loginMsg').textContent = 'Entrando…'; $('loginMsg').classList.remove('err');
@@ -692,31 +1204,23 @@ if (DEMO){
     $('cancelPassWrap').hidden = true; $('lNew').value = '';
     start(); toast('Contraseña guardada');
   });
-  $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [] }; showLogin('Has salido.'); });
-
-  function askNewPass(){
-    showLogin('');
-    $('loginSub').textContent = LINK.type === 'invite' ? 'Bienvenida. Elige tu contraseña para entrar.' : 'Elige una contraseña nueva.';
-    $('loginFields').hidden = true; $('newPassFields').hidden = false;
-    $('lNew').focus();
-  }
-  const enter = () => { if (needsPass) askNewPass(); else if ($('app').hidden) start(); };
-
-  $('chgPass').hidden = false;
-  $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
   $('cancelPass').addEventListener('click', () => {
     $('newPassFields').hidden = true; $('loginFields').hidden = false; $('cancelPassWrap').hidden = true;
     $('loginSub').textContent = 'Agenda y cobros'; $('lNew').value = '';
     $('login').hidden = true; $('app').hidden = false;
   });
 
+  const enter = session => {
+    if (session){ userId = session.user.id; userEmail = session.user.email || ''; }
+    if (needsPass) askNewPass(); else if ($('app').hidden) start();
+  };
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY'){ needsPass = true; askNewPass(); return; }
-    if (event === 'SIGNED_IN' && session) setTimeout(enter, 0);
+    if (event === 'PASSWORD_RECOVERY'){ needsPass = true; if (session){ userId = session.user.id; userEmail = session.user.email || ''; } askNewPass(); return; }
+    if (event === 'SIGNED_IN' && session) setTimeout(() => enter(session), 0);
     if (event === 'SIGNED_OUT') showLogin('');
   });
   sb.auth.getSession().then(({ data }) => {
-    if (data.session) enter();
+    if (data.session) enter(data.session);
     else if (LINK.error) showLogin('El enlace ha caducado o ya se usó. Escribe tu correo y pulsa «¿Has olvidado la contraseña?» para recibir otro.', true);
     else showLogin('');
   });
