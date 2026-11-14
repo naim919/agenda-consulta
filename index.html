@@ -140,6 +140,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
     <div id="newPassFields" hidden>
       <label class="f"><span>Contraseña nueva (mínimo 10 caracteres)</span><input type="password" id="lNew" autocomplete="new-password" minlength="10"></label>
       <button class="btn primary" type="button" id="saveNewPass">Guardar contraseña</button>
+      <p class="msg" id="cancelPassWrap" hidden><button type="button" class="link" id="cancelPass" style="padding:0">Volver a la agenda</button></p>
     </div>
     <p class="msg" id="loginMsg"></p>
   </form>
@@ -150,7 +151,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   <header class="top">
     <div class="wrap top-row">
       <div class="brand">Consulta<small>Fadia Garrido</small></div>
-      <button class="link" id="logout">Salir</button>
+      <div><button class="link" id="chgPass" hidden>Contraseña</button><button class="link" id="logout">Salir</button></div>
     </div>
     <div class="demo" id="demoBar" hidden>Modo de prueba: datos de ejemplo guardados solo en este navegador.</div>
   </header>
@@ -240,7 +241,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 
 <div class="toast" id="toast" hidden></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
 <script>
 /* ============================================================
    CONEXIÓN
@@ -249,10 +250,18 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
    La clave "anon" es pública por diseño: los datos los protege
    la base de datos (cada fila solo la ve la usuaria que la creó).
    ============================================================ */
-const SUPABASE_URL = '';
-const SUPABASE_ANON_KEY = '';
+const SUPABASE_URL = 'https://kvsfcoejwnxroeajqhuk.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_HiAJIXSe-Oedajf_SQGO9g_jA4B0o6h';
 
 const DEMO = !SUPABASE_URL || !SUPABASE_ANON_KEY;
+
+/* Enlace del correo (invitación o cambio de contraseña): se lee ANTES de que
+   la conexión lo procese y lo borre de la dirección. */
+const LINK = (() => {
+  const h = new URLSearchParams(location.hash.slice(1));
+  return { type: h.get('type'), error: h.get('error_description') || h.get('error') };
+})();
+let needsPass = LINK.type === 'invite' || LINK.type === 'recovery';
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -676,21 +685,41 @@ if (DEMO){
     const p = $('lNew').value;
     if (p.length < 10){ showLogin('La contraseña necesita al menos 10 caracteres.', true); return; }
     const { error } = await sb.auth.updateUser({ password: p });
-    if (error){ showLogin('No se ha podido cambiar la contraseña.', true); return; }
-    $('newPassFields').hidden = true; $('loginFields').hidden = false;
-    start();
+    if (error){ showLogin(/same|different/i.test(error.message) ? 'Tiene que ser distinta de la anterior.' : 'No se ha podido guardar la contraseña.', true); return; }
+    needsPass = false;
+    history.replaceState(null, '', location.pathname);
+    $('newPassFields').hidden = true; $('loginFields').hidden = false; $('loginSub').textContent = 'Agenda y cobros';
+    $('cancelPassWrap').hidden = true; $('lNew').value = '';
+    start(); toast('Contraseña guardada');
   });
   $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [] }; showLogin('Has salido.'); });
 
+  function askNewPass(){
+    showLogin('');
+    $('loginSub').textContent = LINK.type === 'invite' ? 'Bienvenida. Elige tu contraseña para entrar.' : 'Elige una contraseña nueva.';
+    $('loginFields').hidden = true; $('newPassFields').hidden = false;
+    $('lNew').focus();
+  }
+  const enter = () => { if (needsPass) askNewPass(); else if ($('app').hidden) start(); };
+
+  $('chgPass').hidden = false;
+  $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
+  $('cancelPass').addEventListener('click', () => {
+    $('newPassFields').hidden = true; $('loginFields').hidden = false; $('cancelPassWrap').hidden = true;
+    $('loginSub').textContent = 'Agenda y cobros'; $('lNew').value = '';
+    $('login').hidden = true; $('app').hidden = false;
+  });
+
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY'){
-      showLogin(''); $('loginSub').textContent = 'Elige una contraseña nueva';
-      $('loginFields').hidden = true; $('newPassFields').hidden = false; return;
-    }
-    if (event === 'SIGNED_IN' && $('newPassFields').hidden && $('app').hidden) start();
+    if (event === 'PASSWORD_RECOVERY'){ needsPass = true; askNewPass(); return; }
+    if (event === 'SIGNED_IN' && session) setTimeout(enter, 0);
     if (event === 'SIGNED_OUT') showLogin('');
   });
-  sb.auth.getSession().then(({ data }) => { if (data.session) start(); else showLogin(''); });
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) enter();
+    else if (LINK.error) showLogin('El enlace ha caducado o ya se usó. Escribe tu correo y pulsa «¿Has olvidado la contraseña?» para recibir otro.', true);
+    else showLogin('');
+  });
 }
 </script>
 </body>
