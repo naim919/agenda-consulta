@@ -59,6 +59,19 @@ nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .btn.small{padding:6px 10px;font-size:13px}
 a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
 .f input[readonly]{background:var(--warm);color:var(--accent)}
+/* recordatorios de cita */
+.recbar{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--stone);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
+.recbar b{font-weight:600}
+.recbar .go{color:var(--sage-deep);font-weight:600;white-space:nowrap}
+.recbar.pend{border-color:#e9d9a8;background:#fffaf0}
+.rec{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--warm)}
+.card .rec:last-child{border-bottom:none}
+.rec .rt{width:46px;flex:none;font-weight:600;font-variant-numeric:tabular-nums}
+.rec .rn{flex:1;min-width:0}
+.rec .rn b{display:block;font-weight:600}
+.rec .rn small{font-size:12px;color:var(--muted)}
+.rec .ok{font-size:12.5px;color:var(--sage-deep);font-weight:600;text-align:right}
+.rec .ok a{display:block;font-weight:500;color:var(--muted);font-size:12px;text-decoration:underline}
 .mov small.due,.pac small.due{color:var(--due)}
 .btn.block{width:100%}
 .sumline{font-size:12.5px;color:var(--muted);margin:0 2px 12px}
@@ -423,6 +436,17 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   </form>
 </dialog>
 
+<!-- RECORDAR CITAS -->
+<dialog id="dRec">
+  <div class="dlg">
+    <h3>Recordar citas</h3>
+    <div class="bar"><div class="week"><button type="button" class="arrow" id="rPrev" aria-label="Día anterior">‹</button><span class="range" id="rDia"></span><button type="button" class="arrow" id="rNext" aria-label="Día siguiente">›</button></div></div>
+    <div id="rList"></div>
+    <p class="hint" style="margin-top:10px">Se abre tu WhatsApp con el mensaje ya escrito: solo tienes que enviarlo. Es gratis.</p>
+    <div class="acts"><button type="button" class="btn" id="rClose">Cerrar</button></div>
+  </div>
+</dialog>
+
 <!-- TIPO DE BONO -->
 <dialog id="dTipo">
   <form class="dlg" id="fTipo" method="dialog">
@@ -707,6 +731,50 @@ function msgJustificante(g){
     (g.metodo_pago ? ' (' + METODOS[g.metodo_pago].toLowerCase() + ')' : '') + ' por ' + concepto + '. ¡Gracias!' + firmaTxt();
 }
 
+// «Hola Ana, te recuerdo tu cita de mañana, martes 17 de noviembre, a las 17:00 (online). …»
+function msgCita(c){
+  const p = pacById(c.paciente_id), d = new Date(c.inicio), k = ymd(d);
+  const fechaL = DIAS[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES_L[d.getMonth()];
+  const cuando = k === ymd(new Date()) ? 'de hoy' : k === ymd(addDays(new Date(), 1)) ? 'de mañana, ' + fechaL + ',' : 'del ' + fechaL;
+  return 'Hola ' + nombreDe(p) + ', te recuerdo tu ' + (c.tipo === 'primera' ? 'primera sesión' : 'cita') + ' ' + cuando + ' a las ' + hm(d) +
+    (c.modalidad === 'online' ? ' (online)' : '') + '. Si no puedes venir, avísame, por favor. ¡Gracias!' + firmaTxt();
+}
+
+/* ---------- recordar citas a los pacientes (desde el WhatsApp de Fadia) ---------- */
+let recDia = null;
+const citasParaRecordar = key => S.citas.filter(c => !c.cancelada && ymd(new Date(c.inicio)) === key).sort(byStart);
+function openRec(key){ recDia = key; renderRec(); $('dRec').showModal(); }
+function renderRec(){
+  const d = fromLocal(recDia, '12:00'), list = citasParaRecordar(recDia);
+  const hoy = ymd(new Date()), man = ymd(addDays(new Date(), 1));
+  $('rDia').textContent = (recDia === hoy ? 'Hoy · ' : recDia === man ? 'Mañana · ' : '') + DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()];
+  $('rList').innerHTML = !list.length ? '<div class="card"><div class="empty">No hay citas ese día.</div></div>' :
+    '<div class="card">' + list.map(c => {
+      const p = pacById(c.paciente_id), tel = p && p.telefono;
+      const sub = [c.tipo === 'primera' ? 'Primera sesión' : null, c.modalidad === 'online' ? 'Online' : 'Presencial'].filter(Boolean).join(' · ');
+      let act;
+      if (!tel) act = '<button type="button" class="btn small" data-pac="' + c.paciente_id + '">Añadir teléfono</button>';
+      else if (c.recordado_el) act = '<span class="ok">✓ Avisado ' + (ymd(new Date(c.recordado_el)) === hoy ? 'a las ' + hm(new Date(c.recordado_el)) : 'el ' + fmtShort(new Date(c.recordado_el))) +
+        '<a href="' + esc(waLink(tel, msgCita(c))) + '" target="_blank" rel="noopener" data-rec="' + c.id + '">Enviar otra vez</a></span>';
+      else act = '<a class="btn small primary" href="' + esc(waLink(tel, msgCita(c))) + '" target="_blank" rel="noopener" data-rec="' + c.id + '">WhatsApp</a>';
+      return '<div class="rec" style="--pc:' + colorOf(c.paciente_id) + '"><span class="pcol"></span><span class="rt">' + hm(new Date(c.inicio)) + '</span>' +
+        '<span class="rn"><b>' + esc(p ? p.alias : '—') + '</b><small>' + sub + '</small></span>' + act + '</div>';
+    }).join('') + '</div>';
+}
+$('rPrev').addEventListener('click', () => { recDia = ymd(addDays(fromLocal(recDia, '12:00'), -1)); renderRec(); });
+$('rNext').addEventListener('click', () => { recDia = ymd(addDays(fromLocal(recDia, '12:00'), 1)); renderRec(); });
+$('rClose').addEventListener('click', () => $('dRec').close());
+// al pulsar «WhatsApp» se abre su WhatsApp (el enlace sigue su curso) y se apunta como avisado
+$('rList').addEventListener('click', e => {
+  const a = e.target.closest('[data-rec]'); if (!a) return;
+  const c = S.citas.find(x => x.id === a.dataset.rec); if (!c) return;
+  const patch = { recordado_el: new Date().toISOString() };
+  Object.assign(c, patch);
+  store.updateCitas([c.id], patch).catch(fail);
+  setTimeout(() => { if ($('dRec').open) renderRec(); render(); }, 400);
+});
+$('dPac').addEventListener('close', () => { if ($('dRec').open) renderRec(); });
+
 function toast(t, act){
   const el = $('toast'), b = $('toastBtn');
   $('toastTxt').textContent = t;
@@ -796,6 +864,13 @@ function renderAgenda(){
     '<div class="bar"><div class="week"><button class="arrow" data-nav="-1" aria-label="Anterior">‹</button>' +
     '<span class="range">' + title + '</span><button class="arrow" data-nav="1" aria-label="Siguiente">›</button></div>' +
     '<button class="btn small" data-nav="0">Hoy</button></div>';
+  // aviso con las citas de mañana para recordárselas a los pacientes
+  const man = ymd(addDays(new Date(), 1)), cm = citasParaRecordar(man);
+  if (cm.length){
+    const pend = cm.filter(c => !c.recordado_el).length;
+    h += '<button class="recbar' + (pend ? ' pend' : '') + '" data-recdia="' + man + '"><span><b>Mañana: ' + plural(cm.length, 'cita', 'citas') + '</b> · ' +
+      (pend ? plural(pend, 'sin recordar', 'sin recordar') : 'todas recordadas ✓') + '</span><span class="go">' + (pend ? 'Recordar ›' : 'Ver ›') + '</span></button>';
+  }
   h += agMode === 'dia' ? dayHTML(byDay) : agMode === 'semana' ? weekHTML(byDay) : monthHTML(byDay);
   $('vAgenda').innerHTML = h;
   if (pendingScroll){
@@ -1707,8 +1782,9 @@ document.addEventListener('click', e => {
     openCita(null, ymd(cursor), pad(Math.min(23, Math.floor(mins / 60))) + ':' + pad(mins % 60));
     return;
   }
-  const t = e.target.closest('[data-pay],[data-payall],[data-pago],[data-cita],[data-nav],[data-mode],[data-goday],[data-selday],[data-newday],[data-pac],nav.tabs button');
+  const t = e.target.closest('[data-recdia],[data-pay],[data-payall],[data-pago],[data-cita],[data-nav],[data-mode],[data-goday],[data-selday],[data-newday],[data-pac],nav.tabs button');
   if (!t) return;
+  if (t.dataset.recdia){ openRec(t.dataset.recdia); return; }
   if (t.dataset.pago){ openPago(t.dataset.pago); return; }
   if (t.dataset.pay){ e.stopPropagation(); openCobro([t.dataset.pay]); return; }
   if (t.dataset.payall){ openCobro(t.dataset.payall.split(',')); return; }
