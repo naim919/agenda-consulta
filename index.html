@@ -58,6 +58,8 @@ nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .btn.danger{color:var(--due);border-color:var(--due-light)}
 .btn.small{padding:6px 10px;font-size:13px}
 a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+.f input[readonly]{background:var(--warm);color:var(--accent)}
+.mov small.due,.pac small.due{color:var(--due)}
 .btn.block{width:100%}
 .sumline{font-size:12.5px;color:var(--muted);margin:0 2px 12px}
 
@@ -167,7 +169,7 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--in
 .srow .st span{font-size:12.5px;color:var(--muted)}
 .srow .ctl{display:flex;gap:6px;align-items:center}
 .srow select,.srow input[type=time]{height:36px;padding:6px 8px;border:1px solid var(--stone);border-radius:8px;background:#fff;font-size:15px;color:var(--ink)}
-.srow input[type=time]{-webkit-appearance:none;appearance:none;width:84px;min-width:0;text-align:center}
+.srow input[type=time]{-webkit-appearance:none;appearance:none;width:100px;min-width:0;text-align:center}
 .srow input[type=time]::-webkit-date-and-time-value{text-align:center}
 .sw{appearance:none;-webkit-appearance:none;width:46px;height:28px;flex:none;border-radius:14px;background:var(--stone);position:relative;cursor:pointer;transition:background .15s}
 .sw::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s}
@@ -400,6 +402,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   <form class="dlg" id="fCobro" method="dialog">
     <h3 id="kTitle">Cobrar</h3>
     <p class="hint" id="kInfo" style="margin:-6px 0 14px;font-size:14px"></p>
+    <label class="f" id="kTipoWrap" hidden><span>Tipo de bono</span><select id="kTipo"></select></label>
     <div class="row2">
       <label class="f"><span>Fecha de pago</span><input type="date" id="kFecha" required></label>
       <label class="f"><span>Forma de pago</span><select id="kMetodo"><option value="">Elige…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
@@ -408,6 +411,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <label class="f" id="kSesWrap"><span>Sesiones del bono</span><input type="number" id="kSesiones" min="1" max="100" step="1" inputmode="numeric"></label>
       <label class="f"><span>Importe (€)</span><input type="number" id="kImporte" min="0" step="0.5" inputmode="decimal"></label>
     </div>
+    <label class="f" id="kCadWrap" hidden><span>Caduca el (vacío = no caduca)</span><input type="date" id="kCaduca"></label>
     <p class="hint" id="kNota" hidden></p>
     <div class="btnrow" id="kExtra" hidden><a class="btn small" id="kJust" target="_blank" rel="noopener">Enviar justificante por WhatsApp</a></div>
     <div class="acts">
@@ -415,6 +419,29 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <span class="grow"></span>
       <button type="button" class="btn" id="kClose">Cerrar</button>
       <button type="submit" class="btn primary" id="kOk">Cobrar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- TIPO DE BONO -->
+<dialog id="dTipo">
+  <form class="dlg" id="fTipo" method="dialog">
+    <h3 id="tTitle">Tipo de bono</h3>
+    <label class="f"><span>Nombre</span><input id="tNombre" maxlength="60" placeholder="Bono 4 sesiones" required></label>
+    <div class="row2">
+      <label class="f"><span>Sesiones</span><input id="tSes" type="number" min="1" max="100" step="1" inputmode="numeric" required></label>
+      <label class="f"><span>Precio del bono (€)</span><input id="tPrecio" type="number" min="0" step="0.5" inputmode="decimal" required></label>
+    </div>
+    <label class="f"><span>Caducidad</span>
+      <select id="tCad"><option value="">No caduca</option><option value="1">1 mes</option><option value="2">2 meses</option><option value="3">3 meses</option><option value="4">4 meses</option><option value="6">6 meses</option><option value="12">1 año</option></select>
+    </label>
+    <p class="hint" id="tHint"></p>
+    <label class="check" id="tActivoWrap"><input type="checkbox" id="tActivo"> Disponible para vender</label>
+    <div class="acts">
+      <button type="button" class="btn danger small" id="tDel" hidden>Borrar</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="tClose">Cerrar</button>
+      <button type="submit" class="btn primary">Guardar</button>
     </div>
   </form>
 </dialog>
@@ -482,7 +509,7 @@ const PALETA = ['#6f9a74','#c07f52','#5f8bb0','#b06f8c','#3f7f6e','#4f9a9a','#8f
 function colorOf(id){ let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETA[h % PALETA.length]; }
 
 /* ---------- almacén de datos ---------- */
-const DEMO_KEY = 'consulta-demo-v4';
+const DEMO_KEY = 'consulta-demo-v5';
 let sb = null;
 if (!DEMO) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
@@ -526,9 +553,15 @@ const store = DEMO ? (() => {
     const bono = { id: uid(), paciente_id: p[3].id, fecha: ymd(addDays(mon, 3)), importe: 200, metodo_pago: 'bizum', tipo: 'bono', bono_sesiones: 4, created_at: new Date().toISOString() };
     pagos.push(bono);
     citas.filter(c => c.paciente_id === p[3].id).forEach(c => Object.assign(c, { pago_id: bono.id, pagada: true, pagada_el: bono.fecha, metodo_pago: 'bizum', precio: 50 }));
-    db = { pacientes: p, citas, pagos };
+    const tipos = [
+      { id: uid(), nombre: 'Bono 4 sesiones', sesiones: 4, precio: 220, caduca_meses: 3, activo: true, created_at: new Date().toISOString() },
+      { id: uid(), nombre: 'Bono 8 sesiones', sesiones: 8, precio: 420, caduca_meses: null, activo: true, created_at: new Date().toISOString() }
+    ];
+    Object.assign(bono, { bono_tipo_id: null, bono_nombre: 'Bono 4 sesiones', caduca_el: ymd(addMonths(addDays(mon, 3), 3)) });
+    db = { pacientes: p, citas, pagos, tipos };
   }
   if (!db.pagos) db.pagos = [];
+  if (!db.tipos) db.tipos = [];
   // lo mismo que hace la base de datos real al anular un pago
   const liberar = g => db.citas.forEach(c => { if (c.pago_id === g.id){
     const pac = db.pacientes.find(x => x.id === c.paciente_id);
@@ -548,7 +581,12 @@ const store = DEMO ? (() => {
     async deleteCitas(ids){ db.citas = db.citas.filter(c => !ids.includes(c.id)); save(); },
     async insertPago(row){ const g = Object.assign({ id: uid(), bono_sesiones: null, created_at: new Date().toISOString() }, row); db.pagos.push(g); save(); return Object.assign({}, g); },
     async updatePago(id, patch){ const g = db.pagos.find(x => x.id === id); Object.assign(g, patch); save(); return Object.assign({}, g); },
-    async deletePago(id){ const g = db.pagos.find(x => x.id === id); if (g) liberar(g); db.pagos = db.pagos.filter(x => x.id !== id); save(); }
+    async deletePago(id){ const g = db.pagos.find(x => x.id === id); if (g) liberar(g); db.pagos = db.pagos.filter(x => x.id !== id); save(); },
+    async saveTipo(x){
+      if (x.id){ const t = db.tipos.find(y => y.id === x.id); Object.assign(t, x); save(); return Object.assign({}, t); }
+      const n = Object.assign({}, x, { id: uid(), created_at: new Date().toISOString() }); db.tipos.push(n); save(); return Object.assign({}, n);
+    },
+    async deleteTipo(id){ db.tipos = db.tipos.filter(t => t.id !== id); db.pagos.forEach(g => { if (g.bono_tipo_id === id) g.bono_tipo_id = null; }); save(); }
   };
 })() : {
   async load(){
@@ -568,7 +606,9 @@ const store = DEMO ? (() => {
       pagos.push(...data);
       if (data.length < 1000) break;
     }
-    return { pacientes, citas, pagos };
+    const { data: tipos, error: e3 } = await sb.from('bonos_tipos').select('*').order('sesiones');
+    if (e3) throw e3;
+    return { pacientes, citas, pagos, tipos };
   },
   async savePaciente(x){
     const row = { alias: x.alias, precio: x.precio, activo: x.activo, metodo_pago: x.metodo_pago || null, telefono: x.telefono || null };
@@ -582,11 +622,18 @@ const store = DEMO ? (() => {
   async insertPago(row){ const { data, error } = await sb.from('pagos').insert(row).select().single(); if (error) throw error; return data; },
   async updatePago(id, patch){ const { data, error } = await sb.from('pagos').update(patch).eq('id', id).select().single(); if (error) throw error; return data; },
   // al borrar, la base de datos devuelve sus sesiones a «sin pagar» (disparador pago_anulado)
-  async deletePago(id){ const { error } = await sb.from('pagos').delete().eq('id', id); if (error) throw error; }
+  async deletePago(id){ const { error } = await sb.from('pagos').delete().eq('id', id); if (error) throw error; },
+  async saveTipo(x){
+    const row = { nombre: x.nombre, sesiones: x.sesiones, precio: x.precio, caduca_meses: x.caduca_meses || null, activo: x.activo };
+    const q = x.id ? sb.from('bonos_tipos').update(row).eq('id', x.id) : sb.from('bonos_tipos').insert(row);
+    const { data, error } = await q.select().single(); if (error) throw error; return data;
+  },
+  // los bonos ya vendidos conservan su nombre, sesiones, importe y caducidad
+  async deleteTipo(id){ const { error } = await sb.from('bonos_tipos').delete().eq('id', id); if (error) throw error; }
 };
 
 /* ---------- estado ---------- */
-let S = { pacientes: [], citas: [], pagos: [] };
+let S = { pacientes: [], citas: [], pagos: [], tipos: [] };
 let view = 'Agenda';
 let agMode = 'semana';
 try { agMode = localStorage.getItem('consulta-modo') || 'semana'; } catch(e) {}
@@ -611,15 +658,26 @@ const bonoQuedan = g => g.bono_sesiones - citasDePago(g.id).length;
 const r2 = n => Math.round(Number(n) * 100) / 100;
 const byPago = (a, b) => (b.fecha + (b.created_at || '')).localeCompare(a.fecha + (a.created_at || ''));
 function bonoDe(c){ const g = c.pago_id ? pagoById(c.pago_id) : null; return g && g.tipo === 'bono' ? g : null; }
-function bonosActivos(pid){ return S.pagos.filter(g => g.tipo === 'bono' && g.paciente_id === pid && bonoQuedan(g) > 0).sort((a, b) => byPago(b, a)); }
+const bonoCaducado = g => !!g.caduca_el && g.caduca_el < ymd(new Date());
+const bonoNombre = g => g.bono_nombre || 'Bono de ' + g.bono_sesiones + ' sesiones';
+// bonos con sesiones por usar; primero el que caduca antes
+function bonosConSaldo(pid){
+  return S.pagos.filter(g => g.tipo === 'bono' && g.paciente_id === pid && bonoQuedan(g) > 0)
+    .sort((a, b) => (a.caduca_el || '9999').localeCompare(b.caduca_el || '9999') || byPago(b, a));
+}
+const bonosActivos = pid => bonosConSaldo(pid).filter(g => !bonoCaducado(g));   // los que aún se pueden usar
+const tiposVenta = () => S.tipos.filter(t => t.activo).sort((a, b) => a.sesiones - b.sesiones || a.precio - b.precio);
 
 /* Reparte las sesiones sin pagar del paciente entre sus bonos con saldo:
-   primero las más antiguas (lo que ya debía), luego las siguientes de la agenda. */
+   primero las más antiguas (lo que ya debía), luego las siguientes de la agenda.
+   Un bono con caducidad solo cubre sesiones hasta ese día. */
 async function syncBonos(pid){
   let libres = S.citas.filter(c => c.paciente_id === pid && !c.cancelada && !c.pagada && !isFree(c)).sort(byStart);
-  for (const g of bonosActivos(pid)){
+  for (const g of bonosConSaldo(pid)){
     if (!libres.length) break;
-    const take = libres.slice(0, bonoQuedan(g)); libres = libres.slice(take.length);
+    const take = libres.filter(c => !g.caduca_el || ymd(new Date(c.inicio)) <= g.caduca_el).slice(0, bonoQuedan(g));
+    if (!take.length) continue;
+    libres = libres.filter(c => !take.includes(c));
     const patch = { pago_id: g.id, pagada: true, pagada_el: g.fecha, metodo_pago: g.metodo_pago, precio: r2(g.importe / g.bono_sesiones) };
     await store.updateCitas(take.map(c => c.id), patch);
     take.forEach(c => Object.assign(c, patch));
@@ -838,9 +896,21 @@ const cobradoEn = filtro => S.pagos.filter(g => filtro(g.fecha)).reduce((s, g) =
 
 function movRow(g){
   const p = pacById(g.paciente_id), n = citasDePago(g.id).length;
-  const det = g.tipo === 'bono' ? 'Bono · ' + (g.bono_sesiones - n) + ' de ' + g.bono_sesiones + ' por usar' : plural(n, 'sesión', 'sesiones');
+  let det = plural(n, 'sesión', 'sesiones'), aviso = false;
+  if (g.tipo === 'bono'){
+    const q = g.bono_sesiones - n;
+    if (bonoCaducado(g)){ det = bonoNombre(g) + ' · caducó el ' + fmtShort(new Date(g.caduca_el + 'T12:00')) + (q ? ' · ' + q + ' sin usar' : ''); aviso = q > 0; }
+    else {
+      det = bonoNombre(g) + ' · ' + (q ? q + ' de ' + g.bono_sesiones + ' por usar' : 'usado entero');
+      if (g.caduca_el && q){
+        const dias = Math.round((fromLocal(g.caduca_el, '12:00') - fromLocal(ymd(new Date()), '12:00')) / 864e5);
+        det += ' · caduca el ' + fmtShort(new Date(g.caduca_el + 'T12:00'));
+        aviso = dias <= 30;
+      }
+    }
+  }
   return '<button class="mov" data-pago="' + g.id + '"><span class="md">' + fmtShort(new Date(g.fecha + 'T12:00')) + '</span>' +
-    '<span><b>' + esc(p ? p.alias : '—') + '</b><small>' + det + '</small></span>' +
+    '<span><b>' + esc(p ? p.alias : '—') + '</b><small' + (aviso ? ' class="due"' : '') + '>' + det + '</small></span>' +
     '<span class="mi">' + eur(g.importe) + '<small>' + (METODOS[g.metodo_pago] || 'Sin indicar') + '</small></span></button>';
 }
 
@@ -874,8 +944,11 @@ function renderCobros(){
     '</div><p class="hint" style="margin-top:8px">Toca una fecha para cobrar solo esa sesión.' + (rows.some(r => !(r.p && r.p.telefono)) ? ' «Recordar» sale si el paciente tiene teléfono.' : '') + '</p>';
 
   // bonos en curso
-  const activos = S.pagos.filter(g => g.tipo === 'bono' && bonoQuedan(g) > 0).sort(byPago);
-  if (activos.length) h += '<p class="sec">Bonos en curso · ' + activos.length + '</p><div class="card">' + activos.map(movRow).join('') + '</div>';
+  // vigentes con sesiones por usar, y los que caducaron hace poco con sesiones sin usar
+  const hace90 = ymd(addDays(now, -90));
+  const activos = S.pagos.filter(g => g.tipo === 'bono' && bonoQuedan(g) > 0 && (!bonoCaducado(g) || g.caduca_el >= hace90))
+    .sort((a, b) => (bonoCaducado(a) - bonoCaducado(b)) || (a.caduca_el || '9999').localeCompare(b.caduca_el || '9999'));
+  if (activos.length) h += '<p class="sec">Bonos en curso · ' + activos.filter(g => !bonoCaducado(g)).length + '</p><div class="card">' + activos.map(movRow).join('') + '</div>';
 
   // movimientos
   const movs = S.pagos.slice().sort(byPago);
@@ -942,7 +1015,7 @@ function exportCobros(per){
     ['Fecha de pago', 'Paciente', 'Concepto', 'Sesiones', 'Importe', 'Forma de pago'],
     rows.map(g => {
       const p = pacById(g.paciente_id), cs = citasDePago(g.id);
-      const concepto = g.tipo === 'bono' ? 'Bono de ' + g.bono_sesiones + ' sesiones' : 'Sesiones del ' + cs.map(c => dmy(new Date(c.inicio))).join(', ');
+      const concepto = g.tipo === 'bono' ? bonoNombre(g) + (g.bono_nombre && !/\d/.test(g.bono_nombre) ? ' (' + g.bono_sesiones + ' sesiones)' : '') : 'Sesiones del ' + cs.map(c => dmy(new Date(c.inicio))).join(', ');
       return [dmy(new Date(g.fecha + 'T12:00')), csvTxt(p ? p.alias : ''), csvTxt(concepto), g.tipo === 'bono' ? g.bono_sesiones : cs.length, csvNum(g.importe), METODOS[g.metodo_pago] || ''];
     }));
   toast('Descargando ' + plural(rows.length, 'cobro', 'cobros'));
@@ -986,7 +1059,8 @@ function openCobro(ids){
   $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (list.length === 1 ? 'sesión del ' + fmtDay(d0) + ' ' + MESES[d0.getMonth()] : plural(list.length, 'sesión', 'sesiones') + ': ' + fechasDe(list));
   $('kFecha').value = ymd(new Date());
   $('kMetodo').value = (p && p.metodo_pago) || '';
-  $('kSesWrap').hidden = true;
+  $('kSesWrap').hidden = true; $('kTipoWrap').hidden = true; $('kCadWrap').hidden = true;
+  $('kSesiones').readOnly = false; $('kImporte').readOnly = false;
   $('kImporte').value = r2(list.reduce((s, c) => s + Number(c.precio), 0));
   $('kNota').hidden = true; $('kExtra').hidden = true; $('kQuitar').hidden = true;
   $('kOk').textContent = 'Cobrar';
@@ -998,18 +1072,38 @@ function openBono(pid){
   kMode = 'bono'; kIds = []; kPago = null; kPid = pid;
   const libres = S.citas.filter(c => c.paciente_id === pid && !c.cancelada && !c.pagada && !isFree(c) && isPast(c)).length;
   $('kTitle').textContent = 'Vender bono';
-  $('kInfo').textContent = p.alias + ' · ' + eur(p.precio) + ' por sesión';
+  $('kInfo').textContent = p.alias + ' · ' + eur(p.precio) + ' por sesión suelta';
   $('kFecha').value = ymd(new Date());
   $('kMetodo').value = p.metodo_pago || '';
-  $('kSesWrap').hidden = false; $('kSesiones').value = 4; $('kImporte').value = r2(4 * p.precio);
+  const tipos = tiposVenta();
+  $('kTipo').innerHTML = tipos.map(t => '<option value="' + t.id + '">' + esc(t.nombre) + ' · ' + eur(t.precio) + '</option>').join('') + '<option value="">Otro (a medida)</option>';
+  $('kTipoWrap').hidden = false; $('kSesWrap').hidden = false; $('kCadWrap').hidden = false;
+  $('kTipo').value = tipos.length ? tipos[0].id : '';
+  aplicarTipo();
   $('kNota').hidden = false;
-  $('kNota').textContent = 'Cubre primero ' + (libres === 1 ? 'la sesión que debe y luego ' : libres > 1 ? 'las ' + libres + ' sesiones que debe y luego ' : '') + 'sus próximas citas, por orden. «No vino» gasta sesión; «Cancelada», no.';
+  $('kNota').textContent = (tipos.length ? '' : 'Puedes crear tus tipos de bono en Ajustes. ') + 'Cubre primero ' + (libres === 1 ? 'la sesión que debe y luego ' : libres > 1 ? 'las ' + libres + ' sesiones que debe y luego ' : '') + 'sus próximas citas, por orden. «No vino» gasta sesión; «Cancelada», no.';
   $('kExtra').hidden = true; $('kQuitar').hidden = true;
   $('kOk').textContent = 'Vender bono';
   $('dCobro').showModal();
 }
-$('kSesiones').addEventListener('input', () => {
+// Con un tipo elegido, sesiones, importe y caducidad salen de él (no se tocan: para eso está «Otro»)
+function aplicarTipo(){
   if (kMode !== 'bono') return;
+  const t = S.tipos.find(x => x.id === $('kTipo').value), p = pacById(kPid);
+  $('kSesiones').readOnly = !!t; $('kImporte').readOnly = !!t;
+  if (t){
+    $('kSesiones').value = t.sesiones; $('kImporte').value = t.precio;
+    $('kCaduca').value = t.caduca_meses && $('kFecha').value ? ymd(addMonths(fromLocal($('kFecha').value, '12:00'), t.caduca_meses)) : '';
+  } else {
+    if (!$('kSesiones').value) $('kSesiones').value = 4;
+    $('kImporte').value = r2((Number($('kSesiones').value) || 0) * (p ? p.precio : 0));
+    $('kCaduca').value = '';
+  }
+}
+$('kTipo').addEventListener('change', aplicarTipo);
+$('kFecha').addEventListener('change', () => { if (kMode === 'bono' && $('kTipo').value) aplicarTipo(); });
+$('kSesiones').addEventListener('input', () => {
+  if (kMode !== 'bono' || $('kTipo').value) return;
   const p = pacById(kPid);
   $('kImporte').value = r2((Number($('kSesiones').value) || 0) * (p ? p.precio : 0));
 });
@@ -1019,12 +1113,14 @@ function openPago(id){
   kMode = 'ver'; kPago = g; kPid = g.paciente_id;
   const p = pacById(g.paciente_id), cs = citasDePago(id), bono = g.tipo === 'bono';
   kIds = cs.map(c => c.id);
-  $('kTitle').textContent = bono ? 'Bono' : 'Pago';
+  $('kTitle').textContent = bono ? bonoNombre(g) : 'Pago';
   $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (bono
-    ? 'usadas ' + cs.length + ' de ' + g.bono_sesiones + (cs.length ? ': ' + fechasDe(cs) : '')
+    ? 'usadas ' + cs.length + ' de ' + g.bono_sesiones + (cs.length ? ': ' + fechasDe(cs) : '') + (bonoCaducado(g) ? ' · caducado' : '')
     : (cs.length ? plural(cs.length, 'sesión', 'sesiones') + ': ' + fechasDe(cs) : 'sin sesiones'));
   $('kFecha').value = g.fecha;
   $('kMetodo').value = g.metodo_pago || '';
+  $('kTipoWrap').hidden = true; $('kCadWrap').hidden = !bono; $('kCaduca').value = g.caduca_el || '';
+  $('kSesiones').readOnly = false; $('kImporte').readOnly = false;
   $('kSesWrap').hidden = !bono; $('kSesiones').value = g.bono_sesiones || '';
   $('kImporte').value = g.importe;
   $('kNota').hidden = true;
@@ -1060,7 +1156,11 @@ $('fCobro').addEventListener('submit', async ev => {
       toast('Cobrado ' + eur(importe) + ' · ' + METODOS[metodo], { label: 'Deshacer', fn: () => anularPago(g.id, true) });
     } else if (kMode === 'bono'){
       if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
-      const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'bono', bono_sesiones: n });
+      const t = S.tipos.find(x => x.id === $('kTipo').value);
+      const caduca = $('kCaduca').value || null;
+      if (caduca && caduca < fecha){ $('kCaduca').focus(); toast('La caducidad es anterior a la venta'); return; }
+      const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'bono', bono_sesiones: n,
+        bono_tipo_id: t ? t.id : null, bono_nombre: t ? t.nombre : 'Bono de ' + n + ' sesiones', caduca_el: caduca });
       S.pagos.push(g);
       await syncBonos(kPid);
       await recordarMetodo(kPid, metodo);
@@ -1074,8 +1174,18 @@ $('fCobro').addEventListener('submit', async ev => {
         if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
         if (n < usadas){ $('kSesiones').focus(); toast('Ya se han usado ' + usadas + ' sesiones'); return; }
         patch.bono_sesiones = n;
+        patch.caduca_el = $('kCaduca').value || null;
       }
       Object.assign(g, await store.updatePago(g.id, patch));
+      // si se adelanta la caducidad, las sesiones que quedan fuera salen del bono
+      if (bono && g.caduca_el){
+        const fuera = citasDePago(g.id).filter(c => ymd(new Date(c.inicio)) > g.caduca_el);
+        if (fuera.length){
+          const pac = pacById(g.paciente_id);
+          const fp = { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: pac ? pac.precio : fuera[0].precio };
+          await store.updateCitas(fuera.map(c => c.id), fp); fuera.forEach(c => Object.assign(c, fp));
+        }
+      }
       const cs = citasDePago(g.id);
       if (cs.length){
         const cp = { pagada_el: fecha, metodo_pago: metodo };
@@ -1272,7 +1382,8 @@ $('fCita').addEventListener('submit', async ev => {
       const oldPid = editing.paciente_id;
       const patch = Object.assign({}, base, { inicio: start.toISOString(), cancelada, no_vino });
       // una sesión de bono que se cancela (o pasa a gratis, o cambia de paciente) deja libre su hueco del bono
-      if (bonoDe(editing) && (cancelada || precio === 0 || pid !== oldPid))
+      const bEd = bonoDe(editing);
+      if (bEd && (cancelada || precio === 0 || pid !== oldPid || (bEd.caduca_el && ymd(start) > bEd.caduca_el)))
         Object.assign(patch, { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: precio === 0 ? 0 : (pacById(pid) || {}).precio ?? precio });
       await store.updateCitas([editing.id], patch);
       Object.assign(editing, patch);
@@ -1435,6 +1546,13 @@ async function renderAjustes(){
     rowA('sin_marcar_hora', 'Citas sin marcar', 'Sesiones de hoy sin pagar', '<input type="time" data-cfg="sin_marcar_hora" value="' + (c.sin_marcar_hora || '21:00') + '" aria-label="Hora del repaso">') +
     '</div><p class="hint" style="margin-top:8px">Valen para todos los dispositivos donde actives los avisos.</p>';
   if (!isStandalone() && !DEMO && pushOK()) h += '<p class="sec">Tenerla como app</p><div class="set"><p class="note">En Safari: <b>Compartir → «Añadir a pantalla de inicio»</b>. Se abrirá a pantalla completa, con el icono de Fadia.</p></div>';
+  const tiposL = S.tipos.slice().sort((a, b) => (b.activo - a.activo) || a.sesiones - b.sesiones || a.precio - b.precio);
+  h += '<p class="sec">Tipos de bono</p><div class="card">' + (tiposL.length ? tiposL.map(t =>
+      '<button class="pac" data-tipo="' + t.id + '"' + (t.activo ? '' : ' style="opacity:.55"') + '><span class="pi"><b>' + esc(t.nombre) + '</b><br><span>' +
+      plural(t.sesiones, 'sesión', 'sesiones') + ' · ' + eur(t.precio) + ' (' + eur(r2(t.precio / t.sesiones)) + '/sesión)' +
+      (t.caduca_meses ? ' · caduca a ' + (t.caduca_meses === 12 ? '1 año' : t.caduca_meses + (t.caduca_meses === 1 ? ' mes' : ' meses')) : '') + (t.activo ? '' : ' · retirado') + '</span></span></button>').join('')
+    : '<div class="empty" style="padding:16px">Aún no hay tipos de bono.</div>') +
+    '</div><div class="btnrow" style="padding-top:8px"><button class="btn small primary" id="tipoNuevo">+ Tipo de bono</button></div>';
   h += '<p class="sec">Mensajes de WhatsApp</p><div class="set">' +
     '<label class="f" style="padding-top:12px"><span>Cómo pueden pagarte</span><input id="msgPago" maxlength="200" placeholder="Bizum al 600 000 000" value="' + esc(c.msg_pago || '') + '"></label>' +
     '<label class="f"><span>Firma</span><input id="msgFirma" maxlength="80" placeholder="Fadia" value="' + esc(c.msg_firma || '') + '"></label>' +
@@ -1446,6 +1564,8 @@ async function renderAjustes(){
             '<div class="srow"><div class="st"><b>Salir</b><span>Cerrar la sesión en este dispositivo</span></div><button class="btn small danger" id="logout">Salir</button></div>') +
     '</div>';
   box.innerHTML = h;
+  $('tipoNuevo').addEventListener('click', () => openTipo(null));
+  box.querySelectorAll('[data-tipo]').forEach(b => b.addEventListener('click', () => openTipo(b.dataset.tipo)));
   ['msgPago', 'msgFirma'].forEach(id => $(id).addEventListener('change', () => {
     cfg = cfg || Object.assign({}, AVISOS_DEF);
     cfg[id === 'msgPago' ? 'msg_pago' : 'msg_firma'] = $(id).value.trim();
@@ -1462,7 +1582,7 @@ async function renderAjustes(){
     location.reload();
   });
   if ($('chgPass')) $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
-  if ($('logout')) $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [], pagos: [] }; cfg = null; showLogin('Has salido.'); });
+  if ($('logout')) $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [], pagos: [], tipos: [] }; cfg = null; showLogin('Has salido.'); });
   box.querySelectorAll('[data-cfgsw]').forEach(el => el.addEventListener('change', () => {
     const k = el.dataset.cfgsw;
     if (!el.checked) cfg[k] = null;
@@ -1483,6 +1603,54 @@ async function renderAjustes(){
     guardarCfg();
   }));
 }
+/* ---------- tipos de bono ---------- */
+let editingTipo = null, nombreAuto = true;
+function tipoHint(){
+  const n = Number($('tSes').value), pr = Number($('tPrecio').value);
+  $('tHint').textContent = n > 0 && $('tPrecio').value !== '' ? eur(r2(pr / n)) + ' por sesión' : '';
+}
+function openTipo(id){
+  editingTipo = id ? S.tipos.find(t => t.id === id) : null;
+  const t = editingTipo;
+  $('tTitle').textContent = t ? 'Tipo de bono' : 'Nuevo tipo de bono';
+  $('tNombre').value = t ? t.nombre : 'Bono 4 sesiones';
+  $('tSes').value = t ? t.sesiones : 4;
+  $('tPrecio').value = t ? t.precio : '';
+  $('tCad').value = t && t.caduca_meses ? String(t.caduca_meses) : '';
+  $('tActivo').checked = t ? !!t.activo : true;
+  $('tActivoWrap').hidden = !t; $('tDel').hidden = !t;
+  nombreAuto = !t || t.nombre === 'Bono ' + t.sesiones + ' sesiones';
+  tipoHint();
+  $('dTipo').showModal();
+}
+$('tSes').addEventListener('input', () => { if (nombreAuto) $('tNombre').value = 'Bono ' + ($('tSes').value || '') + ' sesiones'; tipoHint(); });
+$('tPrecio').addEventListener('input', tipoHint);
+$('tNombre').addEventListener('input', () => { nombreAuto = false; });
+$('tClose').addEventListener('click', () => $('dTipo').close());
+$('fTipo').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const nombre = $('tNombre').value.trim(), sesiones = Math.round(Number($('tSes').value)), precio = Number($('tPrecio').value);
+  if (!nombre || !(sesiones >= 1 && sesiones <= 100) || $('tPrecio').value === '' || !(precio >= 0)){ toast('Revisa el nombre, las sesiones y el precio'); return; }
+  try {
+    const saved = await store.saveTipo({ id: editingTipo ? editingTipo.id : undefined, nombre, sesiones, precio,
+      caduca_meses: $('tCad').value ? Number($('tCad').value) : null, activo: editingTipo ? $('tActivo').checked : true });
+    if (editingTipo) Object.assign(editingTipo, saved); else S.tipos.push(saved);
+    $('dTipo').close(); renderAjustes(); toast('Tipo de bono guardado');
+  } catch(e){ fail(e); }
+});
+$('tDel').addEventListener('click', async () => {
+  const t = editingTipo; if (!t) return;
+  const vendidos = S.pagos.filter(g => g.bono_tipo_id === t.id).length;
+  const r = await ask('¿Borrar «' + t.nombre + '»?', (vendidos ? 'Los ' + plural(vendidos, 'bono vendido', 'bonos vendidos') + ' de este tipo no cambian. ' : '') + 'Si solo quieres dejar de venderlo, mejor desmarca «Disponible para vender».', [{ label: 'Borrar', value: 1, cls: 'danger' }]);
+  if (!r) return;
+  try {
+    await store.deleteTipo(t.id);
+    S.tipos = S.tipos.filter(x => x.id !== t.id);
+    S.pagos.forEach(g => { if (g.bono_tipo_id === t.id) g.bono_tipo_id = null; });
+    $('dTipo').close(); renderAjustes(); toast('Tipo de bono borrado');
+  } catch(e){ fail(e); }
+});
+
 async function guardarCfg(){
   if (DEMO){ toast('En la prueba no se guardan los avisos'); return; }
   try { await saveCfg(); toast('Guardado'); } catch(e){ fail(e); }
@@ -1577,7 +1745,7 @@ function hashView(){
 window.addEventListener('hashchange', () => { if (hashView() && !$('app').hidden) render(); });
 async function start(){
   hashView();
-  try { S = await store.load(); if (!S.pagos) S.pagos = []; }
+  try { S = await store.load(); if (!S.pagos) S.pagos = []; if (!S.tipos) S.tipos = []; }
   catch(e){ console.error(e); toast('No se han podido cargar los datos'); }
   try { if (!cfg) await loadCfg(); } catch(e){ console.error(e); }   // textos de los WhatsApp
   $('login').hidden = true; $('app').hidden = false;
