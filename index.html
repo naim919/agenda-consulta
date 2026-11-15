@@ -59,6 +59,15 @@ nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .btn.small{padding:6px 10px;font-size:13px}
 a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
 .f input[readonly]{background:var(--warm);color:var(--accent)}
+/* sesiones de un bono (casillas) */
+.chks{max-height:250px;overflow:auto}
+.chk{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--warm);font-size:14px;cursor:pointer}
+.chks .chk:last-child{border-bottom:none}
+.chk input{width:20px;height:20px;flex:none;accent-color:var(--sage-deep)}
+.chk span{flex:1}
+.chk small{font-size:12px;color:var(--muted);white-space:nowrap}
+.chk.on small{color:var(--sage-deep);font-weight:600}
+.chk.debe small{color:var(--due)}
 /* recordatorios de cita */
 .recbar{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--stone);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
 .recbar b{font-weight:600}
@@ -352,6 +361,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
     <div class="f"><span>Modalidad</span>
       <div class="seg" id="cMod"><button type="button" data-m="presencial">Presencial</button><button type="button" data-m="online">Online</button></div>
     </div>
+    <label class="f" id="cPagoSelWrap" hidden><span>Pago</span><select id="cPagoSel"></select></label>
     <label class="f" id="cRepWrap"><span>Repetir</span>
       <select id="cRep">
         <option value="0">No se repite</option>
@@ -399,6 +409,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
         <button type="button" class="btn small" id="pBono">Vender bono</button>
         <button type="button" class="btn small" id="pTerminar">Terminar terapia</button>
       </div>
+      <div class="btnrow" id="pBonos"></div>
       <div id="pHist"></div>
     </div>
     <div class="acts">
@@ -424,7 +435,15 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <label class="f" id="kSesWrap"><span>Sesiones del bono</span><input type="number" id="kSesiones" min="1" max="100" step="1" inputmode="numeric"></label>
       <label class="f"><span>Importe (€)</span><input type="number" id="kImporte" min="0" step="0.5" inputmode="decimal"></label>
     </div>
-    <label class="f" id="kCadWrap" hidden><span>Caduca el (vacío = no caduca)</span><input type="date" id="kCaduca"></label>
+    <div class="row2" id="kCadRow" hidden>
+      <label class="f"><span>Caducidad (opcional)</span><input type="date" id="kCaduca"></label>
+      <label class="f"><span>Usadas antes de la app</span><input type="number" id="kPrevias" min="0" max="99" step="1" inputmode="numeric" value="0"></label>
+    </div>
+    <div id="kSesBox" hidden>
+      <p class="sec" id="kSesHead" style="margin:4px 2px 6px"></p>
+      <div class="card chks" id="kSesList"></div>
+      <p class="hint" style="margin:6px 0 10px">Marca qué citas paga este bono. Se numeran por fecha.</p>
+    </div>
     <p class="hint" id="kNota" hidden></p>
     <div class="btnrow" id="kExtra" hidden><a class="btn small" id="kJust" target="_blank" rel="noopener">Enviar justificante por WhatsApp</a></div>
     <div class="acts">
@@ -533,7 +552,7 @@ const PALETA = ['#6f9a74','#c07f52','#5f8bb0','#b06f8c','#3f7f6e','#4f9a9a','#8f
 function colorOf(id){ let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETA[h % PALETA.length]; }
 
 /* ---------- almacén de datos ---------- */
-const DEMO_KEY = 'consulta-demo-v5';
+const DEMO_KEY = 'consulta-demo-v6';
 let sb = null;
 if (!DEMO) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
@@ -678,11 +697,15 @@ function groupByDay(){ const m = {}; S.citas.forEach(c => (m[ymd(new Date(c.inic
 /* ---------- pagos y bonos ---------- */
 const pagoById = id => S.pagos.find(g => g.id === id);
 const citasDePago = id => S.citas.filter(c => c.pago_id === id).sort(byStart);
-const bonoQuedan = g => g.bono_sesiones - citasDePago(g.id).length;
+const bonoPrevias = g => Number(g.bono_previas || 0);   // sesiones gastadas antes de usar la app
+const bonoQuedan = g => g.bono_sesiones - bonoPrevias(g) - citasDePago(g.id).length;
 const r2 = n => Math.round(Number(n) * 100) / 100;
 const byPago = (a, b) => (b.fecha + (b.created_at || '')).localeCompare(a.fecha + (a.created_at || ''));
 function bonoDe(c){ const g = c.pago_id ? pagoById(c.pago_id) : null; return g && g.tipo === 'bono' ? g : null; }
+// número de sesión dentro del bono: las usadas antes + su orden por fecha
+function bonoNum(c){ const b = bonoDe(c); return b ? bonoPrevias(b) + citasDePago(b.id).findIndex(x => x.id === c.id) + 1 : 0; }
 const bonoCaducado = g => !!g.caduca_el && g.caduca_el < ymd(new Date());
+const bonoValidoPara = (g, dia) => !g.caduca_el || dia <= g.caduca_el;
 const bonoNombre = g => g.bono_nombre || 'Bono de ' + g.bono_sesiones + ' sesiones';
 // bonos con sesiones por usar; primero el que caduca antes
 function bonosConSaldo(pid){
@@ -692,19 +715,22 @@ function bonosConSaldo(pid){
 const bonosActivos = pid => bonosConSaldo(pid).filter(g => !bonoCaducado(g));   // los que aún se pueden usar
 const tiposVenta = () => S.tipos.filter(t => t.activo).sort((a, b) => a.sesiones - b.sesiones || a.precio - b.precio);
 
-/* Reparte las sesiones sin pagar del paciente entre sus bonos con saldo:
-   primero las más antiguas (lo que ya debía), luego las siguientes de la agenda.
-   Un bono con caducidad solo cubre sesiones hasta ese día. */
-async function syncBonos(pid){
-  let libres = S.citas.filter(c => c.paciente_id === pid && !c.cancelada && !c.pagada && !isFree(c)).sort(byStart);
-  for (const g of bonosConSaldo(pid)){
-    if (!libres.length) break;
-    const take = libres.filter(c => !g.caduca_el || ymd(new Date(c.inicio)) <= g.caduca_el).slice(0, bonoQuedan(g));
-    if (!take.length) continue;
-    libres = libres.filter(c => !take.includes(c));
-    const patch = { pago_id: g.id, pagada: true, pagada_el: g.fecha, metodo_pago: g.metodo_pago, precio: r2(g.importe / g.bono_sesiones) };
-    await store.updateCitas(take.map(c => c.id), patch);
-    take.forEach(c => Object.assign(c, patch));
+/* Meter o sacar citas de un bono. Nada se reparte solo: lo decide Fadia
+   (al vender el bono, en la ventana del bono o en el campo «Pago» de la cita). */
+async function meterEnBono(ids, g){
+  if (!ids.length) return;
+  const patch = { pago_id: g.id, pagada: true, pagada_el: g.fecha, metodo_pago: g.metodo_pago, precio: r2(g.importe / g.bono_sesiones) };
+  await store.updateCitas(ids, patch);
+  S.citas.filter(c => ids.includes(c.id)).forEach(c => Object.assign(c, patch));
+}
+async function sacarDeBono(ids){
+  const porPac = {};
+  S.citas.filter(c => ids.includes(c.id)).forEach(c => (porPac[c.paciente_id] = porPac[c.paciente_id] || []).push(c));
+  for (const [pid, list] of Object.entries(porPac)){
+    const p = pacById(pid);
+    const patch = { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: p ? p.precio : list[0].precio };
+    await store.updateCitas(list.map(c => c.id), patch);
+    list.forEach(c => Object.assign(c, patch));
   }
 }
 
@@ -826,7 +852,7 @@ function chipFor(c, sm){
   if (isFree(c)) return '<span class="chip gratis' + k + '">Gratis</span>';
   if (c.pagada){
     const b = bonoDe(c);
-    if (b) return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Bono ' + (citasDePago(b.id).findIndex(x => x.id === c.id) + 1) + '/' + b.bono_sesiones + '</span>';
+    if (b) return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Bono ' + bonoNum(c) + '/' + b.bono_sesiones + '</span>';
     return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Pagada</span>';
   }
   if (isPast(c)) return '<span class="chip due' + k + '" data-pay="' + c.id + '">' + (c.no_vino ? 'No vino · ' : '') + 'Sin pagar</span>';
@@ -1118,7 +1144,12 @@ function renderPacientes(){
 }
 
 /* ---------- cobrar, ver un pago y vender bonos (la misma ventana) ---------- */
-let kMode = null, kIds = [], kPago = null, kPid = null;
+let kMode = null, kIds = [], kPago = null, kPid = null, kSel = new Set();
+
+function kReset(){
+  ['kTipoWrap', 'kSesWrap', 'kCadRow', 'kSesBox', 'kNota', 'kExtra', 'kQuitar'].forEach(id => $(id).hidden = true);
+  $('kSesiones').readOnly = false; $('kImporte').readOnly = false;
+}
 
 function openCobro(ids){
   const c0 = S.citas.find(c => c.id === ids[0]);
@@ -1130,34 +1161,67 @@ function openCobro(ids){
   if (!list.length) return;
   kMode = 'nuevo'; kIds = list.map(c => c.id); kPago = null; kPid = list[0].paciente_id;
   const p = pacById(kPid), d0 = new Date(list[0].inicio);
+  kReset();
   $('kTitle').textContent = 'Cobrar';
   $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (list.length === 1 ? 'sesión del ' + fmtDay(d0) + ' ' + MESES[d0.getMonth()] : plural(list.length, 'sesión', 'sesiones') + ': ' + fechasDe(list));
   $('kFecha').value = ymd(new Date());
   $('kMetodo').value = (p && p.metodo_pago) || '';
-  $('kSesWrap').hidden = true; $('kTipoWrap').hidden = true; $('kCadWrap').hidden = true;
-  $('kSesiones').readOnly = false; $('kImporte').readOnly = false;
   $('kImporte').value = r2(list.reduce((s, c) => s + Number(c.precio), 0));
-  $('kNota').hidden = true; $('kExtra').hidden = true; $('kQuitar').hidden = true;
+  // si tiene un bono con sesiones libres, se lo recuerda
+  const b = bonosActivos(kPid)[0];
+  if (b){ $('kNota').hidden = false; $('kNota').textContent = 'Tiene un ' + bonoNombre(b).toLowerCase() + ' con ' + plural(bonoQuedan(b), 'sesión libre', 'sesiones libres') + '. Para pagar con él, elige el bono en el campo «Pago» de la cita.'; }
   $('kOk').textContent = 'Cobrar';
   $('dCobro').showModal();
 }
 
+/* --- sesiones de un bono: lista con casillas --- */
+function candidatasBono(){
+  const g = kMode === 'ver' ? kPago : null, cad = $('kCaduca').value || null;
+  return S.citas.filter(c => c.paciente_id === kPid && !c.cancelada && !isFree(c) &&
+    (g ? (c.pago_id === g.id || !c.pagada) : !c.pagada) && (!cad || ymd(new Date(c.inicio)) <= cad)).sort(byStart);
+}
+const kCap = () => Math.max(0, (Math.round(Number($('kSesiones').value)) || 0) - (Math.round(Number($('kPrevias').value)) || 0));
+function paintSesList(){
+  const cand = candidatasBono(), cap = kCap(), prev = Math.round(Number($('kPrevias').value)) || 0;
+  // solo quedan marcadas las que siguen siendo posibles, y nunca más de las que caben
+  kSel = new Set(cand.filter(c => kSel.has(c.id)).map(c => c.id).slice(0, cap));
+  let n = prev;
+  $('kSesHead').textContent = 'Sesiones del bono · ' + (prev + kSel.size) + ' de ' + ($('kSesiones').value || 0) + (prev ? ' (' + prev + ' antes de la app)' : '');
+  $('kSesList').innerHTML = cand.length ? cand.map(c => {
+    const on = kSel.has(c.id), d = new Date(c.inicio);
+    const tag = on ? 'sesión ' + (++n) + '.ª' : (isPast(c) ? 'debe' : '');
+    return '<label class="chk' + (on ? ' on' : (isPast(c) ? ' debe' : '')) + '"><input type="checkbox" data-sc="' + c.id + '"' + (on ? ' checked' : '') + '>' +
+      '<span>' + fmtDay(d) + ' ' + MESES[d.getMonth()] + ' · ' + hm(d) + '</span><small>' + tag + '</small></label>';
+  }).join('') : '<div class="empty" style="padding:14px">No tiene citas sin pagar' + ($('kCaduca').value ? ' antes de la caducidad' : '') + '. Podrás añadirlas después.</div>';
+}
+$('kSesList').addEventListener('change', e => {
+  const cb = e.target.closest('[data-sc]'); if (!cb) return;
+  if (cb.checked){
+    if (kSel.size >= kCap()){ cb.checked = false; toast('El bono ya tiene todas sus sesiones'); return; }
+    kSel.add(cb.dataset.sc);
+  } else kSel.delete(cb.dataset.sc);
+  paintSesList();
+});
+['kSesiones', 'kPrevias', 'kCaduca'].forEach(id => $(id).addEventListener('input', () => { if (kMode === 'bono' || (kMode === 'ver' && kPago && kPago.tipo === 'bono')) paintSesList(); }));
+
 function openBono(pid){
   const p = pacById(pid); if (!p) return;
   kMode = 'bono'; kIds = []; kPago = null; kPid = pid;
-  const libres = S.citas.filter(c => c.paciente_id === pid && !c.cancelada && !c.pagada && !isFree(c) && isPast(c)).length;
+  kReset();
   $('kTitle').textContent = 'Vender bono';
   $('kInfo').textContent = p.alias + ' · ' + eur(p.precio) + ' por sesión suelta';
   $('kFecha').value = ymd(new Date());
   $('kMetodo').value = p.metodo_pago || '';
   const tipos = tiposVenta();
   $('kTipo').innerHTML = tipos.map(t => '<option value="' + t.id + '">' + esc(t.nombre) + ' · ' + eur(t.precio) + '</option>').join('') + '<option value="">Otro (a medida)</option>';
-  $('kTipoWrap').hidden = false; $('kSesWrap').hidden = false; $('kCadWrap').hidden = false;
   $('kTipo').value = tipos.length ? tipos[0].id : '';
+  ['kTipoWrap', 'kSesWrap', 'kCadRow', 'kSesBox'].forEach(id => $(id).hidden = false);
+  $('kPrevias').value = 0; $('kSesiones').value = '';
   aplicarTipo();
-  $('kNota').hidden = false;
-  $('kNota').textContent = (tipos.length ? '' : 'Puedes crear tus tipos de bono en Ajustes. ') + 'Cubre primero ' + (libres === 1 ? 'la sesión que debe y luego ' : libres > 1 ? 'las ' + libres + ' sesiones que debe y luego ' : '') + 'sus próximas citas, por orden. «No vino» gasta sesión; «Cancelada», no.';
-  $('kExtra').hidden = true; $('kQuitar').hidden = true;
+  // por defecto: lo que debe y las siguientes, hasta llenar el bono
+  kSel = new Set(candidatasBono().slice(0, kCap()).map(c => c.id));
+  paintSesList();
+  if (!tipos.length){ $('kNota').hidden = false; $('kNota').textContent = 'Puedes crear tus tipos de bono en Ajustes.'; }
   $('kOk').textContent = 'Vender bono';
   $('dCobro').showModal();
 }
@@ -1174,8 +1238,9 @@ function aplicarTipo(){
     $('kImporte').value = r2((Number($('kSesiones').value) || 0) * (p ? p.precio : 0));
     $('kCaduca').value = '';
   }
+  if (!$('kSesBox').hidden) paintSesList();
 }
-$('kTipo').addEventListener('change', aplicarTipo);
+$('kTipo').addEventListener('change', () => { aplicarTipo(); kSel = new Set(candidatasBono().slice(0, kCap()).map(c => c.id)); paintSesList(); });
 $('kFecha').addEventListener('change', () => { if (kMode === 'bono' && $('kTipo').value) aplicarTipo(); });
 $('kSesiones').addEventListener('input', () => {
   if (kMode !== 'bono' || $('kTipo').value) return;
@@ -1188,17 +1253,20 @@ function openPago(id){
   kMode = 'ver'; kPago = g; kPid = g.paciente_id;
   const p = pacById(g.paciente_id), cs = citasDePago(id), bono = g.tipo === 'bono';
   kIds = cs.map(c => c.id);
+  kReset();
   $('kTitle').textContent = bono ? bonoNombre(g) : 'Pago';
   $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (bono
-    ? 'usadas ' + cs.length + ' de ' + g.bono_sesiones + (cs.length ? ': ' + fechasDe(cs) : '') + (bonoCaducado(g) ? ' · caducado' : '')
+    ? 'vendido el ' + fmtShort(new Date(g.fecha + 'T12:00')) + (bonoCaducado(g) ? ' · caducado' : '')
     : (cs.length ? plural(cs.length, 'sesión', 'sesiones') + ': ' + fechasDe(cs) : 'sin sesiones'));
   $('kFecha').value = g.fecha;
   $('kMetodo').value = g.metodo_pago || '';
-  $('kTipoWrap').hidden = true; $('kCadWrap').hidden = !bono; $('kCaduca').value = g.caduca_el || '';
-  $('kSesiones').readOnly = false; $('kImporte').readOnly = false;
-  $('kSesWrap').hidden = !bono; $('kSesiones').value = g.bono_sesiones || '';
   $('kImporte').value = g.importe;
-  $('kNota').hidden = true;
+  if (bono){
+    ['kSesWrap', 'kCadRow', 'kSesBox'].forEach(x => $(x).hidden = false);
+    $('kSesiones').value = g.bono_sesiones; $('kCaduca').value = g.caduca_el || ''; $('kPrevias').value = bonoPrevias(g);
+    kSel = new Set(kIds);
+    paintSesList();
+  }
   $('kJust').href = waLink(p && p.telefono || '', msgJustificante(g));
   $('kExtra').hidden = false;
   $('kQuitar').hidden = false; $('kQuitar').textContent = bono ? 'Anular bono' : 'Anular pago';
@@ -1218,7 +1286,14 @@ $('fCobro').addEventListener('submit', async ev => {
   if (!fecha){ $('kFecha').focus(); toast('Falta la fecha de pago'); return; }
   if (!metodo){ $('kMetodo').focus(); toast('Elige la forma de pago'); return; }
   if ($('kImporte').value === '' || !(importe >= 0)){ $('kImporte').focus(); toast('Falta el importe'); return; }
-  const n = Math.round(Number($('kSesiones').value));
+  const n = Math.round(Number($('kSesiones').value)), prev = Math.round(Number($('kPrevias').value)) || 0;
+  const esBono = kMode === 'bono' || (kMode === 'ver' && kPago.tipo === 'bono');
+  if (esBono){
+    if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
+    if (prev < 0 || prev >= n + 1 || prev + kSel.size > n){ $('kPrevias').focus(); toast('No caben: ' + n + ' sesiones en total'); return; }
+    const cad = $('kCaduca').value || null;
+    if (cad && cad < fecha){ $('kCaduca').focus(); toast('La caducidad es anterior a la venta'); return; }
+  }
   try {
     if (kMode === 'nuevo'){
       const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'sesiones' });
@@ -1230,45 +1305,30 @@ $('fCobro').addEventListener('submit', async ev => {
       $('dCobro').close(); render();
       toast('Cobrado ' + eur(importe) + ' · ' + METODOS[metodo], { label: 'Deshacer', fn: () => anularPago(g.id, true) });
     } else if (kMode === 'bono'){
-      if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
       const t = S.tipos.find(x => x.id === $('kTipo').value);
-      const caduca = $('kCaduca').value || null;
-      if (caduca && caduca < fecha){ $('kCaduca').focus(); toast('La caducidad es anterior a la venta'); return; }
-      const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'bono', bono_sesiones: n,
-        bono_tipo_id: t ? t.id : null, bono_nombre: t ? t.nombre : 'Bono de ' + n + ' sesiones', caduca_el: caduca });
+      const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'bono', bono_sesiones: n, bono_previas: prev,
+        bono_tipo_id: t ? t.id : null, bono_nombre: t ? t.nombre : 'Bono de ' + n + ' sesiones', caduca_el: $('kCaduca').value || null });
       S.pagos.push(g);
-      await syncBonos(kPid);
+      await meterEnBono([...kSel], g);
       await recordarMetodo(kPid, metodo);
       $('dCobro').close(); render();
-      toast('Bono de ' + n + ' sesiones · ' + eur(importe), { label: 'Deshacer', fn: () => anularPago(g.id, true) });
+      toast(bonoNombre(g) + ' · ' + eur(importe), { label: 'Deshacer', fn: () => anularPago(g.id, true) });
     } else if (kMode === 'ver'){
       const g = kPago, bono = g.tipo === 'bono';
       const patch = { fecha, importe, metodo_pago: metodo };
-      if (bono){
-        const usadas = citasDePago(g.id).length;
-        if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
-        if (n < usadas){ $('kSesiones').focus(); toast('Ya se han usado ' + usadas + ' sesiones'); return; }
-        patch.bono_sesiones = n;
-        patch.caduca_el = $('kCaduca').value || null;
-      }
+      if (bono) Object.assign(patch, { bono_sesiones: n, bono_previas: prev, caduca_el: $('kCaduca').value || null });
       Object.assign(g, await store.updatePago(g.id, patch));
-      // si se adelanta la caducidad, las sesiones que quedan fuera salen del bono
-      if (bono && g.caduca_el){
-        const fuera = citasDePago(g.id).filter(c => ymd(new Date(c.inicio)) > g.caduca_el);
-        if (fuera.length){
-          const pac = pacById(g.paciente_id);
-          const fp = { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: pac ? pac.precio : fuera[0].precio };
-          await store.updateCitas(fuera.map(c => c.id), fp); fuera.forEach(c => Object.assign(c, fp));
+      if (bono){
+        const antes = citasDePago(g.id).map(c => c.id);
+        await sacarDeBono(antes.filter(id => !kSel.has(id)));
+        await meterEnBono([...kSel], g);          // también actualiza fecha, forma de pago y precio por sesión
+      } else {
+        const cs = citasDePago(g.id);
+        if (cs.length){
+          const cp = { pagada_el: fecha, metodo_pago: metodo };
+          await store.updateCitas(cs.map(c => c.id), cp); cs.forEach(c => Object.assign(c, cp));
         }
       }
-      const cs = citasDePago(g.id);
-      if (cs.length){
-        const cp = { pagada_el: fecha, metodo_pago: metodo };
-        if (bono) cp.precio = r2(importe / g.bono_sesiones);
-        await store.updateCitas(cs.map(c => c.id), cp);
-        cs.forEach(c => Object.assign(c, cp));
-      }
-      if (bono) await syncBonos(g.paciente_id);
       $('dCobro').close(); render(); toast('Guardado');
     }
   } catch(e){ fail(e); }
@@ -1290,7 +1350,6 @@ async function anularPago(id, sinPreguntar){
       Object.assign(c, { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: g.tipo === 'bono' && p ? p.precio : c.precio });
     });
     S.pagos = S.pagos.filter(x => x.id !== id);
-    await syncBonos(g.paciente_id);
     if ($('dCobro').open) $('dCobro').close();
     render(); toast(sinPreguntar ? 'Deshecho' : 'Anulado');
   } catch(e){ fail(e); }
@@ -1317,7 +1376,43 @@ function setTipo(t, aplicar){
     if (prim){ $('cDur').value = '15'; $('cPrecio').value = '0'; $('cRep').value = '0'; }
     else { $('cDur').value = '60'; const p = pacById($('cPac').value); $('cPrecio').value = p ? p.precio : ($('cNewPrecio').value || ''); }
   }
+  paintPagoSel();
 }
+
+/* Campo «Pago» de la cita: sesión suelta o uno de los bonos del paciente, diciendo qué sesión será.
+   Se ve si el paciente tiene algún bono que sirva para ese día. */
+function bonosParaCita(pid, dia, citaId){
+  return S.pagos.filter(g => g.tipo === 'bono' && g.paciente_id === pid && bonoValidoPara(g, dia) &&
+    (bonoQuedan(g) > 0 || (citaId && citasDePago(g.id).some(c => c.id === citaId))))
+    .sort((a, b) => (a.caduca_el || '9999').localeCompare(b.caduca_el || '9999') || byPago(b, a));
+}
+function paintPagoSel(){
+  const wrap = $('cPagoSelWrap'), sel = $('cPagoSel'), pid = $('cPac').value, c = editing;
+  const antes = sel.value;
+  // primera sesión, paciente nuevo o ya pagada aparte: aquí no se elige
+  if (tipo === 'primera' || !pid || pid === '__new' || (c && c.pagada && !bonoDe(c))){ wrap.hidden = true; sel.innerHTML = ''; $('cPrecio').readOnly = false; return; }
+  const dia = $('cFecha').value || ymd(new Date());
+  const bonos = bonosParaCita(pid, dia, c && c.id);
+  if (!bonos.length){ wrap.hidden = true; sel.innerHTML = ''; $('cPrecio').readOnly = false; return; }
+  const p = pacById(pid);
+  sel.innerHTML = '<option value="suelta">Sesión suelta · ' + eur(p ? p.precio : 0) + '</option>' + bonos.map(g => {
+    const dentro = c && c.pago_id === g.id;
+    const num = dentro ? bonoNum(c) : bonoPrevias(g) + citasDePago(g.id).filter(x => ymd(new Date(x.inicio)) <= dia).length + 1;
+    return '<option value="' + g.id + '">' + esc(bonoNombre(g)) + ' · ' + (dentro ? 'es' : 'será') + ' la ' + num + '.ª de ' + g.bono_sesiones + '</option>';
+  }).join('');
+  wrap.hidden = false;
+  if (c && bonoDe(c)) sel.value = c.pago_id;                              // ya está en un bono
+  else if (antes && [...sel.options].some(o => o.value === antes)) sel.value = antes;
+  else sel.value = c ? 'suelta' : bonos[0].id;                           // cita nueva: el bono, por defecto
+  aplicarPagoSel();
+}
+function aplicarPagoSel(){
+  const g = pagoById($('cPagoSel').value), p = pacById($('cPac').value);
+  if (g){ $('cPrecio').value = r2(g.importe / g.bono_sesiones); $('cPrecio').readOnly = true; }
+  else { if ($('cPrecio').readOnly && p) $('cPrecio').value = p.precio; $('cPrecio').readOnly = false; }
+}
+$('cPagoSel').addEventListener('change', aplicarPagoSel);
+$('cFecha').addEventListener('change', paintPagoSel);
 
 function fillPacSelect(selected){
   const opts = S.pacientes.filter(p => p.activo || p.id === selected).sort((a, b) => a.alias.localeCompare(b.alias, 'es'))
@@ -1339,7 +1434,7 @@ function paintPagoInfo(){
   box.hidden = false;
   box.className = 'pagoinfo ' + (c.pagada ? 'paid' : isPast(c) ? 'due' : '');
   $('cPagoTxt').textContent = !c.pagada ? 'Sin pagar · ' + eur(c.precio)
-    : b ? 'Bono · sesión ' + (citasDePago(b.id).findIndex(x => x.id === c.id) + 1) + ' de ' + b.bono_sesiones
+    : b ? 'Bono · sesión ' + bonoNum(c) + ' de ' + b.bono_sesiones
     : 'Pagada' + (g ? ' el ' + fmtShort(new Date(g.fecha + 'T12:00')) : '') + (c.metodo_pago ? ' · ' + METODOS[c.metodo_pago] : '');
   $('cPagoBtn').textContent = !c.pagada ? 'Cobrar' : b ? 'Ver bono' : 'Ver pago';
 }
@@ -1372,12 +1467,14 @@ function openCita(id, day, time, pacId){
     $('cDur').value = '60';
     const p = pacId ? pacById(pacId) : null;
     $('cPrecio').value = p ? p.precio : '';
-    setModo('presencial'); $('cRep').value = '0';
+    setModo('online'); $('cRep').value = '0';   // online por defecto: es lo más habitual
     setEstado('normal');
     $('cRepWrap').hidden = false; $('cEstadoWrap').hidden = true; $('cDel').hidden = true; $('cSerieNote').hidden = true;
     setTipo('sesion', false);
   }
   $('cNewPac').hidden = true; $('cNewAlias').value = ''; $('cNewPrecio').value = ''; $('cNewTel').value = '';
+  $('cPagoSel').innerHTML = '';
+  paintPagoSel();
   paintPagoInfo();
   paintTel();
   $('dCita').showModal();
@@ -1389,7 +1486,9 @@ $('cPac').addEventListener('change', () => {
   paintTel();
   if (v === '__new'){ $('cNewAlias').focus(); return; }
   const p = pacById(v);
-  if (p && !editing && tipo !== 'primera') $('cPrecio').value = p.precio;
+  if (p && !editing && tipo !== 'primera'){ $('cPrecio').readOnly = false; $('cPrecio').value = p.precio; }
+  $('cPagoSel').innerHTML = '';
+  paintPagoSel();
 });
 $('cNewPrecio').addEventListener('input', () => { if (tipo !== 'primera') $('cPrecio').value = $('cNewPrecio').value; });
 document.querySelectorAll('#cTipo button').forEach(b => b.addEventListener('click', () => setTipo(b.dataset.t, true)));
@@ -1406,9 +1505,7 @@ $('cDel').addEventListener('click', async () => {
   if (!r) return;
   const ids = [editing.id].concat(r === 'all' ? later.map(c => c.id) : []);
   try {
-    const pid = editing.paciente_id;
-    await store.deleteCitas(ids); S.citas = S.citas.filter(c => !ids.includes(c.id));
-    await syncBonos(pid);   // el hueco que deja en un bono pasa a la siguiente cita
+    await store.deleteCitas(ids); S.citas = S.citas.filter(c => !ids.includes(c.id));   // si estaba en un bono, su hueco queda libre
     $('dCita').close(); render(); toast(ids.length === 1 ? 'Cita borrada' : ids.length + ' citas borradas');
   } catch(e){ fail(e); }
 });
@@ -1435,6 +1532,9 @@ $('fCita').addEventListener('submit', async ev => {
 
   const cancelada = estado === 'cancelada', no_vino = estado === 'novino';
   if (pid === '__new' && $('cNewPrecio').value === ''){ $('cNewPrecio').focus(); toast('Pon su precio habitual por sesión'); return; }
+  // lo elegido en «Pago»: un bono, o nada (sesión suelta)
+  const selBono = !$('cPagoSelWrap').hidden ? pagoById($('cPagoSel').value) : null;
+  let aviso = '';
 
   try {
     if (pid === '__new'){
@@ -1462,19 +1562,30 @@ $('fCita').addEventListener('submit', async ev => {
         Object.assign(patch, { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: precio === 0 ? 0 : (pacById(pid) || {}).precio ?? precio });
       await store.updateCitas([editing.id], patch);
       Object.assign(editing, patch);
+      // cambio en «Pago»: pasar a un bono, cambiar de bono o volver a sesión suelta
+      if (!cancelada && precio !== 0){
+        const cur = bonoDe(editing);
+        if (selBono && (!cur || cur.id !== selBono.id)){
+          if (cur) await sacarDeBono([editing.id]);
+          if (bonoQuedan(selBono) > 0 && bonoValidoPara(selBono, ymd(start))) await meterEnBono([editing.id], selBono);
+          else aviso = ' · ese bono ya no tiene sesiones libres';
+        } else if (!selBono && cur && !$('cPagoSelWrap').hidden) await sacarDeBono([editing.id]);
+      }
       if (scope === 'all'){
         const dayDelta = Math.round((startOfDay(start) - startOfDay(oldStart)) / 864e5);
         for (const c of later){
           const nd = addDays(new Date(c.inicio), dayDelta); nd.setHours(start.getHours(), start.getMinutes(), 0, 0);
           const p = Object.assign({}, base, { inicio: nd.toISOString() });
+          if (bonoDe(c) || selBono) delete p.precio;   // el precio de las sesiones de bono no se toca
           await store.updateCitas([c.id], p); Object.assign(c, p);
         }
       }
-      if (oldPid !== pid) await syncBonos(oldPid);
-      toast(scope === 'all' ? plural(later.length + 1, 'cita cambiada', 'citas cambiadas') : 'Cita guardada');
+      toast((scope === 'all' ? plural(later.length + 1, 'cita cambiada', 'citas cambiadas') : 'Cita guardada') + aviso);
     } else {
       const [step, times] = $('cRep').value === '0' ? [0, 1] : $('cRep').value.split(':').map(Number);
       const serie = times > 1 ? uid() : null;
+      const pac = pacById(pid);
+      if (selBono && pac) base.precio = pac.precio;   // las que no quepan en el bono, a su precio normal
       const rows = [];
       for (let i = 0; i < times; i++){
         const d = addDays(start, step * i); d.setHours(start.getHours(), start.getMinutes(), 0, 0);
@@ -1482,9 +1593,14 @@ $('fCita').addEventListener('submit', async ev => {
       }
       const saved = await store.insertCitas(rows);
       S.citas.push(...saved);
-      toast(saved.length === 1 ? 'Cita creada' : saved.length + ' citas creadas');
+      let cubiertas = 0;
+      if (selBono){
+        const ids = saved.filter(c => bonoValidoPara(selBono, ymd(new Date(c.inicio)))).sort(byStart).slice(0, Math.max(0, bonoQuedan(selBono))).map(c => c.id);
+        await meterEnBono(ids, selBono); cubiertas = ids.length;
+      }
+      toast((saved.length === 1 ? 'Cita creada' : saved.length + ' citas creadas') +
+        (selBono ? (saved.length === 1 ? (cubiertas ? ' · con el bono' : ' · el bono ya no tiene sesiones libres') : ' · ' + cubiertas + ' con el bono') : ''));
     }
-    await syncBonos(pid);   // si tiene bono con saldo, las cubre
     $('dCita').close();
     cursor = startOfDay(start);
     render();
@@ -1519,6 +1635,10 @@ function renderPacHist(){
   $('pResumen').textContent = plural(hechas.length, 'sesión hecha', 'sesiones hechas') + ' · pagado ' + eur(pagado) + (debe ? ' · debe ' + eur(debe) : ' · nada pendiente') +
     (bonos.length ? ' · bono: ' + plural(quedan, 'sesión', 'sesiones') + ' por usar' : '');
   $('pTerminar').hidden = !p.activo;
+  // sus bonos con sesiones por usar: se abren para ver y cambiar qué sesiones cubren
+  const misBonos = S.pagos.filter(g => g.tipo === 'bono' && g.paciente_id === p.id && bonoQuedan(g) > 0 && !bonoCaducado(g)).sort(byPago);
+  $('pBonos').innerHTML = misBonos.map(g => '<button type="button" class="btn small" data-pago="' + g.id + '">' + esc(bonoNombre(g)) + ' · quedan ' + bonoQuedan(g) + ' ›</button>').join('');
+  $('pBonos').hidden = !misBonos.length;
   const pasadas = mine.filter(c => isPast(c)).reverse();
   let h = '';
   if (futuras.length) h += '<p class="sec" style="margin-top:4px">Próximas · ' + futuras.length + '</p><div class="card hist">' + futuras.slice(0, 4).map(c => citaRow(c, true)).join('') + '</div>';
