@@ -68,6 +68,9 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--in
 .chk small{font-size:12px;color:var(--muted);white-space:nowrap}
 .chk.on small{color:var(--sage-deep);font-weight:600}
 .chk.debe small{color:var(--due)}
+.chk.nueva{background:#fffaf0}
+.pasadas{background:#fff;border:1px dashed var(--stone);border-radius:12px;padding:10px 12px 12px;margin-bottom:12px}
+.pasadas .f{margin-bottom:8px}
 /* recordatorios de cita */
 .recbar{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--stone);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
 .recbar b{font-weight:600}
@@ -437,12 +440,20 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
     </div>
     <div class="row2" id="kCadRow" hidden>
       <label class="f"><span>Caducidad (opcional)</span><input type="date" id="kCaduca"></label>
-      <label class="f"><span>Usadas antes de la app</span><input type="number" id="kPrevias" min="0" max="99" step="1" inputmode="numeric" value="0"></label>
+      <label class="f" id="kPrevWrap" hidden><span>Usadas sin fecha</span><input type="number" id="kPrevias" min="0" max="99" step="1" inputmode="numeric" value="0"></label>
     </div>
     <div id="kSesBox" hidden>
       <p class="sec" id="kSesHead" style="margin:4px 2px 6px"></p>
       <div class="card chks" id="kSesList"></div>
       <p class="hint" style="margin:6px 0 10px">Marca qué citas paga este bono. Se numeran por fecha.</p>
+      <div class="pasadas">
+        <p class="hint" style="margin:0 0 6px">¿Ya hizo sesiones de este bono antes de usar la app? Añádelas con su fecha:</p>
+        <div class="row2">
+          <label class="f"><span>Fecha</span><input type="date" id="kPasFecha"></label>
+          <label class="f"><span>Hora</span><input type="time" id="kPasHora" step="300" value="10:00"></label>
+        </div>
+        <button type="button" class="btn small" id="kPasAdd">+ Añadir sesión pasada</button>
+      </div>
     </div>
     <p class="hint" id="kNota" hidden></p>
     <div class="btnrow" id="kExtra" hidden><a class="btn small" id="kJust" target="_blank" rel="noopener">Enviar justificante por WhatsApp</a></div>
@@ -1145,10 +1156,13 @@ function renderPacientes(){
 
 /* ---------- cobrar, ver un pago y vender bonos (la misma ventana) ---------- */
 let kMode = null, kIds = [], kPago = null, kPid = null, kSel = new Set();
+let kPend = [];   // sesiones pasadas que se añadirán al guardar: { tmp, inicio }
 
 function kReset(){
-  ['kTipoWrap', 'kSesWrap', 'kCadRow', 'kSesBox', 'kNota', 'kExtra', 'kQuitar'].forEach(id => $(id).hidden = true);
+  $('kNota').dataset.fija = '';
+  ['kTipoWrap', 'kSesWrap', 'kCadRow', 'kSesBox', 'kNota', 'kExtra', 'kQuitar', 'kPrevWrap'].forEach(id => $(id).hidden = true);
   $('kSesiones').readOnly = false; $('kImporte').readOnly = false;
+  kPend = []; $('kPasFecha').value = '';
 }
 
 function openCobro(ids){
@@ -1184,26 +1198,71 @@ const kCap = () => Math.max(0, (Math.round(Number($('kSesiones').value)) || 0) -
 function paintSesList(){
   const cand = candidatasBono(), cap = kCap(), prev = Math.round(Number($('kPrevias').value)) || 0;
   // solo quedan marcadas las que siguen siendo posibles, y nunca más de las que caben
-  kSel = new Set(cand.filter(c => kSel.has(c.id)).map(c => c.id).slice(0, cap));
+  kSel = new Set(cand.filter(c => kSel.has(c.id)).map(c => c.id).slice(0, Math.max(0, cap - kPend.length)));
+  // citas que ya existen + sesiones pasadas por añadir, todo junto y por fecha
+  const items = cand.map(c => ({ id: c.id, d: new Date(c.inicio), on: kSel.has(c.id), debe: isPast(c) }))
+    .concat(kPend.map(x => ({ id: x.tmp, d: new Date(x.inicio), on: true, nueva: true })))
+    .sort((a, b) => a.d - b.d);
   let n = prev;
-  $('kSesHead').textContent = 'Sesiones del bono · ' + (prev + kSel.size) + ' de ' + ($('kSesiones').value || 0) + (prev ? ' (' + prev + ' antes de la app)' : '');
-  $('kSesList').innerHTML = cand.length ? cand.map(c => {
-    const on = kSel.has(c.id), d = new Date(c.inicio);
-    const tag = on ? 'sesión ' + (++n) + '.ª' : (isPast(c) ? 'debe' : '');
-    return '<label class="chk' + (on ? ' on' : (isPast(c) ? ' debe' : '')) + '"><input type="checkbox" data-sc="' + c.id + '"' + (on ? ' checked' : '') + '>' +
-      '<span>' + fmtDay(d) + ' ' + MESES[d.getMonth()] + ' · ' + hm(d) + '</span><small>' + tag + '</small></label>';
-  }).join('') : '<div class="empty" style="padding:14px">No tiene citas sin pagar' + ($('kCaduca').value ? ' antes de la caducidad' : '') + '. Podrás añadirlas después.</div>';
+  $('kSesHead').textContent = 'Sesiones del bono · ' + (prev + kSel.size + kPend.length) + ' de ' + ($('kSesiones').value || 0) + (prev ? ' (' + prev + ' sin fecha)' : '');
+  $('kSesList').innerHTML = items.length ? items.map(it => {
+    const tag = it.on ? 'sesión ' + (++n) + '.ª' + (it.nueva ? ' · se añade' : '') : (it.debe ? 'debe' : '');
+    return '<label class="chk' + (it.nueva ? ' on nueva' : it.on ? ' on' : (it.debe ? ' debe' : '')) + '"><input type="checkbox" ' + (it.nueva ? 'data-pend' : 'data-sc') + '="' + it.id + '"' + (it.on ? ' checked' : '') + '>' +
+      '<span>' + fmtDay(it.d) + ' ' + MESES[it.d.getMonth()] + ' · ' + hm(it.d) + '</span><small>' + tag + '</small></label>';
+  }).join('') : '<div class="empty" style="padding:14px">No tiene citas sin pagar' + ($('kCaduca').value ? ' antes de la caducidad' : '') + '. Puedes añadir sesiones pasadas abajo, o asignar citas más adelante.</div>';
+  // si hay sesiones del bono anteriores a la fecha de pago, lo normal es que lo comprara antes
+  if (kMode === 'bono'){
+    const primera = items.filter(it => it.on).map(it => ymd(it.d)).sort()[0];
+    const avisar = primera && $('kFecha').value && primera < $('kFecha').value;
+    $('kNota').hidden = !avisar && !$('kNota').dataset.fija;
+    if (avisar) $('kNota').textContent = 'Hay sesiones del bono anteriores a la fecha de pago. Si lo compró antes, pon la fecha en que lo pagó: así el cobro cuenta en su mes y la caducidad se calcula bien.';
+    else if ($('kNota').dataset.fija) $('kNota').textContent = $('kNota').dataset.fija;
+  }
 }
+$('kFecha').addEventListener('change', () => { if (kMode === 'bono') paintSesList(); });
 $('kSesList').addEventListener('change', e => {
+  const pend = e.target.closest('[data-pend]');
+  if (pend){ kPend = kPend.filter(x => x.tmp !== pend.dataset.pend); paintSesList(); return; }   // desmarcar = quitarla
   const cb = e.target.closest('[data-sc]'); if (!cb) return;
   if (cb.checked){
-    if (kSel.size >= kCap()){ cb.checked = false; toast('El bono ya tiene todas sus sesiones'); return; }
+    if (kSel.size + kPend.length >= kCap()){ cb.checked = false; toast('El bono ya tiene todas sus sesiones'); return; }
     kSel.add(cb.dataset.sc);
   } else kSel.delete(cb.dataset.sc);
   paintSesList();
 });
+// sesión hecha antes de usar la app: se apunta y se crea como cita al guardar
+$('kPasAdd').addEventListener('click', () => {
+  const f = $('kPasFecha').value, h = $('kPasHora').value || '10:00';
+  if (!f){ $('kPasFecha').focus(); toast('Elige la fecha de la sesión'); return; }
+  if (f > ymd(new Date())){ toast('Tiene que ser una sesión ya hecha'); return; }
+  const cad = $('kCaduca').value;
+  if (cad && f > cad){ toast('Esa fecha es posterior a la caducidad'); return; }
+  if (S.citas.some(c => c.paciente_id === kPid && !c.cancelada && ymd(new Date(c.inicio)) === f) || kPend.some(x => ymd(new Date(x.inicio)) === f)){
+    toast('Ya hay una cita ese día: márcala en la lista'); return;
+  }
+  if (kSel.size + kPend.length >= kCap()){ toast('El bono ya tiene todas sus sesiones'); return; }
+  kPend.push({ tmp: 'p' + Date.now(), inicio: fromLocal(f, h).toISOString() });
+  $('kPasFecha').value = '';
+  paintSesList();
+});
+// crea como citas las sesiones pasadas apuntadas (hechas, online y de 60 min, como lo habitual)
+async function crearPasadas(){
+  if (!kPend.length) return [];
+  const p = pacById(kPid);
+  const rows = kPend.map(x => ({ paciente_id: kPid, inicio: x.inicio, duracion_min: 60, modalidad: 'online', precio: p ? p.precio : 0, tipo: 'sesion',
+    pagada: false, pagada_el: null, metodo_pago: null, serie_id: null }));
+  const saved = await store.insertCitas(rows);
+  S.citas.push(...saved);
+  kPend = [];
+  return saved.map(c => c.id);
+}
 ['kSesiones', 'kPrevias', 'kCaduca'].forEach(id => $(id).addEventListener('input', () => { if (kMode === 'bono' || (kMode === 'ver' && kPago && kPago.tipo === 'bono')) paintSesList(); }));
 
+// la hora a la que suele venir (la de su última cita); si no hay, las 10:00
+function horaHabitual(pid){
+  const l = S.citas.filter(c => c.paciente_id === pid && !c.cancelada).sort(byStart);
+  return l.length ? hm(new Date(l[l.length - 1].inicio)) : '10:00';
+}
 function openBono(pid){
   const p = pacById(pid); if (!p) return;
   kMode = 'bono'; kIds = []; kPago = null; kPid = pid;
@@ -1217,11 +1276,13 @@ function openBono(pid){
   $('kTipo').value = tipos.length ? tipos[0].id : '';
   ['kTipoWrap', 'kSesWrap', 'kCadRow', 'kSesBox'].forEach(id => $(id).hidden = false);
   $('kPrevias').value = 0; $('kSesiones').value = '';
+  $('kPasHora').value = horaHabitual(pid);
   aplicarTipo();
   // por defecto: lo que debe y las siguientes, hasta llenar el bono
   kSel = new Set(candidatasBono().slice(0, kCap()).map(c => c.id));
   paintSesList();
-  if (!tipos.length){ $('kNota').hidden = false; $('kNota').textContent = 'Puedes crear tus tipos de bono en Ajustes.'; }
+  $('kNota').dataset.fija = tipos.length ? '' : 'Puedes crear tus tipos de bono en Ajustes.';
+  paintSesList();
   $('kOk').textContent = 'Vender bono';
   $('dCobro').showModal();
 }
@@ -1265,6 +1326,8 @@ function openPago(id){
     ['kSesWrap', 'kCadRow', 'kSesBox'].forEach(x => $(x).hidden = false);
     $('kSesiones').value = g.bono_sesiones; $('kCaduca').value = g.caduca_el || ''; $('kPrevias').value = bonoPrevias(g);
     kSel = new Set(kIds);
+    $('kPrevWrap').hidden = !(bonoPrevias(g) > 0);   // solo bonos antiguos guardados con un número
+    $('kPasHora').value = horaHabitual(g.paciente_id);
     paintSesList();
   }
   $('kJust').href = waLink(p && p.telefono || '', msgJustificante(g));
@@ -1290,7 +1353,7 @@ $('fCobro').addEventListener('submit', async ev => {
   const esBono = kMode === 'bono' || (kMode === 'ver' && kPago.tipo === 'bono');
   if (esBono){
     if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
-    if (prev < 0 || prev >= n + 1 || prev + kSel.size > n){ $('kPrevias').focus(); toast('No caben: ' + n + ' sesiones en total'); return; }
+    if (prev < 0 || prev + kSel.size + kPend.length > n){ toast('No caben: el bono tiene ' + n + ' sesiones'); return; }
     const cad = $('kCaduca').value || null;
     if (cad && cad < fecha){ $('kCaduca').focus(); toast('La caducidad es anterior a la venta'); return; }
   }
@@ -1309,7 +1372,8 @@ $('fCobro').addEventListener('submit', async ev => {
       const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'bono', bono_sesiones: n, bono_previas: prev,
         bono_tipo_id: t ? t.id : null, bono_nombre: t ? t.nombre : 'Bono de ' + n + ' sesiones', caduca_el: $('kCaduca').value || null });
       S.pagos.push(g);
-      await meterEnBono([...kSel], g);
+      const nuevas = await crearPasadas();
+      await meterEnBono([...kSel, ...nuevas], g);
       await recordarMetodo(kPid, metodo);
       $('dCobro').close(); render();
       toast(bonoNombre(g) + ' · ' + eur(importe), { label: 'Deshacer', fn: () => anularPago(g.id, true) });
@@ -1321,7 +1385,8 @@ $('fCobro').addEventListener('submit', async ev => {
       if (bono){
         const antes = citasDePago(g.id).map(c => c.id);
         await sacarDeBono(antes.filter(id => !kSel.has(id)));
-        await meterEnBono([...kSel], g);          // también actualiza fecha, forma de pago y precio por sesión
+        const nuevas = await crearPasadas();
+        await meterEnBono([...kSel, ...nuevas], g);   // también actualiza fecha, forma de pago y precio por sesión
       } else {
         const cs = citasDePago(g.id);
         if (cs.length){
