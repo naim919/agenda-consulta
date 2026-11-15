@@ -57,6 +57,7 @@ nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .btn.primary{background:var(--sage-deep);border-color:var(--sage-deep);color:#fff;font-weight:600}
 .btn.danger{color:var(--due);border-color:var(--due-light)}
 .btn.small{padding:6px 10px;font-size:13px}
+a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
 .btn.block{width:100%}
 .sumline{font-size:12.5px;color:var(--muted);margin:0 2px 12px}
 
@@ -219,7 +220,41 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 .msg{font-size:13px;margin-top:12px;color:var(--muted)}
 .msg.err{color:var(--due)}
 
-.toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;background:var(--ink);color:#fff;padding:10px 16px;border-radius:22px;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.2);white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;background:var(--ink);color:#fff;padding:10px 16px;border-radius:22px;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.2);white-space:nowrap;display:flex;align-items:center;gap:14px}
+.toast[hidden]{display:none}
+.toast button{color:#f3d58a;font-weight:700;font-size:14px;padding:2px 0}
+
+/* pago dentro de la cita */
+.pagoinfo{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--stone);border-radius:10px;padding:9px 12px;margin-bottom:12px;font-size:14px}
+.pagoinfo.due{border-color:var(--due-light);color:var(--due)}
+.pagoinfo.paid{border-color:var(--sage-light);color:var(--sage-deep)}
+
+/* cobros: caja, movimientos, resumen */
+.caja{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:10px}
+.caja b{font-family:var(--serif);font-weight:normal;font-size:20px;margin-right:6px}
+.caja span{color:var(--muted);font-size:13px}
+.mov{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--warm)}
+.card .mov:last-child{border-bottom:none}
+.mov .md{font-size:13px;color:var(--muted)}
+.mov b{display:block;font-weight:600;font-size:14.5px}
+.mov small{font-size:12px;color:var(--muted)}
+.mov .mi{text-align:right;font-family:var(--serif);font-size:16px}
+.mov .mi small{display:block;font-family:var(--sans)}
+.more-btn{display:block;width:100%;padding:10px;font-size:13px;color:var(--sage-deep);font-weight:600}
+.res{display:grid;grid-template-columns:44px 1fr 1fr;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--warm);font-size:13px}
+.card .res:last-child{border-bottom:none}
+.res.head{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:8px;padding-bottom:6px}
+.res .rl{color:var(--muted);text-transform:capitalize}
+.res b{font-family:var(--serif);font-weight:normal;font-size:16px}
+.res small{display:block;color:var(--muted);font-size:11.5px}
+.res.off{opacity:.45}
+.minibar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:20px 2px 8px}
+.minibar .sec{margin:0}
+.minibar select{padding:5px 8px;border:1px solid var(--stone);border-radius:8px;background:#fff;font-size:14px}
+.minibar .modes{margin:0;padding:2px}
+.minibar .modes button{padding:4px 10px;font-size:13px}
+.bonos .pac{cursor:pointer}
+.debt .acts2{display:flex;gap:6px;flex:none}
 </style>
 </head>
 <body>
@@ -318,13 +353,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <div class="seg estado" id="cEstado"><button type="button" data-e="normal">Normal</button><button type="button" data-e="novino">No vino</button><button type="button" data-e="cancelada">Cancelada</button></div>
     </div>
     <p class="hint" id="cEstadoNote" hidden></p>
-    <div id="cPayWrap">
-      <label class="check"><input type="checkbox" id="cPagada"> Pagada</label>
-      <div class="row2" id="cMetodoWrap">
-        <label class="f"><span>Fecha de pago</span><input type="date" id="cPagoFecha"></label>
-        <label class="f"><span>Forma de pago</span><select id="cMetodo"><option value="">Elige…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
-      </div>
-    </div>
+    <div class="pagoinfo" id="cPagoInfo" hidden><span id="cPagoTxt"></span><button type="button" class="btn small" id="cPagoBtn"></button></div>
     <p class="hint" id="cSerieNote" style="margin-top:8px" hidden></p>
     <p class="warn" id="cWarn" hidden></p>
     <div class="acts">
@@ -352,6 +381,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <p class="hint" id="pResumen" style="margin:6px 0 10px"></p>
       <div class="btnrow">
         <button type="button" class="btn small primary" id="pNuevaCita">+ Cita</button>
+        <button type="button" class="btn small" id="pBono">Vender bono</button>
         <button type="button" class="btn small" id="pTerminar">Terminar terapia</button>
       </div>
       <div id="pHist"></div>
@@ -374,8 +404,14 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
       <label class="f"><span>Fecha de pago</span><input type="date" id="kFecha" required></label>
       <label class="f"><span>Forma de pago</span><select id="kMetodo"><option value="">Elige…</option><option value="efectivo">Efectivo</option><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option></select></label>
     </div>
+    <div class="row2">
+      <label class="f" id="kSesWrap"><span>Sesiones del bono</span><input type="number" id="kSesiones" min="1" max="100" step="1" inputmode="numeric"></label>
+      <label class="f"><span>Importe (€)</span><input type="number" id="kImporte" min="0" step="0.5" inputmode="decimal"></label>
+    </div>
+    <p class="hint" id="kNota" hidden></p>
+    <div class="btnrow" id="kExtra" hidden><a class="btn small" id="kJust" target="_blank" rel="noopener">Enviar justificante por WhatsApp</a></div>
     <div class="acts">
-      <button type="button" class="btn danger small" id="kQuitar" hidden>Quitar pago</button>
+      <button type="button" class="btn danger small" id="kQuitar" hidden>Anular</button>
       <span class="grow"></span>
       <button type="button" class="btn" id="kClose">Cerrar</button>
       <button type="submit" class="btn primary" id="kOk">Cobrar</button>
@@ -392,7 +428,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
   </div>
 </dialog>
 
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" hidden><span id="toastTxt"></span><button type="button" id="toastBtn" hidden></button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
 <script>
@@ -446,7 +482,7 @@ const PALETA = ['#6f9a74','#c07f52','#5f8bb0','#b06f8c','#3f7f6e','#4f9a9a','#8f
 function colorOf(id){ let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETA[h % PALETA.length]; }
 
 /* ---------- almacén de datos ---------- */
-const DEMO_KEY = 'consulta-demo-v3';
+const DEMO_KEY = 'consulta-demo-v4';
 let sb = null;
 if (!DEMO) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
@@ -484,8 +520,20 @@ const store = DEMO ? (() => {
     mk(3, addDays(mon, 3), '19:00');
     mk(3, addDays(mon, 3), '11:30', { duracion_min: 60 });
     mk(4, addDays(mon, 4), '12:00', { duracion_min: 15, precio: 0, tipo: 'primera' });
-    db = { pacientes: p, citas };
+    // los cobros de ejemplo pasan a ser pagos (uno por sesión), y Marta tiene un bono de 4
+    const pagos = [];
+    citas.filter(c => c.pagada).forEach(c => { pagos.push({ id: c.id, paciente_id: c.paciente_id, fecha: c.pagada_el, importe: c.precio, metodo_pago: c.metodo_pago, tipo: 'sesiones', bono_sesiones: null, created_at: c.inicio }); c.pago_id = c.id; });
+    const bono = { id: uid(), paciente_id: p[3].id, fecha: ymd(addDays(mon, 3)), importe: 200, metodo_pago: 'bizum', tipo: 'bono', bono_sesiones: 4, created_at: new Date().toISOString() };
+    pagos.push(bono);
+    citas.filter(c => c.paciente_id === p[3].id).forEach(c => Object.assign(c, { pago_id: bono.id, pagada: true, pagada_el: bono.fecha, metodo_pago: 'bizum', precio: 50 }));
+    db = { pacientes: p, citas, pagos };
   }
+  if (!db.pagos) db.pagos = [];
+  // lo mismo que hace la base de datos real al anular un pago
+  const liberar = g => db.citas.forEach(c => { if (c.pago_id === g.id){
+    const pac = db.pacientes.find(x => x.id === c.paciente_id);
+    Object.assign(c, { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: g.tipo === 'bono' && pac ? pac.precio : c.precio });
+  } });
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {} };
   save();
   return {
@@ -494,10 +542,13 @@ const store = DEMO ? (() => {
       if (x.id){ const i = db.pacientes.findIndex(p => p.id === x.id); Object.assign(db.pacientes[i], x); save(); return Object.assign({}, db.pacientes[i]); }
       const n = Object.assign({}, x, { id: uid() }); db.pacientes.push(n); save(); return Object.assign({}, n);
     },
-    async deletePaciente(id){ db.pacientes = db.pacientes.filter(p => p.id !== id); db.citas = db.citas.filter(c => c.paciente_id !== id); save(); },
-    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid(), cancelada: false, no_vino: false, metodo_pago: null, serie_id: null, tipo: 'sesion' }, c)); db.citas.push(...out); save(); return JSON.parse(JSON.stringify(out)); },
+    async deletePaciente(id){ db.pacientes = db.pacientes.filter(p => p.id !== id); db.citas = db.citas.filter(c => c.paciente_id !== id); db.pagos = db.pagos.filter(g => g.paciente_id !== id); save(); },
+    async insertCitas(arr){ const out = arr.map(c => Object.assign({ id: uid(), cancelada: false, no_vino: false, metodo_pago: null, serie_id: null, tipo: 'sesion', pago_id: null }, c)); db.citas.push(...out); save(); return JSON.parse(JSON.stringify(out)); },
     async updateCitas(ids, patch){ db.citas.forEach(c => { if (ids.includes(c.id)) Object.assign(c, patch); }); save(); },
-    async deleteCitas(ids){ db.citas = db.citas.filter(c => !ids.includes(c.id)); save(); }
+    async deleteCitas(ids){ db.citas = db.citas.filter(c => !ids.includes(c.id)); save(); },
+    async insertPago(row){ const g = Object.assign({ id: uid(), bono_sesiones: null, created_at: new Date().toISOString() }, row); db.pagos.push(g); save(); return Object.assign({}, g); },
+    async updatePago(id, patch){ const g = db.pagos.find(x => x.id === id); Object.assign(g, patch); save(); return Object.assign({}, g); },
+    async deletePago(id){ const g = db.pagos.find(x => x.id === id); if (g) liberar(g); db.pagos = db.pagos.filter(x => x.id !== id); save(); }
   };
 })() : {
   async load(){
@@ -510,7 +561,14 @@ const store = DEMO ? (() => {
       citas.push(...data);
       if (data.length < 1000) break;
     }
-    return { pacientes, citas };
+    const pagos = [];
+    for (let from = 0; ; from += 1000){
+      const { data, error } = await sb.from('pagos').select('*').order('fecha').range(from, from + 999);
+      if (error) throw error;
+      pagos.push(...data);
+      if (data.length < 1000) break;
+    }
+    return { pacientes, citas, pagos };
   },
   async savePaciente(x){
     const row = { alias: x.alias, precio: x.precio, activo: x.activo, metodo_pago: x.metodo_pago || null, telefono: x.telefono || null };
@@ -520,11 +578,15 @@ const store = DEMO ? (() => {
   async deletePaciente(id){ const { error } = await sb.from('pacientes').delete().eq('id', id); if (error) throw error; },
   async insertCitas(arr){ const { data, error } = await sb.from('citas').insert(arr).select(); if (error) throw error; return data; },
   async updateCitas(ids, patch){ const { error } = await sb.from('citas').update(patch).in('id', ids); if (error) throw error; },
-  async deleteCitas(ids){ const { error } = await sb.from('citas').delete().in('id', ids); if (error) throw error; }
+  async deleteCitas(ids){ const { error } = await sb.from('citas').delete().in('id', ids); if (error) throw error; },
+  async insertPago(row){ const { data, error } = await sb.from('pagos').insert(row).select().single(); if (error) throw error; return data; },
+  async updatePago(id, patch){ const { data, error } = await sb.from('pagos').update(patch).eq('id', id).select().single(); if (error) throw error; return data; },
+  // al borrar, la base de datos devuelve sus sesiones a «sin pagar» (disparador pago_anulado)
+  async deletePago(id){ const { error } = await sb.from('pagos').delete().eq('id', id); if (error) throw error; }
 };
 
 /* ---------- estado ---------- */
-let S = { pacientes: [], citas: [] };
+let S = { pacientes: [], citas: [], pagos: [] };
 let view = 'Agenda';
 let agMode = 'semana';
 try { agMode = localStorage.getItem('consulta-modo') || 'semana'; } catch(e) {}
@@ -542,9 +604,58 @@ const isDue = c => !c.cancelada && !c.pagada && !isFree(c) && isPast(c);
 const dueList = () => S.citas.filter(isDue);
 function groupByDay(){ const m = {}; S.citas.forEach(c => (m[ymd(new Date(c.inicio))] = m[ymd(new Date(c.inicio))] || []).push(c)); Object.values(m).forEach(l => l.sort(byStart)); return m; }
 
-function toast(t){
-  const el = $('toast'); el.textContent = t; el.hidden = false;
-  clearTimeout(toast._t); toast._t = setTimeout(() => el.hidden = true, 2400);
+/* ---------- pagos y bonos ---------- */
+const pagoById = id => S.pagos.find(g => g.id === id);
+const citasDePago = id => S.citas.filter(c => c.pago_id === id).sort(byStart);
+const bonoQuedan = g => g.bono_sesiones - citasDePago(g.id).length;
+const r2 = n => Math.round(Number(n) * 100) / 100;
+const byPago = (a, b) => (b.fecha + (b.created_at || '')).localeCompare(a.fecha + (a.created_at || ''));
+function bonoDe(c){ const g = c.pago_id ? pagoById(c.pago_id) : null; return g && g.tipo === 'bono' ? g : null; }
+function bonosActivos(pid){ return S.pagos.filter(g => g.tipo === 'bono' && g.paciente_id === pid && bonoQuedan(g) > 0).sort((a, b) => byPago(b, a)); }
+
+/* Reparte las sesiones sin pagar del paciente entre sus bonos con saldo:
+   primero las más antiguas (lo que ya debía), luego las siguientes de la agenda. */
+async function syncBonos(pid){
+  let libres = S.citas.filter(c => c.paciente_id === pid && !c.cancelada && !c.pagada && !isFree(c)).sort(byStart);
+  for (const g of bonosActivos(pid)){
+    if (!libres.length) break;
+    const take = libres.slice(0, bonoQuedan(g)); libres = libres.slice(take.length);
+    const patch = { pago_id: g.id, pagada: true, pagada_el: g.fecha, metodo_pago: g.metodo_pago, precio: r2(g.importe / g.bono_sesiones) };
+    await store.updateCitas(take.map(c => c.id), patch);
+    take.forEach(c => Object.assign(c, patch));
+  }
+}
+
+/* ---------- mensajes de WhatsApp ---------- */
+function waNum(tel){
+  let n = String(tel || '').replace(/[^\d+]/g, '').replace(/^\+/, '').replace(/^00/, '');
+  if (/^[6789]\d{8}$/.test(n)) n = '34' + n;
+  return n;
+}
+const waLink = (tel, text) => 'https://wa.me/' + waNum(tel) + '?text=' + encodeURIComponent(text);
+const nombreDe = p => ((p && p.alias) || '').split(/\s+/)[0];
+const fechasDe = list => list.map(c => fmtShort(new Date(c.inicio))).join(', ');
+function firmaTxt(){ const f = (cfg && cfg.msg_firma || '').trim(); return f ? '\n' + f : ''; }
+function msgRecordar(p, list){
+  const total = list.reduce((s, c) => s + Number(c.precio), 0);
+  const como = (cfg && cfg.msg_pago || '').trim();
+  return 'Hola ' + nombreDe(p) + ', te escribo para recordarte el pago pendiente de ' + (list.length === 1 ? 'la sesión del ' : 'las sesiones del ') +
+    fechasDe(list) + ' (' + eur(total) + ').' + (como ? ' Puedes pagarlo por ' + como + '.' : '') + ' ¡Gracias!' + firmaTxt();
+}
+function msgJustificante(g){
+  const p = pacById(g.paciente_id), cs = citasDePago(g.id);
+  const concepto = g.tipo === 'bono' ? 'un bono de ' + g.bono_sesiones + ' sesiones' : (cs.length === 1 ? 'la sesión del ' : 'las sesiones del ') + fechasDe(cs);
+  return 'Hola ' + nombreDe(p) + ', te confirmo que he recibido tu pago de ' + eur(g.importe) + ' el ' + dmy(new Date(g.fecha + 'T12:00')) +
+    (g.metodo_pago ? ' (' + METODOS[g.metodo_pago].toLowerCase() + ')' : '') + ' por ' + concepto + '. ¡Gracias!' + firmaTxt();
+}
+
+function toast(t, act){
+  const el = $('toast'), b = $('toastBtn');
+  $('toastTxt').textContent = t;
+  if (act){ b.textContent = act.label; b.hidden = false; b.onclick = () => { el.hidden = true; act.fn(); }; }
+  else { b.hidden = true; b.onclick = null; }
+  el.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.hidden = true, act ? 6000 : 2400);
 }
 function fail(e){ console.error(e); toast('No se ha podido guardar. Revisa la conexión.'); }
 
@@ -580,13 +691,18 @@ function render(){
   if (view === 'Pacientes') renderPacientes();
   if (view === 'Ajustes') renderAjustes();
   if ($('dPac').open && editingPac) renderPacHist();
+  if ($('dCita').open && editing) paintPagoInfo();
 }
 
 function chipFor(c, sm){
   const k = sm ? ' sm' : '';
   if (c.cancelada) return '<span class="chip off' + k + '">Cancelada</span>';
   if (isFree(c)) return '<span class="chip gratis' + k + '">Gratis</span>';
-  if (c.pagada) return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Pagada</span>';
+  if (c.pagada){
+    const b = bonoDe(c);
+    if (b) return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Bono ' + (citasDePago(b.id).findIndex(x => x.id === c.id) + 1) + '/' + b.bono_sesiones + '</span>';
+    return '<span class="chip paid' + k + '" data-pay="' + c.id + '">Pagada</span>';
+  }
   if (isPast(c)) return '<span class="chip due' + k + '" data-pay="' + c.id + '">' + (c.no_vino ? 'No vino · ' : '') + 'Sin pagar</span>';
   return '<span class="chip later' + k + '" data-pay="' + c.id + '" title="Marcar como pagada por adelantado">' + eur(c.precio) + '</span>';
 }
@@ -594,7 +710,7 @@ function chipFor(c, sm){
 function citaRow(c, withDate){
   const p = pacById(c.paciente_id), d = new Date(c.inicio);
   const prim = c.tipo === 'primera';
-  const sub = [prim ? 'Primera sesión' : null, c.modalidad === 'online' ? 'Online' : 'Presencial', isFree(c) ? null : eur(c.precio), c.no_vino ? 'No vino' : null, c.pagada && c.metodo_pago ? METODOS[c.metodo_pago] : null].filter(Boolean).join(' · ');
+  const sub = [prim ? 'Primera sesión' : null, c.modalidad === 'online' ? 'Online' : 'Presencial', isFree(c) ? null : eur(c.precio), c.no_vino ? 'No vino' : null, c.pagada && c.metodo_pago && !bonoDe(c) ? METODOS[c.metodo_pago] : null].filter(Boolean).join(' · ');
   const tag = prim ? '<span class="tag1">1ª</span>' : '';
   return '<div class="cita' + (c.cancelada ? ' cancel' : '') + (prim ? ' primera' : '') + '" role="button" tabindex="0" data-cita="' + c.id + '" style="--pc:' + colorOf(c.paciente_id) + '">' +
     '<span class="pcol"></span>' +
@@ -706,19 +822,44 @@ function monthHTML(byDay){
   return h;
 }
 
+let movLimit = 15, resMode = 'trim', resYear = new Date().getFullYear(), expPer = null;
+
+// Periodos: 'Y2026' (año entero) o 'T2026-3' (tercer trimestre de 2026)
+function enPeriodo(f, per){
+  if (Number(f.slice(0, 4)) !== Number(per.slice(1, 5))) return false;
+  return per[0] === 'Y' || Math.ceil(Number(f.slice(5, 7)) / 3) === Number(per.slice(6));
+}
+const perLabel = per => per[0] === 'Y' ? 'Todo ' + per.slice(1, 5) : ['1er', '2º', '3er', '4º'][Number(per.slice(6)) - 1] + ' trimestre ' + per.slice(1, 5);
+const perSlug = per => per[0] === 'Y' ? per.slice(1, 5) : per.slice(1, 5) + '-T' + per.slice(6);
+// Trabajado: sesiones hechas (no canceladas), por el día de la sesión.
+// Cobrado: lo cobrado (pagos y bonos), por el día del pago.
+function trabajado(filtro){ const l = S.citas.filter(c => !c.cancelada && isPast(c) && filtro(ymd(new Date(c.inicio)))); return { n: l.length, eur: l.reduce((s, c) => s + Number(c.precio), 0) }; }
+const cobradoEn = filtro => S.pagos.filter(g => filtro(g.fecha)).reduce((s, g) => s + Number(g.importe), 0);
+
+function movRow(g){
+  const p = pacById(g.paciente_id), n = citasDePago(g.id).length;
+  const det = g.tipo === 'bono' ? 'Bono · ' + (g.bono_sesiones - n) + ' de ' + g.bono_sesiones + ' por usar' : plural(n, 'sesión', 'sesiones');
+  return '<button class="mov" data-pago="' + g.id + '"><span class="md">' + fmtShort(new Date(g.fecha + 'T12:00')) + '</span>' +
+    '<span><b>' + esc(p ? p.alias : '—') + '</b><small>' + det + '</small></span>' +
+    '<span class="mi">' + eur(g.importe) + '<small>' + (METODOS[g.metodo_pago] || 'Sin indicar') + '</small></span></button>';
+}
+
 function renderCobros(){
+  const now = new Date(), hoy = ymd(now), mes = hoy.slice(0, 7);
   const due = dueList();
   const total = due.reduce((s, c) => s + Number(c.precio), 0);
-  const now = new Date(), mes = ymd(now).slice(0, 7);
-  const paidMonth = S.citas.filter(c => c.pagada && (c.pagada_el || '').startsWith(mes));
-  const cobrado = paidMonth.reduce((s, c) => s + Number(c.precio), 0);
-  const porMetodo = {};
-  paidMonth.forEach(c => { const k = METODOS[c.metodo_pago] || 'Sin indicar'; porMetodo[k] = (porMetodo[k] || 0) + Number(c.precio); });
-
   let h = '<div class="stats"><div class="stat due"><b>' + eur(total) + '</b><span>Pendiente de cobro</span></div>' +
-    '<div class="stat"><b>' + eur(cobrado) + '</b><span>Cobrado en ' + MESES_L[now.getMonth()] + '</span></div></div>';
-  if (Object.keys(porMetodo).length) h += '<p class="sumline">' + Object.entries(porMetodo).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + eur(v)).join(' · ') + '</p>';
+    '<div class="stat"><b>' + eur(cobradoEn(f => f.startsWith(mes))) + '</b><span>Cobrado en ' + MESES_L[now.getMonth()] + '</span></div></div>';
 
+  // caja de hoy
+  const deHoy = S.pagos.filter(g => g.fecha === hoy);
+  const porM = {};
+  deHoy.forEach(g => { const k = METODOS[g.metodo_pago] || 'Sin indicar'; porM[k] = (porM[k] || 0) + Number(g.importe); });
+  h += deHoy.length
+    ? '<div class="caja"><b>' + eur(deHoy.reduce((s, g) => s + Number(g.importe), 0)) + '</b>cobrado hoy<br><span>' + Object.entries(porM).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + eur(v)).join(' · ') + '</span></div>'
+    : '<div class="caja"><span>Hoy aún no has cobrado nada.</span></div>';
+
+  // quién debe
   const groups = {};
   due.forEach(c => (groups[c.paciente_id] = groups[c.paciente_id] || []).push(c));
   const rows = Object.entries(groups).map(([pid, list]) => ({ pid, p: pacById(pid), list: list.sort(byStart), sum: list.reduce((s, c) => s + Number(c.precio), 0) })).sort((a, b) => b.sum - a.sum);
@@ -726,51 +867,85 @@ function renderCobros(){
   h += !rows.length ? '<div class="card"><div class="empty">Nadie debe nada. Todo cobrado.</div></div>' :
     '<div class="card">' + rows.map(r =>
       '<div class="debt" style="--pc:' + colorOf(r.pid) + '"><div class="debt-h"><div><b>' + esc(r.p ? r.p.alias : '—') + '</b><br><span>' + plural(r.list.length, 'sesión', 'sesiones') + ' · ' + eur(r.sum) +
-      (r.p && r.p.metodo_pago ? ' · ' + METODOS[r.p.metodo_pago] : '') + '</span></div>' +
-      '<button class="btn small primary" data-payall="' + r.list.map(c => c.id).join(',') + '">Cobrar todo</button></div>' +
+      (r.p && r.p.metodo_pago ? ' · ' + METODOS[r.p.metodo_pago] : '') + '</span></div><div class="acts2">' +
+      (r.p && r.p.telefono ? '<a class="btn small" href="' + esc(waLink(r.p.telefono, msgRecordar(r.p, r.list))) + '" target="_blank" rel="noopener" title="Recordar el pago por WhatsApp">Recordar</a>' : '') +
+      '<button class="btn small primary" data-payall="' + r.list.map(c => c.id).join(',') + '">Cobrar</button></div></div>' +
       '<div class="dates">' + r.list.map(c => '<button class="date" data-pay="' + c.id + '" title="Cobrar solo esta sesión">' + fmtShort(new Date(c.inicio)) + (c.no_vino ? ' · no vino' : '') + ' · ' + eur(c.precio) + '</button>').join('') + '</div></div>').join('') +
-    '</div><p class="hint" style="margin-top:8px">Toca una fecha para cobrar solo esa sesión.</p>';
+    '</div><p class="hint" style="margin-top:8px">Toca una fecha para cobrar solo esa sesión.' + (rows.some(r => !(r.p && r.p.telefono)) ? ' «Recordar» sale si el paciente tiene teléfono.' : '') + '</p>';
 
-  // últimos 6 meses
-  const months = [];
-  for (let i = 5; i >= 0; i--){ const d = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push({ d, k: ymd(d).slice(0, 7) }); }
-  months.forEach(m => {
-    const ses = S.citas.filter(c => !c.cancelada && isPast(c) && ymd(new Date(c.inicio)).startsWith(m.k));
-    m.ses = ses.length;
-    m.pend = ses.filter(c => !c.pagada).reduce((s, c) => s + Number(c.precio), 0);
-    m.cob = S.citas.filter(c => c.pagada && (c.pagada_el || '').startsWith(m.k)).reduce((s, c) => s + Number(c.precio), 0);
-  });
-  const max = Math.max(1, ...months.map(m => m.cob));
-  h += '<p class="sec">Últimos meses · cobrado</p><div class="card">' + months.slice().reverse().map(m =>
-    '<div class="mrow"><span class="ml">' + MESES[m.d.getMonth()] + '</span><div><div class="meter"><i style="width:' + Math.round(m.cob / max * 100) + '%"></i></div>' +
-    '<small>' + plural(m.ses, 'sesión', 'sesiones') + (m.pend ? ' · falta ' + eur(m.pend) : '') + '</small></div><span class="mv">' + eur(m.cob) + '</span></div>').join('') + '</div>';
+  // bonos en curso
+  const activos = S.pagos.filter(g => g.tipo === 'bono' && bonoQuedan(g) > 0).sort(byPago);
+  if (activos.length) h += '<p class="sec">Bonos en curso · ' + activos.length + '</p><div class="card">' + activos.map(movRow).join('') + '</div>';
 
-  // exportar
-  const years = [...new Set(S.citas.map(c => new Date(c.inicio).getFullYear()).concat([now.getFullYear()]))].sort((a, b) => b - a);
-  h += '<p class="sec">Para la gestoría</p><div class="exp"><select id="expYear" aria-label="Año">' + years.map(y => '<option>' + y + '</option>').join('') + '</select>' +
-    '<button class="btn" id="expBtn">Descargar Excel</button></div>';
+  // movimientos
+  const movs = S.pagos.slice().sort(byPago);
+  h += '<p class="sec">Movimientos</p>' + (movs.length
+    ? '<div class="card">' + movs.slice(0, movLimit).map(movRow).join('') + (movs.length > movLimit ? '<button class="more-btn" id="movMas">Ver más (' + (movs.length - movLimit) + ')</button>' : '') + '</div><p class="hint" style="margin-top:8px">Toca un cobro para corregirlo, anularlo o mandar el justificante.</p>'
+    : '<div class="card"><div class="empty">Aún no hay cobros.</div></div>');
+
+  // resumen por trimestres o meses
+  const years = [...new Set(S.citas.map(c => new Date(c.inicio).getFullYear()).concat(S.pagos.map(g => Number(g.fecha.slice(0, 4))), [now.getFullYear()]))].sort((a, b) => b - a);
+  if (!years.includes(resYear)) resYear = years[0];
+  const per = resMode === 'trim'
+    ? [1, 2, 3, 4].map(t => ({ l: 'T' + t, f: f => f.startsWith(resYear + '-') && Math.ceil(Number(f.slice(5, 7)) / 3) === t, fut: resYear === now.getFullYear() && t > Math.ceil((now.getMonth() + 1) / 3) }))
+    : MESES.map((m, i) => ({ l: m, f: f => f.startsWith(resYear + '-' + pad(i + 1)), fut: resYear === now.getFullYear() && i > now.getMonth() }));
+  h += '<div class="minibar"><p class="sec">Resumen</p><div style="display:flex;gap:6px;align-items:center"><div class="modes"><button data-res="trim" class="' + (resMode === 'trim' ? 'on' : '') + '">Trimestres</button><button data-res="mes" class="' + (resMode === 'mes' ? 'on' : '') + '">Meses</button></div>' +
+    '<select id="resYear" aria-label="Año">' + years.map(y => '<option' + (y === resYear ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></div></div>' +
+    '<div class="card"><div class="res head"><span></span><span>Trabajado</span><span>Cobrado</span></div>' + per.map(x => {
+      const t = trabajado(x.f), c = cobradoEn(x.f);
+      return '<div class="res' + (x.fut ? ' off' : '') + '"><span class="rl">' + x.l + '</span><span><b>' + eur(t.eur) + '</b><small>' + plural(t.n, 'sesión', 'sesiones') + '</small></span><span><b>' + eur(c) + '</b></span></div>';
+    }).join('') + '</div><p class="hint" style="margin-top:8px">Trabajado: sesiones hechas, por el día de la sesión. Cobrado: lo que te han pagado, por el día del pago (los bonos, el día que se venden).</p>';
+
+  // para la gestoría
+  const opts = [];
+  years.forEach(y => { opts.push('Y' + y); for (let t = 4; t >= 1; t--) if (!(y === now.getFullYear() && t > Math.ceil((now.getMonth() + 1) / 3))) opts.push('T' + y + '-' + t); });
+  if (!expPer || !opts.includes(expPer)) expPer = 'T' + now.getFullYear() + '-' + Math.ceil((now.getMonth() + 1) / 3);
+  h += '<p class="sec">Para la gestoría</p><div class="exp"><select id="expPer" aria-label="Periodo">' + opts.map(o => '<option value="' + o + '"' + (o === expPer ? ' selected' : '') + '>' + perLabel(o) + '</option>').join('') + '</select></div>' +
+    '<div class="btnrow" style="margin-top:8px"><button class="btn" id="expCob">Excel de cobros</button><button class="btn" id="expSes">Excel de sesiones</button></div>';
+
   $('vCobros').innerHTML = h;
-  $('expBtn').addEventListener('click', () => exportCSV(Number($('expYear').value)));
+  if ($('movMas')) $('movMas').addEventListener('click', () => { movLimit += 30; renderCobros(); });
+  document.querySelectorAll('#vCobros [data-res]').forEach(b => b.addEventListener('click', () => { resMode = b.dataset.res; renderCobros(); }));
+  $('resYear').addEventListener('change', () => { resYear = Number($('resYear').value); renderCobros(); });
+  $('expPer').addEventListener('change', () => { expPer = $('expPer').value; });
+  $('expCob').addEventListener('click', () => exportCobros($('expPer').value));
+  $('expSes').addEventListener('click', () => exportSesiones($('expPer').value));
 }
 
-function exportCSV(year){
-  const rows = S.citas.filter(c => new Date(c.inicio).getFullYear() === year).sort(byStart);
-  if (!rows.length){ toast('No hay citas en ' + year); return; }
-  const num = n => Number(n).toFixed(2).replace('.', ',');
-  const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
-  const head = ['Fecha','Hora','Paciente','Tipo','Modalidad','Duración (min)','Precio','Estado','Pagada','Fecha de pago','Forma de pago'];
-  const lines = [head.join(';')].concat(rows.map(c => {
-    const d = new Date(c.inicio), p = pacById(c.paciente_id);
-    const estado = c.cancelada ? 'Cancelada' : c.no_vino ? 'No vino' : isPast(c) ? 'Realizada' : 'Prevista';
-    return [dmy(d), hm(d), q(p ? p.alias : ''), c.tipo === 'primera' ? 'Primera sesión (gratis)' : 'Sesión', c.modalidad === 'online' ? 'Online' : 'Presencial', c.duracion_min, num(c.precio), estado,
-      c.pagada ? 'Sí' : 'No', c.pagada_el ? dmy(new Date(c.pagada_el + 'T12:00')) : '', METODOS[c.metodo_pago] || ''].join(';');
-  }));
-  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+/* ---------- Excel (CSV que Excel abre en español) ---------- */
+const csvNum = n => Number(n).toFixed(2).replace('.', ',');
+const csvTxt = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+function descargarCSV(nombre, head, filas){
+  const blob = new Blob(['﻿' + [head.join(';')].concat(filas.map(f => f.join(';'))).join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'consulta-' + year + '.csv';
+  a.href = URL.createObjectURL(blob); a.download = nombre;
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-  toast('Descargando ' + plural(rows.length, 'cita', 'citas'));
+}
+function exportSesiones(per){
+  const rows = S.citas.filter(c => enPeriodo(ymd(new Date(c.inicio)), per)).sort(byStart);
+  if (!rows.length){ toast('No hay sesiones en ese periodo'); return; }
+  descargarCSV('consulta-sesiones-' + perSlug(per) + '.csv',
+    ['Fecha', 'Hora', 'Paciente', 'Tipo', 'Modalidad', 'Duración (min)', 'Precio', 'Estado', 'Pagada', 'Fecha de pago', 'Forma de pago'],
+    rows.map(c => {
+      const d = new Date(c.inicio), p = pacById(c.paciente_id), b = bonoDe(c);
+      const estado = c.cancelada ? 'Cancelada' : c.no_vino ? 'No vino' : isPast(c) ? 'Realizada' : 'Prevista';
+      return [dmy(d), hm(d), csvTxt(p ? p.alias : ''), c.tipo === 'primera' ? 'Primera sesión (gratis)' : 'Sesión', c.modalidad === 'online' ? 'Online' : 'Presencial', c.duracion_min, csvNum(c.precio), estado,
+        c.pagada ? 'Sí' : 'No', c.pagada_el ? dmy(new Date(c.pagada_el + 'T12:00')) : '', (b ? 'Bono · ' : '') + (METODOS[c.metodo_pago] || '')];
+    }));
+  toast('Descargando ' + plural(rows.length, 'sesión', 'sesiones'));
+}
+function exportCobros(per){
+  const rows = S.pagos.filter(g => enPeriodo(g.fecha, per)).sort((a, b) => (a.fecha + (a.created_at || '')).localeCompare(b.fecha + (b.created_at || '')));
+  if (!rows.length){ toast('No hay cobros en ese periodo'); return; }
+  descargarCSV('consulta-cobros-' + perSlug(per) + '.csv',
+    ['Fecha de pago', 'Paciente', 'Concepto', 'Sesiones', 'Importe', 'Forma de pago'],
+    rows.map(g => {
+      const p = pacById(g.paciente_id), cs = citasDePago(g.id);
+      const concepto = g.tipo === 'bono' ? 'Bono de ' + g.bono_sesiones + ' sesiones' : 'Sesiones del ' + cs.map(c => dmy(new Date(c.inicio))).join(', ');
+      return [dmy(new Date(g.fecha + 'T12:00')), csvTxt(p ? p.alias : ''), csvTxt(concepto), g.tipo === 'bono' ? g.bono_sesiones : cs.length, csvNum(g.importe), METODOS[g.metodo_pago] || ''];
+    }));
+  toast('Descargando ' + plural(rows.length, 'cobro', 'cobros'));
 }
 
 function renderPacientes(){
@@ -794,50 +969,149 @@ function renderPacientes(){
   s.addEventListener('input', () => { pacQuery = s.value; renderPacientes(); const n = $('pacSearch'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); });
 }
 
-/* ---------- cobrar: siempre con fecha y forma de pago ---------- */
-let cobroIds = [];
+/* ---------- cobrar, ver un pago y vender bonos (la misma ventana) ---------- */
+let kMode = null, kIds = [], kPago = null, kPid = null;
+
 function openCobro(ids){
-  const list = S.citas.filter(c => ids.includes(c.id) && !c.cancelada && !isFree(c)).sort(byStart);
+  const c0 = S.citas.find(c => c.id === ids[0]);
+  if (ids.length === 1 && c0 && c0.pagada){
+    if (c0.pago_id && pagoById(c0.pago_id)) return openPago(c0.pago_id);
+    toast('Este pago no tiene detalles guardados'); return;
+  }
+  const list = S.citas.filter(c => ids.includes(c.id) && !c.cancelada && !c.pagada && !isFree(c)).sort(byStart);
   if (!list.length) return;
-  cobroIds = list.map(c => c.id);
-  const first = list[0], p = pacById(first.paciente_id);
-  const ya = list.length === 1 && first.pagada;
-  const total = list.reduce((s, c) => s + Number(c.precio), 0);
-  const d = new Date(first.inicio);
-  $('kTitle').textContent = ya ? 'Pago' : 'Cobrar';
-  $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (list.length === 1 ? 'sesión del ' + fmtDay(d) + ' ' + MESES[d.getMonth()] : plural(list.length, 'sesión', 'sesiones')) + ' · ' + eur(total);
-  $('kFecha').value = ya && first.pagada_el ? first.pagada_el : ymd(new Date());
-  $('kMetodo').value = first.metodo_pago || (p && p.metodo_pago) || '';
-  $('kQuitar').hidden = !ya;
-  $('kOk').textContent = ya ? 'Guardar' : 'Cobrar ' + eur(total);
+  kMode = 'nuevo'; kIds = list.map(c => c.id); kPago = null; kPid = list[0].paciente_id;
+  const p = pacById(kPid), d0 = new Date(list[0].inicio);
+  $('kTitle').textContent = 'Cobrar';
+  $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (list.length === 1 ? 'sesión del ' + fmtDay(d0) + ' ' + MESES[d0.getMonth()] : plural(list.length, 'sesión', 'sesiones') + ': ' + fechasDe(list));
+  $('kFecha').value = ymd(new Date());
+  $('kMetodo').value = (p && p.metodo_pago) || '';
+  $('kSesWrap').hidden = true;
+  $('kImporte').value = r2(list.reduce((s, c) => s + Number(c.precio), 0));
+  $('kNota').hidden = true; $('kExtra').hidden = true; $('kQuitar').hidden = true;
+  $('kOk').textContent = 'Cobrar';
   $('dCobro').showModal();
 }
-$('kClose').addEventListener('click', () => $('dCobro').close());
+
+function openBono(pid){
+  const p = pacById(pid); if (!p) return;
+  kMode = 'bono'; kIds = []; kPago = null; kPid = pid;
+  const libres = S.citas.filter(c => c.paciente_id === pid && !c.cancelada && !c.pagada && !isFree(c) && isPast(c)).length;
+  $('kTitle').textContent = 'Vender bono';
+  $('kInfo').textContent = p.alias + ' · ' + eur(p.precio) + ' por sesión';
+  $('kFecha').value = ymd(new Date());
+  $('kMetodo').value = p.metodo_pago || '';
+  $('kSesWrap').hidden = false; $('kSesiones').value = 4; $('kImporte').value = r2(4 * p.precio);
+  $('kNota').hidden = false;
+  $('kNota').textContent = 'Cubre primero ' + (libres === 1 ? 'la sesión que debe y luego ' : libres > 1 ? 'las ' + libres + ' sesiones que debe y luego ' : '') + 'sus próximas citas, por orden. «No vino» gasta sesión; «Cancelada», no.';
+  $('kExtra').hidden = true; $('kQuitar').hidden = true;
+  $('kOk').textContent = 'Vender bono';
+  $('dCobro').showModal();
+}
+$('kSesiones').addEventListener('input', () => {
+  if (kMode !== 'bono') return;
+  const p = pacById(kPid);
+  $('kImporte').value = r2((Number($('kSesiones').value) || 0) * (p ? p.precio : 0));
+});
+
+function openPago(id){
+  const g = pagoById(id); if (!g) return;
+  kMode = 'ver'; kPago = g; kPid = g.paciente_id;
+  const p = pacById(g.paciente_id), cs = citasDePago(id), bono = g.tipo === 'bono';
+  kIds = cs.map(c => c.id);
+  $('kTitle').textContent = bono ? 'Bono' : 'Pago';
+  $('kInfo').textContent = (p ? p.alias + ' · ' : '') + (bono
+    ? 'usadas ' + cs.length + ' de ' + g.bono_sesiones + (cs.length ? ': ' + fechasDe(cs) : '')
+    : (cs.length ? plural(cs.length, 'sesión', 'sesiones') + ': ' + fechasDe(cs) : 'sin sesiones'));
+  $('kFecha').value = g.fecha;
+  $('kMetodo').value = g.metodo_pago || '';
+  $('kSesWrap').hidden = !bono; $('kSesiones').value = g.bono_sesiones || '';
+  $('kImporte').value = g.importe;
+  $('kNota').hidden = true;
+  $('kJust').href = waLink(p && p.telefono || '', msgJustificante(g));
+  $('kExtra').hidden = false;
+  $('kQuitar').hidden = false; $('kQuitar').textContent = bono ? 'Anular bono' : 'Anular pago';
+  $('kOk').textContent = 'Guardar';
+  $('dCobro').showModal();
+}
+
+// si el paciente no tenía forma de pago habitual, se queda con esta
+async function recordarMetodo(pid, metodo){
+  const p = pacById(pid);
+  if (p && !p.metodo_pago){ try { Object.assign(p, await store.savePaciente(Object.assign({}, p, { metodo_pago: metodo }))); } catch(e) {} }
+}
+
 $('fCobro').addEventListener('submit', async ev => {
   ev.preventDefault();
-  const fecha = $('kFecha').value, metodo = $('kMetodo').value;
+  const fecha = $('kFecha').value, metodo = $('kMetodo').value, importe = Number($('kImporte').value);
   if (!fecha){ $('kFecha').focus(); toast('Falta la fecha de pago'); return; }
   if (!metodo){ $('kMetodo').focus(); toast('Elige la forma de pago'); return; }
-  const patch = { pagada: true, pagada_el: fecha, metodo_pago: metodo };
+  if ($('kImporte').value === '' || !(importe >= 0)){ $('kImporte').focus(); toast('Falta el importe'); return; }
+  const n = Math.round(Number($('kSesiones').value));
   try {
-    await store.updateCitas(cobroIds, patch);
-    const list = S.citas.filter(c => cobroIds.includes(c.id));
-    list.forEach(c => Object.assign(c, patch));
-    // si el paciente no tenía forma de pago habitual, se queda con esta
-    const p = pacById(list[0].paciente_id);
-    if (p && !p.metodo_pago){ try { Object.assign(p, await store.savePaciente(Object.assign({}, p, { metodo_pago: metodo }))); } catch(e) {} }
-    $('dCobro').close(); render();
-    toast((list.length === 1 ? 'Cobrada' : plural(list.length, 'sesión cobrada', 'sesiones cobradas')) + ' · ' + METODOS[metodo]);
+    if (kMode === 'nuevo'){
+      const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'sesiones' });
+      S.pagos.push(g);
+      const patch = { pago_id: g.id, pagada: true, pagada_el: fecha, metodo_pago: metodo };
+      await store.updateCitas(kIds, patch);
+      S.citas.filter(c => kIds.includes(c.id)).forEach(c => Object.assign(c, patch));
+      await recordarMetodo(kPid, metodo);
+      $('dCobro').close(); render();
+      toast('Cobrado ' + eur(importe) + ' · ' + METODOS[metodo], { label: 'Deshacer', fn: () => anularPago(g.id, true) });
+    } else if (kMode === 'bono'){
+      if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
+      const g = await store.insertPago({ paciente_id: kPid, fecha, importe, metodo_pago: metodo, tipo: 'bono', bono_sesiones: n });
+      S.pagos.push(g);
+      await syncBonos(kPid);
+      await recordarMetodo(kPid, metodo);
+      $('dCobro').close(); render();
+      toast('Bono de ' + n + ' sesiones · ' + eur(importe), { label: 'Deshacer', fn: () => anularPago(g.id, true) });
+    } else if (kMode === 'ver'){
+      const g = kPago, bono = g.tipo === 'bono';
+      const patch = { fecha, importe, metodo_pago: metodo };
+      if (bono){
+        const usadas = citasDePago(g.id).length;
+        if (!(n >= 1 && n <= 100)){ $('kSesiones').focus(); toast('Número de sesiones no válido'); return; }
+        if (n < usadas){ $('kSesiones').focus(); toast('Ya se han usado ' + usadas + ' sesiones'); return; }
+        patch.bono_sesiones = n;
+      }
+      Object.assign(g, await store.updatePago(g.id, patch));
+      const cs = citasDePago(g.id);
+      if (cs.length){
+        const cp = { pagada_el: fecha, metodo_pago: metodo };
+        if (bono) cp.precio = r2(importe / g.bono_sesiones);
+        await store.updateCitas(cs.map(c => c.id), cp);
+        cs.forEach(c => Object.assign(c, cp));
+      }
+      if (bono) await syncBonos(g.paciente_id);
+      $('dCobro').close(); render(); toast('Guardado');
+    }
   } catch(e){ fail(e); }
 });
-$('kQuitar').addEventListener('click', async () => {
-  const patch = { pagada: false, pagada_el: null };
+
+async function anularPago(id, sinPreguntar){
+  const g = pagoById(id); if (!g) return;
+  if (!sinPreguntar){
+    const n = citasDePago(id).length;
+    const r = await ask(g.tipo === 'bono' ? '¿Anular el bono?' : '¿Anular este pago?',
+      (n ? plural(n, 'sesión vuelve', 'sesiones vuelven') + ' a «sin pagar». ' : '') + 'Desaparece de los movimientos.', [{ label: 'Anular', value: 1, cls: 'danger' }]);
+    if (!r) return;
+  }
   try {
-    await store.updateCitas(cobroIds, patch);
-    S.citas.filter(c => cobroIds.includes(c.id)).forEach(c => Object.assign(c, patch));
-    $('dCobro').close(); render(); toast('Pago quitado');
+    await store.deletePago(id);
+    S.citas.forEach(c => {
+      if (c.pago_id !== id) return;
+      const p = pacById(c.paciente_id);
+      Object.assign(c, { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: g.tipo === 'bono' && p ? p.precio : c.precio });
+    });
+    S.pagos = S.pagos.filter(x => x.id !== id);
+    await syncBonos(g.paciente_id);
+    if ($('dCobro').open) $('dCobro').close();
+    render(); toast(sinPreguntar ? 'Deshecho' : 'Anulado');
   } catch(e){ fail(e); }
-});
+}
+$('kQuitar').addEventListener('click', () => { if (kPago) anularPago(kPago.id); });
+$('kClose').addEventListener('click', () => $('dCobro').close());
 
 /* ---------- ventana de cita ---------- */
 let editing = null, modo = 'presencial', estado = 'normal', tipo = 'sesion';
@@ -846,23 +1120,18 @@ let editing = null, modo = 'presencial', estado = 'normal', tipo = 'sesion';
 function telHTML(tel){
   const t = String(tel || '').trim(); if (!t) return '';
   const n = t.replace(/[^\d+]/g, '');
-  let wa = n.replace(/^\+/, '').replace(/^00/, '');
-  if (/^[6789]\d{8}$/.test(wa)) wa = '34' + wa;
-  return '<a href="tel:' + esc(n) + '">Llamar · ' + esc(t) + '</a><a href="https://wa.me/' + esc(wa) + '" target="_blank" rel="noopener">WhatsApp</a>';
+  return '<a href="tel:' + esc(n) + '">Llamar · ' + esc(t) + '</a><a href="https://wa.me/' + esc(waNum(t)) + '" target="_blank" rel="noopener">WhatsApp</a>';
 }
 function paintTel(){ const p = pacById($('cPac').value); const h = p ? telHTML(p.telefono) : ''; $('cTel').innerHTML = h; $('cTel').hidden = !h; }
 function setTipo(t, aplicar){
   tipo = t;
   document.querySelectorAll('#cTipo button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
   const prim = t === 'primera';
-  $('cPayWrap').hidden = prim;
-  if (prim) $('cPagada').checked = false;
   if (!editing) $('cRepWrap').hidden = prim;
   if (aplicar){
     if (prim){ $('cDur').value = '15'; $('cPrecio').value = '0'; $('cRep').value = '0'; }
     else { $('cDur').value = '60'; const p = pacById($('cPac').value); $('cPrecio').value = p ? p.precio : ($('cNewPrecio').value || ''); }
   }
-  paintMetodo();
 }
 
 function fillPacSelect(selected){
@@ -875,15 +1144,21 @@ function setEstado(e){
   estado = e;
   document.querySelectorAll('#cEstado button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
   $('cEstadoNote').hidden = e === 'normal';
-  $('cEstadoNote').textContent = e === 'novino' ? 'No vino: se cobra igualmente.' : 'Cancelada: no se cobra.';
-  if (e === 'cancelada') $('cPagada').checked = false;
-  $('cPagada').disabled = e === 'cancelada';
-  paintMetodo();
+  $('cEstadoNote').textContent = e === 'novino' ? 'No vino: se cobra igualmente (si tiene bono, gasta sesión).' : 'Cancelada: no se cobra (si tiene bono, no gasta sesión).';
 }
-function paintMetodo(){
-  $('cMetodoWrap').hidden = !$('cPagada').checked;
-  if ($('cPagada').checked && !$('cPagoFecha').value) $('cPagoFecha').value = ymd(new Date());
+// El pago se ve y se gestiona desde aquí, pero se hace en la ventana de cobro
+function paintPagoInfo(){
+  const c = editing, box = $('cPagoInfo');
+  if (!c || c.cancelada || isFree(c)){ box.hidden = true; return; }
+  const g = c.pago_id ? pagoById(c.pago_id) : null, b = bonoDe(c);
+  box.hidden = false;
+  box.className = 'pagoinfo ' + (c.pagada ? 'paid' : isPast(c) ? 'due' : '');
+  $('cPagoTxt').textContent = !c.pagada ? 'Sin pagar · ' + eur(c.precio)
+    : b ? 'Bono · sesión ' + (citasDePago(b.id).findIndex(x => x.id === c.id) + 1) + ' de ' + b.bono_sesiones
+    : 'Pagada' + (g ? ' el ' + fmtShort(new Date(g.fecha + 'T12:00')) : '') + (c.metodo_pago ? ' · ' + METODOS[c.metodo_pago] : '');
+  $('cPagoBtn').textContent = !c.pagada ? 'Cobrar' : b ? 'Ver bono' : 'Ver pago';
 }
+$('cPagoBtn').addEventListener('click', () => { if (editing) openCobro([editing.id]); });
 
 function openCita(id, day, time, pacId){
   editing = id ? S.citas.find(c => c.id === id) : null;
@@ -897,9 +1172,6 @@ function openCita(id, day, time, pacId){
     if (!$('cDur').value) $('cDur').value = '60';
     $('cPrecio').value = editing.precio;
     setModo(editing.modalidad);
-    $('cPagada').checked = !!editing.pagada;
-    $('cPagoFecha').value = editing.pagada_el || '';
-    $('cMetodo').value = editing.metodo_pago || (pacById(editing.paciente_id) || {}).metodo_pago || '';
     setEstado(editing.cancelada ? 'cancelada' : editing.no_vino ? 'novino' : 'normal');
     $('cRepWrap').hidden = true; $('cEstadoWrap').hidden = false; $('cDel').hidden = false;
     setTipo(editing.tipo || 'sesion', false);
@@ -915,15 +1187,13 @@ function openCita(id, day, time, pacId){
     $('cDur').value = '60';
     const p = pacId ? pacById(pacId) : null;
     $('cPrecio').value = p ? p.precio : '';
-    $('cMetodo').value = p && p.metodo_pago || '';
-    $('cPagoFecha').value = '';
-    setModo('presencial'); $('cPagada').checked = false; $('cRep').value = '0';
+    setModo('presencial'); $('cRep').value = '0';
     setEstado('normal');
     $('cRepWrap').hidden = false; $('cEstadoWrap').hidden = true; $('cDel').hidden = true; $('cSerieNote').hidden = true;
     setTipo('sesion', false);
   }
   $('cNewPac').hidden = true; $('cNewAlias').value = ''; $('cNewPrecio').value = ''; $('cNewTel').value = '';
-  paintMetodo();
+  paintPagoInfo();
   paintTel();
   $('dCita').showModal();
 }
@@ -934,10 +1204,9 @@ $('cPac').addEventListener('change', () => {
   paintTel();
   if (v === '__new'){ $('cNewAlias').focus(); return; }
   const p = pacById(v);
-  if (p && !editing){ if (tipo !== 'primera') $('cPrecio').value = p.precio; $('cMetodo').value = p.metodo_pago || ''; }
+  if (p && !editing && tipo !== 'primera') $('cPrecio').value = p.precio;
 });
 $('cNewPrecio').addEventListener('input', () => { if (tipo !== 'primera') $('cPrecio').value = $('cNewPrecio').value; });
-$('cPagada').addEventListener('change', paintMetodo);
 document.querySelectorAll('#cTipo button').forEach(b => b.addEventListener('click', () => setTipo(b.dataset.t, true)));
 document.querySelectorAll('#cMod button').forEach(b => b.addEventListener('click', () => setModo(b.dataset.m)));
 document.querySelectorAll('#cEstado button').forEach(b => b.addEventListener('click', () => setEstado(b.dataset.e)));
@@ -951,8 +1220,12 @@ $('cDel').addEventListener('click', async () => {
     : await ask('¿Borrar esta cita?', 'No se puede deshacer.', [{ label: 'Borrar', value: 'one', cls: 'danger' }]);
   if (!r) return;
   const ids = [editing.id].concat(r === 'all' ? later.map(c => c.id) : []);
-  try { await store.deleteCitas(ids); S.citas = S.citas.filter(c => !ids.includes(c.id)); $('dCita').close(); render(); toast(ids.length === 1 ? 'Cita borrada' : ids.length + ' citas borradas'); }
-  catch(e){ fail(e); }
+  try {
+    const pid = editing.paciente_id;
+    await store.deleteCitas(ids); S.citas = S.citas.filter(c => !ids.includes(c.id));
+    await syncBonos(pid);   // el hueco que deja en un bono pasa a la siguiente cita
+    $('dCita').close(); render(); toast(ids.length === 1 ? 'Cita borrada' : ids.length + ' citas borradas');
+  } catch(e){ fail(e); }
 });
 
 $('fCita').addEventListener('submit', async ev => {
@@ -976,17 +1249,13 @@ $('fCita').addEventListener('submit', async ev => {
   }
 
   const cancelada = estado === 'cancelada', no_vino = estado === 'novino';
-  const pagada = !cancelada && tipo !== 'primera' && $('cPagada').checked;
-  const metodo = $('cMetodo').value || null;
-  const fechaPago = $('cPagoFecha').value || ymd(new Date());
-  if (pagada && !metodo){ $('cMetodo').focus(); toast('Elige la forma de pago'); return; }
   if (pid === '__new' && $('cNewPrecio').value === ''){ $('cNewPrecio').focus(); toast('Pon su precio habitual por sesión'); return; }
 
   try {
     if (pid === '__new'){
       const alias = $('cNewAlias').value.trim();
       if (!alias){ $('cNewAlias').focus(); toast('Escribe el nombre e inicial'); return; }
-      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value), activo: true, metodo_pago: metodo, telefono: $('cNewTel').value.trim() || null });
+      const np = await store.savePaciente({ alias, precio: Number($('cNewPrecio').value), activo: true, metodo_pago: null, telefono: $('cNewTel').value.trim() || null });
       S.pacientes.push(np); pid = np.id;
     }
     const base = { paciente_id: pid, duracion_min: dur, modalidad: modo, precio, tipo };
@@ -1000,8 +1269,11 @@ $('fCita').addEventListener('submit', async ev => {
           [{ label: 'Solo esta', value: 'one' }, { label: 'Esta y las ' + later.length + ' siguientes', value: 'all', cls: 'primary' }]);
         if (!scope) return;
       }
-      const patch = Object.assign({}, base, { inicio: start.toISOString(), cancelada, no_vino, pagada,
-        pagada_el: pagada ? fechaPago : null, metodo_pago: pagada ? metodo : editing.metodo_pago || null });
+      const oldPid = editing.paciente_id;
+      const patch = Object.assign({}, base, { inicio: start.toISOString(), cancelada, no_vino });
+      // una sesión de bono que se cancela (o pasa a gratis, o cambia de paciente) deja libre su hueco del bono
+      if (bonoDe(editing) && (cancelada || precio === 0 || pid !== oldPid))
+        Object.assign(patch, { pago_id: null, pagada: false, pagada_el: null, metodo_pago: null, precio: precio === 0 ? 0 : (pacById(pid) || {}).precio ?? precio });
       await store.updateCitas([editing.id], patch);
       Object.assign(editing, patch);
       if (scope === 'all'){
@@ -1012,6 +1284,7 @@ $('fCita').addEventListener('submit', async ev => {
           await store.updateCitas([c.id], p); Object.assign(c, p);
         }
       }
+      if (oldPid !== pid) await syncBonos(oldPid);
       toast(scope === 'all' ? plural(later.length + 1, 'cita cambiada', 'citas cambiadas') : 'Cita guardada');
     } else {
       const [step, times] = $('cRep').value === '0' ? [0, 1] : $('cRep').value.split(':').map(Number);
@@ -1019,13 +1292,13 @@ $('fCita').addEventListener('submit', async ev => {
       const rows = [];
       for (let i = 0; i < times; i++){
         const d = addDays(start, step * i); d.setHours(start.getHours(), start.getMinutes(), 0, 0);
-        const paid = i === 0 && pagada;
-        rows.push(Object.assign({}, base, { inicio: d.toISOString(), serie_id: serie, pagada: paid, pagada_el: paid ? fechaPago : null, metodo_pago: paid ? metodo : null }));
+        rows.push(Object.assign({}, base, { inicio: d.toISOString(), serie_id: serie, pagada: false, pagada_el: null, metodo_pago: null }));
       }
       const saved = await store.insertCitas(rows);
       S.citas.push(...saved);
       toast(saved.length === 1 ? 'Cita creada' : saved.length + ' citas creadas');
     }
+    await syncBonos(pid);   // si tiene bono con saldo, las cubre
     $('dCita').close();
     cursor = startOfDay(start);
     render();
@@ -1053,10 +1326,12 @@ function renderPacHist(){
   const p = editingPac; if (!p) return;
   const mine = S.citas.filter(c => c.paciente_id === p.id).sort(byStart);
   const hechas = mine.filter(c => !c.cancelada && isPast(c));
-  const pagado = mine.filter(c => c.pagada).reduce((s, c) => s + Number(c.precio), 0);
+  const pagado = S.pagos.filter(g => g.paciente_id === p.id).reduce((s, g) => s + Number(g.importe), 0);
   const debe = mine.filter(isDue).reduce((s, c) => s + Number(c.precio), 0);
   const futuras = mine.filter(c => !isPast(c) && !c.cancelada);
-  $('pResumen').textContent = plural(hechas.length, 'sesión hecha', 'sesiones hechas') + ' · pagado ' + eur(pagado) + (debe ? ' · debe ' + eur(debe) : ' · nada pendiente');
+  const bonos = bonosActivos(p.id), quedan = bonos.reduce((s, g) => s + bonoQuedan(g), 0);
+  $('pResumen').textContent = plural(hechas.length, 'sesión hecha', 'sesiones hechas') + ' · pagado ' + eur(pagado) + (debe ? ' · debe ' + eur(debe) : ' · nada pendiente') +
+    (bonos.length ? ' · bono: ' + plural(quedan, 'sesión', 'sesiones') + ' por usar' : '');
   $('pTerminar').hidden = !p.activo;
   const pasadas = mine.filter(c => isPast(c)).reverse();
   let h = '';
@@ -1070,6 +1345,7 @@ function paintPacTel(){ const h = telHTML($('pTel').value); $('pTelLinks').inner
 $('pTel').addEventListener('input', paintPacTel);
 $('pClose').addEventListener('click', () => $('dPac').close());
 $('pNuevaCita').addEventListener('click', () => { const id = editingPac.id; $('dPac').close(); openCita(null, ymd(cursor), null, id); });
+$('pBono').addEventListener('click', () => { if (editingPac) openBono(editingPac.id); });
 $('pTerminar').addEventListener('click', async () => {
   const p = editingPac; if (!p) return;
   const fut = S.citas.filter(c => c.paciente_id === p.id && !isPast(c) && !c.pagada);
@@ -1120,7 +1396,8 @@ async function loadCfg(){
 }
 async function saveCfg(){
   if (DEMO) return;
-  const row = { owner_id: userId, antes_min: cfg.antes_min, antes2_min: cfg.antes2_min, resumen_hora: cfg.resumen_hora, cobros_dia: cfg.cobros_dia, cobros_hora: cfg.cobros_hora, sin_marcar_hora: cfg.sin_marcar_hora };
+  const row = { owner_id: userId, antes_min: cfg.antes_min, antes2_min: cfg.antes2_min, resumen_hora: cfg.resumen_hora, cobros_dia: cfg.cobros_dia, cobros_hora: cfg.cobros_hora, sin_marcar_hora: cfg.sin_marcar_hora,
+    msg_pago: (cfg.msg_pago || '').trim() || null, msg_firma: (cfg.msg_firma || '').trim() || null };
   const { error } = await sb.from('avisos_ajustes').upsert(row, { onConflict: 'owner_id' });
   if (error) throw error;
   cfgRow = true;
@@ -1158,6 +1435,10 @@ async function renderAjustes(){
     rowA('sin_marcar_hora', 'Citas sin marcar', 'Sesiones de hoy sin pagar', '<input type="time" data-cfg="sin_marcar_hora" value="' + (c.sin_marcar_hora || '21:00') + '" aria-label="Hora del repaso">') +
     '</div><p class="hint" style="margin-top:8px">Valen para todos los dispositivos donde actives los avisos.</p>';
   if (!isStandalone() && !DEMO && pushOK()) h += '<p class="sec">Tenerla como app</p><div class="set"><p class="note">En Safari: <b>Compartir → «Añadir a pantalla de inicio»</b>. Se abrirá a pantalla completa, con el icono de Fadia.</p></div>';
+  h += '<p class="sec">Mensajes de WhatsApp</p><div class="set">' +
+    '<label class="f" style="padding-top:12px"><span>Cómo pueden pagarte</span><input id="msgPago" maxlength="200" placeholder="Bizum al 600 000 000" value="' + esc(c.msg_pago || '') + '"></label>' +
+    '<label class="f"><span>Firma</span><input id="msgFirma" maxlength="80" placeholder="Fadia" value="' + esc(c.msg_firma || '') + '"></label>' +
+    '<p class="hint" style="margin:0 0 12px">Se usan en «Recordar» (Cobros) y en el justificante de pago.</p></div>';
   h += '<p class="sec">Cuenta</p><div class="set">' +
     (DEMO ? '<div class="srow"><div class="st"><b>Modo de prueba</b><span>Datos de ejemplo en este navegador</span></div><button class="btn small" id="demoReset">Reiniciar</button></div>'
           : '<div class="srow"><div class="st"><b>' + esc(userEmail) + '</b><span>Sesión iniciada</span></div></div>' +
@@ -1165,6 +1446,12 @@ async function renderAjustes(){
             '<div class="srow"><div class="st"><b>Salir</b><span>Cerrar la sesión en este dispositivo</span></div><button class="btn small danger" id="logout">Salir</button></div>') +
     '</div>';
   box.innerHTML = h;
+  ['msgPago', 'msgFirma'].forEach(id => $(id).addEventListener('change', () => {
+    cfg = cfg || Object.assign({}, AVISOS_DEF);
+    cfg[id === 'msgPago' ? 'msg_pago' : 'msg_firma'] = $(id).value.trim();
+    if (DEMO){ toast('Guardado en este navegador'); return; }
+    guardarCfg();
+  }));
 
   if ($('avOn')) $('avOn').addEventListener('click', activarAvisos);
   if ($('avOff')) $('avOff').addEventListener('click', desactivarAvisos);
@@ -1175,7 +1462,7 @@ async function renderAjustes(){
     location.reload();
   });
   if ($('chgPass')) $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
-  if ($('logout')) $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [] }; cfg = null; showLogin('Has salido.'); });
+  if ($('logout')) $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [], pagos: [] }; cfg = null; showLogin('Has salido.'); });
   box.querySelectorAll('[data-cfgsw]').forEach(el => el.addEventListener('change', () => {
     const k = el.dataset.cfgsw;
     if (!el.checked) cfg[k] = null;
@@ -1252,8 +1539,9 @@ document.addEventListener('click', e => {
     openCita(null, ymd(cursor), pad(Math.min(23, Math.floor(mins / 60))) + ':' + pad(mins % 60));
     return;
   }
-  const t = e.target.closest('[data-pay],[data-payall],[data-cita],[data-nav],[data-mode],[data-goday],[data-selday],[data-newday],[data-pac],nav.tabs button');
+  const t = e.target.closest('[data-pay],[data-payall],[data-pago],[data-cita],[data-nav],[data-mode],[data-goday],[data-selday],[data-newday],[data-pac],nav.tabs button');
   if (!t) return;
+  if (t.dataset.pago){ openPago(t.dataset.pago); return; }
   if (t.dataset.pay){ e.stopPropagation(); openCobro([t.dataset.pay]); return; }
   if (t.dataset.payall){ openCobro(t.dataset.payall.split(',')); return; }
   if (t.dataset.cita){ openCita(t.dataset.cita); return; }
@@ -1289,8 +1577,9 @@ function hashView(){
 window.addEventListener('hashchange', () => { if (hashView() && !$('app').hidden) render(); });
 async function start(){
   hashView();
-  try { S = await store.load(); }
+  try { S = await store.load(); if (!S.pagos) S.pagos = []; }
   catch(e){ console.error(e); toast('No se han podido cargar los datos'); }
+  try { if (!cfg) await loadCfg(); } catch(e){ console.error(e); }   // textos de los WhatsApp
   $('login').hidden = true; $('app').hidden = false;
   render();
 }
