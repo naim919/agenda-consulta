@@ -1244,6 +1244,7 @@ $('kPasAdd').addEventListener('click', () => {
   kPend.push({ tmp: 'p' + Date.now(), inicio: fromLocal(f, h).toISOString() });
   $('kPasFecha').value = '';
   paintSesList();
+  toast('Apuntada: se guarda al pulsar «' + $('kOk').textContent + '»');
 });
 // crea como citas las sesiones pasadas apuntadas (hechas, online y de 60 min, como lo habitual)
 async function crearPasadas(){
@@ -1420,7 +1421,20 @@ async function anularPago(id, sinPreguntar){
   } catch(e){ fail(e); }
 }
 $('kQuitar').addEventListener('click', () => { if (kPago) anularPago(kPago.id); });
-$('kClose').addEventListener('click', () => $('dCobro').close());
+// Cerrar con sesiones pasadas apuntadas y sin guardar: se pregunta, para no perderlas
+async function cerrarCobro(){
+  if (kPend.length){
+    const r = await ask(plural(kPend.length, 'Hay 1 sesión pasada sin guardar', 'Hay ' + kPend.length + ' sesiones pasadas sin guardar').replace(/^\d+ /, ''),
+      'Si cierras sin guardar, no se añaden al bono.', [{ label: 'Guardar', value: 'guardar', cls: 'primary' }, { label: 'Cerrar sin guardar', value: 'salir', cls: 'danger' }]);
+    if (r === 'guardar'){ $('fCobro').requestSubmit(); return; }
+    if (r !== 'salir') return;
+    kPend = [];
+  }
+  $('dCobro').close();
+}
+$('kClose').addEventListener('click', cerrarCobro);
+// la tecla Escape (o el gesto de cerrar) pasa por lo mismo
+$('dCobro').addEventListener('cancel', e => { if (kPend.length){ e.preventDefault(); cerrarCobro(); } });
 
 /* ---------- ventana de cita ---------- */
 let editing = null, modo = 'presencial', estado = 'normal', tipo = 'sesion';
