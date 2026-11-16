@@ -266,6 +266,7 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--in
 dialog{border:none;border-radius:16px;padding:0;width:min(520px,calc(100% - 24px));max-height:calc(100% - 24px);margin:auto;background:var(--cream);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
 dialog::backdrop{background:rgba(44,44,44,.4)}
 .dlg{padding:20px}
+.dlg h3:focus{outline:none}
 .dlg h3{font-family:var(--serif);font-weight:normal;font-size:22px;margin-bottom:14px}
 .f{display:block;margin-bottom:12px}
 .f>span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
@@ -393,7 +394,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <!-- CITA -->
 <dialog id="dCita">
   <form class="dlg" id="fCita" method="dialog">
-    <h3 id="cTitle">Nueva cita</h3>
+    <h3 id="cTitle" tabindex="-1" autofocus>Nueva cita</h3>
     <div class="f"><span>Tipo</span>
       <div class="seg tipo" id="cTipo"><button type="button" data-t="sesion">Sesión</button><button type="button" data-t="primera">1ª sesión · gratis</button></div>
     </div>
@@ -452,7 +453,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <!-- PACIENTE -->
 <dialog id="dPac">
   <form class="dlg" id="fPac" method="dialog">
-    <h3 id="pTitle">Paciente</h3>
+    <h3 id="pTitle" tabindex="-1" autofocus>Paciente</h3>
     <label class="f"><span>Nombre e inicial</span><input id="pAlias" maxlength="40" placeholder="María G." required></label>
     <label class="f"><span>Teléfono</span><input id="pTel" type="tel" maxlength="30" autocomplete="off" placeholder="600 000 000"></label>
     <p class="tel" id="pTelLinks" hidden></p>
@@ -483,7 +484,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <!-- COBRAR -->
 <dialog id="dCobro">
   <form class="dlg" id="fCobro" method="dialog">
-    <h3 id="kTitle">Cobrar</h3>
+    <h3 id="kTitle" tabindex="-1" autofocus>Cobrar</h3>
     <p class="hint" id="kInfo" style="margin:-6px 0 14px;font-size:14px"></p>
     <label class="f" id="kTipoWrap" hidden><span>Tipo de bono</span><select id="kTipo"></select></label>
     <div class="row2">
@@ -525,7 +526,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <!-- RECORDAR CITAS -->
 <dialog id="dRec">
   <div class="dlg">
-    <h3>Recordar citas</h3>
+    <h3 tabindex="-1" autofocus>Recordar citas</h3>
     <div class="bar"><div class="week"><button type="button" class="arrow" id="rPrev" aria-label="Día anterior">‹</button><span class="range" id="rDia"></span><button type="button" class="arrow" id="rNext" aria-label="Día siguiente">›</button></div></div>
     <div id="rList"></div>
     <p class="hint" style="margin-top:10px">Se abre tu WhatsApp con el mensaje ya escrito: solo tienes que enviarlo. Es gratis.</p>
@@ -536,7 +537,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <!-- TIPO DE BONO -->
 <dialog id="dTipo">
   <form class="dlg" id="fTipo" method="dialog">
-    <h3 id="tTitle">Tipo de bono</h3>
+    <h3 id="tTitle" tabindex="-1" autofocus>Tipo de bono</h3>
     <label class="f"><span>Nombre</span><input id="tNombre" maxlength="60" placeholder="Bono 4 sesiones" required></label>
     <div class="row2">
       <label class="f"><span>Sesiones</span><input id="tSes" type="number" min="1" max="100" step="1" inputmode="numeric" required></label>
@@ -559,7 +560,7 @@ dialog::backdrop{background:rgba(44,44,44,.4)}
 <!-- PREGUNTA -->
 <dialog id="dAsk">
   <div class="dlg">
-    <h3 id="aTitle"></h3>
+    <h3 id="aTitle" tabindex="-1" autofocus></h3>
     <p class="hint" id="aText" style="margin:0 0 14px;font-size:14px"></p>
     <div class="acts col" id="aBtns"></div>
   </div>
@@ -1955,7 +1956,9 @@ async function renderAjustes(){
     location.reload();
   });
   if ($('chgPass')) $('chgPass').addEventListener('click', () => { askNewPass(); $('cancelPassWrap').hidden = false; });
-  if ($('logout')) $('logout').addEventListener('click', async () => { await sb.auth.signOut(); S = { pacientes: [], citas: [], pagos: [], tipos: [] }; cfg = null; showLogin('Has salido.'); });
+  if ($('logout')) $('logout').addEventListener('click', async () => {
+    if (!(await ask('¿Cerrar la sesión?', 'Tendrás que volver a entrar con tu correo y tu contraseña.', [{ label: 'Salir', value: 1, cls: 'danger' }]))) return;
+    await sb.auth.signOut(); S = { pacientes: [], citas: [], pagos: [], tipos: [] }; cfg = null; showLogin('Has salido.'); });
   box.querySelectorAll('[data-cfgsw]').forEach(el => el.addEventListener('change', () => {
     const k = el.dataset.cfgsw;
     if (!el.checked) cfg[k] = null;
@@ -2048,6 +2051,7 @@ async function activarAvisos(){
   renderAjustes();
 }
 async function desactivarAvisos(){
+  if (!(await ask('¿Desactivar los avisos aquí?', 'Dejarás de recibirlos en este dispositivo. Puedes volver a activarlos cuando quieras.', [{ label: 'Desactivar', value: 1, cls: 'danger' }]))) return;
   try {
     const sub = await getSub();
     if (sub){ await sb.from('avisos_suscripciones').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
