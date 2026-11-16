@@ -59,6 +59,62 @@ nav.tabs button.on{color:var(--sage-deep);font-weight:600}
 .btn.small{padding:6px 10px;font-size:13px}
 a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
 .f input[readonly]{background:var(--warm);color:var(--accent)}
+/* Cobros: cifras, pestañas y tarjetas (rojo = se debe · verde = cobrado · dorado = bonos) */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:10px 10px 9px;min-width:0}
+.kpi span{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi b{display:block;font-family:var(--serif);font-weight:normal;font-size:22px;line-height:1.15;margin:4px 0 2px;white-space:nowrap}
+.kpi small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi.due{background:#fcf3ee;border-color:var(--due-light)}
+.kpi.due b{color:var(--due)}
+.kpi.ok b{color:var(--sage-deep)}
+.cobtabs{margin-bottom:14px}
+.cobtabs button{font-size:13.5px;padding:8px 2px;white-space:nowrap}
+.cnt{display:inline-block;min-width:17px;padding:0 5px;margin-left:5px;border-radius:9px;font-size:11px;font-style:normal;font-weight:700;line-height:17px;text-align:center}
+.cnt.r{background:var(--due-light);color:var(--due)}
+.cnt.g{background:#f6e7c4;color:#8a5a00}
+.deuda{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pc);margin-right:7px;vertical-align:1px}
+.deuda .dh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.deuda .dn{min-width:0}
+.deuda .dn b{display:block;font-size:16px;font-weight:600}
+.deuda .dn small{font-size:12.5px;color:var(--muted)}
+.deuda .dm{font-family:var(--serif);font-size:24px;line-height:1.1;color:var(--due);white-space:nowrap}
+.deuda .dates{margin-top:8px}
+.deuda .da{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--warm)}
+.deuda .sintel{font-size:12px;color:var(--muted);margin-right:auto}
+.bnote{display:inline-block;margin-top:6px;font-size:12px;color:#8a5a00;background:#f6e7c4;border-radius:6px;padding:2px 8px}
+.vacio{text-align:center;background:#fff;border:1px dashed var(--stone);border-radius:12px;padding:26px 16px;margin-bottom:10px}
+.vacio b{display:block;font-family:var(--serif);font-weight:normal;font-size:20px;color:var(--sage-deep);margin-bottom:2px}
+.vacio span{font-size:13px;color:var(--muted)}
+.dia-h{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 2px 6px}
+.dia-h:first-child{margin-top:2px}
+.dia-h span:last-child{color:var(--sage-deep);font-weight:700}
+.mov2{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--warm)}
+.card .mov2:last-child{border-bottom:none}
+.mov2 .mi1{min-width:0}
+.mov2 b{display:block;font-weight:600;font-size:14.5px}
+.mov2 small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mov2 .mi2{text-align:right;white-space:nowrap;flex:none}
+.mov2 .mi2 b{font-family:var(--serif);font-weight:normal;font-size:17px;color:var(--sage-deep)}
+.tagb{font-style:normal;font-size:10.5px;font-weight:700;color:#8a5a00;background:#f6e7c4;border-radius:4px;padding:0 5px;margin-right:5px}
+.bonocard{display:block;width:100%;text-align:left;background:#fff;border:1px solid #ecdcae;border-left:4px solid #d9a21b;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.bonocard.off{opacity:.6;border-color:var(--stone);border-left-color:var(--stone)}
+.bonocard .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.bonocard .bh b{font-size:16px;font-weight:600}
+.bonocard .bh span{font-family:var(--serif);font-size:18px}
+.bonocard small{font-size:12.5px;color:var(--muted)}
+.segs{display:flex;gap:4px;margin:10px 0 8px}
+.segs i{flex:1;height:9px;border-radius:5px;background:#f1ece3}
+.segs i.h{background:#b07d10}
+.segs i.p{background:#e8c66e}
+.bonocard .bf{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{font-size:11.5px;padding:2px 8px;border-radius:10px;background:var(--warm);color:var(--accent);white-space:nowrap}
+.pill.warn{background:#f6e7c4;color:#8a5a00;font-weight:600}
+.okc{color:var(--sage-deep)}
+.gestoria{background:#fff;border:1px solid var(--stone);border-radius:12px;padding:12px 14px}
+.gestoria select{width:100%;padding:10px 12px;border:1px solid var(--stone);border-radius:10px;background:#fff;font-size:15px}
+.minibar .modes{flex:0 0 auto}
 /* sesiones de un bono (casillas) */
 .chks{max-height:250px;overflow:auto}
 .chk{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--warm);font-size:14px;cursor:pointer}
@@ -1006,95 +1062,138 @@ const perSlug = per => per[0] === 'Y' ? per.slice(1, 5) : per.slice(1, 5) + '-T'
 function trabajado(filtro){ const l = S.citas.filter(c => !c.cancelada && isPast(c) && filtro(ymd(new Date(c.inicio)))); return { n: l.length, eur: l.reduce((s, c) => s + Number(c.precio), 0) }; }
 const cobradoEn = filtro => S.pagos.filter(g => filtro(g.fecha)).reduce((s, g) => s + Number(g.importe), 0);
 
-function movRow(g){
-  const p = pacById(g.paciente_id), n = citasDePago(g.id).length;
-  let det = plural(n, 'sesión', 'sesiones'), aviso = false;
-  if (g.tipo === 'bono'){
-    const q = g.bono_sesiones - n;
-    if (bonoCaducado(g)){ det = bonoNombre(g) + ' · caducó el ' + fmtShort(new Date(g.caduca_el + 'T12:00')) + (q ? ' · ' + q + ' sin usar' : ''); aviso = q > 0; }
-    else {
-      det = bonoNombre(g) + ' · ' + (q ? q + ' de ' + g.bono_sesiones + ' por usar' : 'usado entero');
-      if (g.caduca_el && q){
-        const dias = Math.round((fromLocal(g.caduca_el, '12:00') - fromLocal(ymd(new Date()), '12:00')) / 864e5);
-        det += ' · caduca el ' + fmtShort(new Date(g.caduca_el + 'T12:00'));
-        aviso = dias <= 30;
-      }
-    }
-  }
-  return '<button class="mov" data-pago="' + g.id + '"><span class="md">' + fmtShort(new Date(g.fecha + 'T12:00')) + '</span>' +
-    '<span><b>' + esc(p ? p.alias : '—') + '</b><small' + (aviso ? ' class="due"' : '') + '>' + det + '</small></span>' +
-    '<span class="mi">' + eur(g.importe) + '<small>' + (METODOS[g.metodo_pago] || 'Sin indicar') + '</small></span></button>';
+/* ---------- Cobros: tres cifras arriba y cuatro pestañas ----------
+   Colores: rojo = lo que se debe · verde = lo cobrado · dorado = bonos. */
+let cobTab = 'pend';
+try { cobTab = localStorage.getItem('consulta-cobtab') || 'pend'; } catch(e) {}
+const capi = s => s.charAt(0).toUpperCase() + s.slice(1);
+function fechaRel(f){
+  const d = fromLocal(f, '12:00');
+  return f === ymd(new Date()) ? 'Hoy' : f === ymd(addDays(new Date(), -1)) ? 'Ayer' : capi(DIAS[d.getDay()]) + ' ' + d.getDate() + ' ' + MESES[d.getMonth()];
 }
+// un bono está «en curso» si no ha caducado y le quedan sesiones libres o programadas
+const bonoEnCurso = g => !bonoCaducado(g) && (bonoQuedan(g) > 0 || citasDePago(g.id).some(c => !isPast(c)));
+const vacio = (t, s) => '<div class="vacio"><b>' + t + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>';
 
 function renderCobros(){
   const now = new Date(), hoy = ymd(now), mes = hoy.slice(0, 7);
-  const due = dueList();
-  const total = due.reduce((s, c) => s + Number(c.precio), 0);
-  let h = '<div class="stats"><div class="stat due"><b>' + eur(total) + '</b><span>Pendiente de cobro</span></div>' +
-    '<div class="stat"><b>' + eur(cobradoEn(f => f.startsWith(mes))) + '</b><span>Cobrado en ' + MESES_L[now.getMonth()] + '</span></div></div>';
-
-  // caja de hoy
-  const deHoy = S.pagos.filter(g => g.fecha === hoy);
-  const porM = {};
-  deHoy.forEach(g => { const k = METODOS[g.metodo_pago] || 'Sin indicar'; porM[k] = (porM[k] || 0) + Number(g.importe); });
-  h += deHoy.length
-    ? '<div class="caja"><b>' + eur(deHoy.reduce((s, g) => s + Number(g.importe), 0)) + '</b>cobrado hoy<br><span>' + Object.entries(porM).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + eur(v)).join(' · ') + '</span></div>'
-    : '<div class="caja"><span>Hoy aún no has cobrado nada.</span></div>';
-
-  // quién debe
+  const due = dueList(), total = due.reduce((s, c) => s + Number(c.precio), 0);
   const groups = {};
   due.forEach(c => (groups[c.paciente_id] = groups[c.paciente_id] || []).push(c));
-  const rows = Object.entries(groups).map(([pid, list]) => ({ pid, p: pacById(pid), list: list.sort(byStart), sum: list.reduce((s, c) => s + Number(c.precio), 0) })).sort((a, b) => b.sum - a.sum);
-  h += '<p class="sec">Quién debe</p>';
-  h += !rows.length ? '<div class="card"><div class="empty">Nadie debe nada. Todo cobrado.</div></div>' :
-    '<div class="card">' + rows.map(r =>
-      '<div class="debt" style="--pc:' + colorOf(r.pid) + '"><div class="debt-h"><div><b>' + esc(r.p ? r.p.alias : '—') + '</b><br><span>' + plural(r.list.length, 'sesión', 'sesiones') + ' · ' + eur(r.sum) +
-      (r.p && r.p.metodo_pago ? ' · ' + METODOS[r.p.metodo_pago] : '') + '</span></div><div class="acts2">' +
-      (r.p && r.p.telefono ? '<a class="btn small" href="' + esc(waLink(r.p.telefono, msgRecordar(r.p, r.list))) + '" target="_blank" rel="noopener" title="Recordar el pago por WhatsApp">Recordar</a>' : '') +
-      '<button class="btn small primary" data-payall="' + r.list.map(c => c.id).join(',') + '">Cobrar</button></div></div>' +
-      '<div class="dates">' + r.list.map(c => '<button class="date" data-pay="' + c.id + '" title="Cobrar solo esta sesión">' + fmtShort(new Date(c.inicio)) + (c.no_vino ? ' · no vino' : '') + ' · ' + eur(c.precio) + '</button>').join('') + '</div></div>').join('') +
-    '</div><p class="hint" style="margin-top:8px">Toca una fecha para cobrar solo esa sesión.' + (rows.some(r => !(r.p && r.p.telefono)) ? ' «Recordar» sale si el paciente tiene teléfono.' : '') + '</p>';
+  const deudas = Object.entries(groups).map(([pid, list]) => ({ pid, p: pacById(pid), list: list.sort(byStart), sum: list.reduce((s, c) => s + Number(c.precio), 0) })).sort((a, b) => b.sum - a.sum);
+  const deHoy = S.pagos.filter(g => g.fecha === hoy);
+  const porM = {};
+  deHoy.forEach(g => { const k = METODOS[g.metodo_pago] || 'Otro'; porM[k] = (porM[k] || 0) + Number(g.importe); });
+  const bonosVivos = S.pagos.filter(g => g.tipo === 'bono' && bonoEnCurso(g));
 
-  // bonos en curso
-  // vigentes con sesiones por usar, y los que caducaron hace poco con sesiones sin usar
-  const hace90 = ymd(addDays(now, -90));
-  const activos = S.pagos.filter(g => g.tipo === 'bono' && bonoQuedan(g) > 0 && (!bonoCaducado(g) || g.caduca_el >= hace90))
-    .sort((a, b) => (bonoCaducado(a) - bonoCaducado(b)) || (a.caduca_el || '9999').localeCompare(b.caduca_el || '9999'));
-  if (activos.length) h += '<p class="sec">Bonos en curso · ' + activos.filter(g => !bonoCaducado(g)).length + '</p><div class="card">' + activos.map(movRow).join('') + '</div>';
+  let h = '<div class="kpis">' +
+    '<div class="kpi due"><span>Pendiente</span><b>' + eur(total) + '</b><small>' + (deudas.length ? plural(deudas.length, 'paciente', 'pacientes') : 'todo cobrado') + '</small></div>' +
+    '<div class="kpi ok"><span>' + capi(MESES_L[now.getMonth()]) + '</span><b>' + eur(cobradoEn(f => f.startsWith(mes))) + '</b><small>cobrado</small></div>' +
+    '<div class="kpi"><span>Hoy</span><b>' + eur(deHoy.reduce((s, g) => s + Number(g.importe), 0)) + '</b><small>' +
+      (deHoy.length ? Object.entries(porM).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + eur(v)).join(' · ') : 'sin cobros') + '</small></div></div>';
 
-  // movimientos
+  const tabs = [['pend', 'Pendiente', deudas.length, 'r'], ['mov', 'Historial'], ['bonos', 'Bonos', bonosVivos.length, 'g'], ['res', 'Resumen']];
+  h += '<div class="modes cobtabs">' + tabs.map(([k, l, n, c]) =>
+    '<button data-cobtab="' + k + '" class="' + (k === cobTab ? 'on' : '') + '">' + l + (n ? '<i class="cnt ' + c + '">' + n + '</i>' : '') + '</button>').join('') + '</div>';
+
+  h += cobTab === 'pend' ? panelPendiente(deudas) : cobTab === 'mov' ? panelHistorial() : cobTab === 'bonos' ? panelBonos() : panelResumen();
+  $('vCobros').innerHTML = h;
+
+  document.querySelectorAll('#vCobros [data-cobtab]').forEach(b => b.addEventListener('click', () => {
+    cobTab = b.dataset.cobtab; try { localStorage.setItem('consulta-cobtab', cobTab); } catch(e) {}
+    renderCobros(); window.scrollTo(0, 0);
+  }));
+  if ($('movMas')) $('movMas').addEventListener('click', () => { movLimit += 30; renderCobros(); });
+  document.querySelectorAll('#vCobros [data-res]').forEach(b => b.addEventListener('click', () => { resMode = b.dataset.res; renderCobros(); }));
+  if ($('resYear')) $('resYear').addEventListener('change', () => { resYear = Number($('resYear').value); renderCobros(); });
+  if ($('expPer')) $('expPer').addEventListener('change', () => { expPer = $('expPer').value; });
+  if ($('expCob')) $('expCob').addEventListener('click', () => exportCobros($('expPer').value));
+  if ($('expSes')) $('expSes').addEventListener('click', () => exportSesiones($('expPer').value));
+}
+
+// 1. Pendiente: una tarjeta por paciente, con el importe grande
+function panelPendiente(deudas){
+  if (!deudas.length) return vacio('Todo cobrado', 'Nadie te debe nada.');
+  return deudas.map(r => {
+    const p = r.p, b = bonosActivos(r.pid)[0];
+    return '<div class="deuda" style="--pc:' + colorOf(r.pid) + '">' +
+      '<div class="dh"><div class="dn"><b><i class="pdot"></i>' + esc(p ? p.alias : '—') + '</b><small>' + plural(r.list.length, 'sesión', 'sesiones') +
+        (p && p.metodo_pago ? ' · suele pagar con ' + METODOS[p.metodo_pago].toLowerCase() : '') + '</small></div><span class="dm">' + eur(r.sum) + '</span></div>' +
+      (b ? '<span class="bnote">Tiene un bono con ' + plural(bonoQuedan(b), 'sesión libre', 'sesiones libres') + '</span>' : '') +
+      '<div class="dates">' + r.list.map(c => '<button class="date" data-pay="' + c.id + '" title="Cobrar solo esta sesión">' + fmtShort(new Date(c.inicio)) + (c.no_vino ? ' · no vino' : '') + ' · ' + eur(c.precio) + '</button>').join('') + '</div>' +
+      '<div class="da">' + (p && p.telefono
+        ? '<a class="btn small" href="' + esc(waLink(p.telefono, msgRecordar(p, r.list))) + '" target="_blank" rel="noopener">Recordar por WhatsApp</a>'
+        : '<span class="sintel">Sin teléfono</span>') +
+      '<button class="btn small primary" data-payall="' + r.list.map(c => c.id).join(',') + '">' + (r.list.length > 1 ? 'Cobrar todo' : 'Cobrar') + '</button></div></div>';
+  }).join('') + '<p class="hint" style="margin-top:4px">Toca una fecha para cobrar solo esa sesión.</p>';
+}
+
+// 2. Historial: los cobros agrupados por día, con el total de cada día
+function panelHistorial(){
   const movs = S.pagos.slice().sort(byPago);
-  h += '<p class="sec">Movimientos</p>' + (movs.length
-    ? '<div class="card">' + movs.slice(0, movLimit).map(movRow).join('') + (movs.length > movLimit ? '<button class="more-btn" id="movMas">Ver más (' + (movs.length - movLimit) + ')</button>' : '') + '</div><p class="hint" style="margin-top:8px">Toca un cobro para corregirlo, anularlo o mandar el justificante.</p>'
-    : '<div class="card"><div class="empty">Aún no hay cobros.</div></div>');
+  if (!movs.length) return vacio('Aún no hay cobros', 'Aquí aparecerá cada cobro y cada bono vendido.');
+  const totalDia = {};
+  movs.forEach(g => { totalDia[g.fecha] = (totalDia[g.fecha] || 0) + Number(g.importe); });
+  const dias = [];
+  movs.slice(0, movLimit).forEach(g => { const d = dias[dias.length - 1]; if (d && d.f === g.fecha) d.l.push(g); else dias.push({ f: g.fecha, l: [g] }); });
+  return dias.map(d => '<div class="dia-h"><span>' + fechaRel(d.f) + '</span><span>' + eur(totalDia[d.f]) + '</span></div><div class="card">' + d.l.map(g => {
+    const p = pacById(g.paciente_id), cs = citasDePago(g.id);
+    const det = g.tipo === 'bono' ? bonoNombre(g) : (cs.length ? plural(cs.length, 'sesión', 'sesiones') + ': ' + fechasDe(cs.slice(0, 3)) + (cs.length > 3 ? '…' : '') : 'sin sesiones');
+    return '<button class="mov2" data-pago="' + g.id + '"><span class="mi1"><b>' + esc(p ? p.alias : '—') + '</b><small>' + (g.tipo === 'bono' ? '<i class="tagb">Bono</i>' : '') + det + '</small></span>' +
+      '<span class="mi2"><b>' + eur(g.importe) + '</b><small>' + (METODOS[g.metodo_pago] || 'Sin indicar') + '</small></span></button>';
+  }).join('') + '</div>').join('') +
+    (movs.length > movLimit ? '<button class="more-btn" id="movMas">Ver más (' + (movs.length - movLimit) + ')</button>' : '') +
+    '<p class="hint" style="margin-top:8px">Toca un cobro para corregirlo, anularlo o mandar el justificante.</p>';
+}
 
-  // resumen por trimestres o meses
+// 3. Bonos: tarjetas con una barra de sesiones (hechas · programadas · libres)
+function bonoCard(g){
+  const p = pacById(g.paciente_id), cs = citasDePago(g.id), cad = bonoCaducado(g);
+  const hechas = bonoPrevias(g) + cs.filter(isPast).length, prog = cs.filter(c => !isPast(c)).length, libres = Math.max(0, g.bono_sesiones - hechas - prog);
+  let segs = '';
+  for (let i = 0; i < g.bono_sesiones; i++) segs += '<i class="' + (i < hechas ? 'h' : i < hechas + prog ? 'p' : '') + '"></i>';
+  let pill = '';
+  if (g.caduca_el){
+    const dias = Math.round((fromLocal(g.caduca_el, '12:00') - fromLocal(ymd(new Date()), '12:00')) / 864e5);
+    pill = cad ? '<span class="pill">Caducó el ' + fmtShort(new Date(g.caduca_el + 'T12:00')) + '</span>'
+      : '<span class="pill' + (dias <= 30 ? ' warn' : '') + '">' + (dias <= 30 ? (dias === 0 ? 'Caduca hoy' : 'Caduca en ' + plural(dias, 'día', 'días')) : 'Caduca el ' + fmtShort(new Date(g.caduca_el + 'T12:00'))) + '</span>';
+  }
+  return '<button class="bonocard' + (cad ? ' off' : '') + '" data-pago="' + g.id + '" style="--pc:' + colorOf(g.paciente_id) + '">' +
+    '<div class="bh"><b><i class="pdot"></i>' + esc(p ? p.alias : '—') + '</b><span>' + eur(g.importe) + '</span></div>' +
+    '<small>' + esc(bonoNombre(g)) + ' · vendido el ' + fmtShort(new Date(g.fecha + 'T12:00')) + '</small>' +
+    '<div class="segs">' + segs + '</div>' +
+    '<div class="bf"><small>' + [plural(hechas, 'hecha', 'hechas'), prog ? plural(prog, 'programada', 'programadas') : null, plural(libres, 'libre', 'libres')].filter(Boolean).join(' · ') + '</small>' + pill + '</div></button>';
+}
+function panelBonos(){
+  const bonos = S.pagos.filter(g => g.tipo === 'bono');
+  const vivos = bonos.filter(bonoEnCurso).sort((a, b) => (a.caduca_el || '9999').localeCompare(b.caduca_el || '9999') || byPago(a, b));
+  const hace90 = ymd(addDays(new Date(), -90));
+  const caducados = bonos.filter(g => bonoCaducado(g) && bonoQuedan(g) > 0 && g.caduca_el >= hace90);
+  let h = vivos.length ? vivos.map(bonoCard).join('') : vacio('No hay bonos en curso', 'Se venden desde la ficha del paciente.');
+  if (caducados.length) h += '<p class="sec">Caducados con sesiones sin usar</p>' + caducados.map(bonoCard).join('');
+  return h + '<p class="hint" style="margin-top:4px">Toca un bono para ver o cambiar sus sesiones. Barra: <b style="color:#b07d10">■</b> hechas · <b style="color:#e8c66e">■</b> programadas · <b style="color:#cfc6b8">■</b> libres.</p>';
+}
+
+// 4. Resumen: trimestres o meses, y los Excel para la gestoría
+function panelResumen(){
+  const now = new Date();
   const years = [...new Set(S.citas.map(c => new Date(c.inicio).getFullYear()).concat(S.pagos.map(g => Number(g.fecha.slice(0, 4))), [now.getFullYear()]))].sort((a, b) => b - a);
   if (!years.includes(resYear)) resYear = years[0];
   const per = resMode === 'trim'
     ? [1, 2, 3, 4].map(t => ({ l: 'T' + t, f: f => f.startsWith(resYear + '-') && Math.ceil(Number(f.slice(5, 7)) / 3) === t, fut: resYear === now.getFullYear() && t > Math.ceil((now.getMonth() + 1) / 3) }))
     : MESES.map((m, i) => ({ l: m, f: f => f.startsWith(resYear + '-' + pad(i + 1)), fut: resYear === now.getFullYear() && i > now.getMonth() }));
-  h += '<div class="minibar"><p class="sec">Resumen</p><div style="display:flex;gap:6px;align-items:center"><div class="modes"><button data-res="trim" class="' + (resMode === 'trim' ? 'on' : '') + '">Trimestres</button><button data-res="mes" class="' + (resMode === 'mes' ? 'on' : '') + '">Meses</button></div>' +
-    '<select id="resYear" aria-label="Año">' + years.map(y => '<option' + (y === resYear ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></div></div>' +
+  let h = '<div class="minibar" style="margin-top:4px"><div class="modes"><button data-res="trim" class="' + (resMode === 'trim' ? 'on' : '') + '">Trimestres</button><button data-res="mes" class="' + (resMode === 'mes' ? 'on' : '') + '">Meses</button></div>' +
+    '<select id="resYear" aria-label="Año">' + years.map(y => '<option' + (y === resYear ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></div>' +
     '<div class="card"><div class="res head"><span></span><span>Trabajado</span><span>Cobrado</span></div>' + per.map(x => {
       const t = trabajado(x.f), c = cobradoEn(x.f);
-      return '<div class="res' + (x.fut ? ' off' : '') + '"><span class="rl">' + x.l + '</span><span><b>' + eur(t.eur) + '</b><small>' + plural(t.n, 'sesión', 'sesiones') + '</small></span><span><b>' + eur(c) + '</b></span></div>';
+      return '<div class="res' + (x.fut ? ' off' : '') + '"><span class="rl">' + x.l + '</span><span><b>' + eur(t.eur) + '</b><small>' + plural(t.n, 'sesión', 'sesiones') + '</small></span><span><b class="okc">' + eur(c) + '</b></span></div>';
     }).join('') + '</div><p class="hint" style="margin-top:8px">Trabajado: sesiones hechas, por el día de la sesión. Cobrado: lo que te han pagado, por el día del pago (los bonos, el día que se venden).</p>';
-
-  // para la gestoría
   const opts = [];
   years.forEach(y => { opts.push('Y' + y); for (let t = 4; t >= 1; t--) if (!(y === now.getFullYear() && t > Math.ceil((now.getMonth() + 1) / 3))) opts.push('T' + y + '-' + t); });
   if (!expPer || !opts.includes(expPer)) expPer = 'T' + now.getFullYear() + '-' + Math.ceil((now.getMonth() + 1) / 3);
-  h += '<p class="sec">Para la gestoría</p><div class="exp"><select id="expPer" aria-label="Periodo">' + opts.map(o => '<option value="' + o + '"' + (o === expPer ? ' selected' : '') + '>' + perLabel(o) + '</option>').join('') + '</select></div>' +
-    '<div class="btnrow" style="margin-top:8px"><button class="btn" id="expCob">Excel de cobros</button><button class="btn" id="expSes">Excel de sesiones</button></div>';
-
-  $('vCobros').innerHTML = h;
-  if ($('movMas')) $('movMas').addEventListener('click', () => { movLimit += 30; renderCobros(); });
-  document.querySelectorAll('#vCobros [data-res]').forEach(b => b.addEventListener('click', () => { resMode = b.dataset.res; renderCobros(); }));
-  $('resYear').addEventListener('change', () => { resYear = Number($('resYear').value); renderCobros(); });
-  $('expPer').addEventListener('change', () => { expPer = $('expPer').value; });
-  $('expCob').addEventListener('click', () => exportCobros($('expPer').value));
-  $('expSes').addEventListener('click', () => exportSesiones($('expPer').value));
+  h += '<p class="sec">Para la gestoría</p><div class="gestoria"><select id="expPer" aria-label="Periodo">' + opts.map(o => '<option value="' + o + '"' + (o === expPer ? ' selected' : '') + '>' + perLabel(o) + '</option>').join('') + '</select>' +
+    '<div class="btnrow" style="padding:10px 0 0"><button class="btn" id="expCob">Excel de cobros</button><button class="btn" id="expSes">Excel de sesiones</button></div></div>';
+  return h;
 }
 
 /* ---------- Excel (CSV que Excel abre en español) ---------- */
